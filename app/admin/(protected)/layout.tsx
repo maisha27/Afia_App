@@ -1,0 +1,24 @@
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import type { ReactNode } from 'react';
+
+export default async function AdminProtectedLayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/admin/login');
+  }
+
+  const { data: adminUser } = await supabase
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!adminUser) {
+    redirect('/');
+  }
+
+  return <>{children}</>;
+}
