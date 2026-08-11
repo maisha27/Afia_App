@@ -21,16 +21,16 @@ export function SiteHeader({ variant = 'screener' }: SiteHeaderProps) {
           <Image
             src="/Images/Official_Logo.png"
             alt="Afia"
-            width={30}
-            height={30}
-            className="h-[30px] w-auto object-contain"
+            width={40}
+            height={40}
+            className="h-[40px] w-auto object-contain"
             priority
           />
           <div className="flex flex-col leading-none gap-[3px]">
-            <span className="font-heading text-[20px] font-semibold text-primary tracking-[-0.01em]">
+            <span className="font-heading text-[22px] font-semibold text-primary tracking-[-0.01em]">
               afia
             </span>
-            <span className="text-[7.5px] font-semibold tracking-[0.22em] uppercase text-[#6B827A]">
+            <span className="text-[8px] font-semibold tracking-[0.22em] uppercase text-[#6B827A]">
               calm in mind
             </span>
           </div>
