@@ -48,6 +48,35 @@
   --color-warning-surface: var(--afia-warning-surface);
   --color-error-surface: var(--afia-error-surface);
 
+  /* Crisis (reserved for crisis support UI only — not health severity) */
+  --color-crisis: var(--afia-crisis);
+  --color-crisis-surface: var(--afia-crisis-surface);
+  --color-crisis-border: var(--afia-crisis-border);
+
+  /* Field-level validation (amber, not red) */
+  --color-field-error-border: var(--afia-field-error-border);
+  --color-field-error-text: var(--afia-field-error-text);
+
+  /* Severity band — design intent, not theme-swappable */
+  --color-severity-low: var(--afia-severity-low);
+  --color-severity-mild: var(--afia-severity-mild);
+  --color-severity-moderate: var(--afia-severity-moderate);
+  --color-severity-high: var(--afia-severity-high);
+  --color-severity-vhigh: var(--afia-severity-vhigh);
+
+  /* Precise text hierarchy */
+  --color-text-1: var(--afia-text-1);
+  --color-text-2: var(--afia-text-2);
+  --color-text-3: var(--afia-text-3);
+  --color-text-4: var(--afia-text-4);
+
+  /* Admin dark theme */
+  --color-admin-bg: var(--afia-admin-bg);
+  --color-admin-card: var(--afia-admin-card);
+  --color-admin-border: var(--afia-admin-border);
+  --color-admin-text: var(--afia-admin-text);
+  --color-admin-text-muted: var(--afia-admin-text-muted);
+
   /* Typography */
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
@@ -109,6 +138,35 @@
   --afia-warning: #9C6B24;
   --afia-warning-surface: #FBF1E1;
   --afia-error-surface: #FBEAE9;
+
+  /* Crisis */
+  --afia-crisis: #B0503F;
+  --afia-crisis-surface: #FBEEEA;
+  --afia-crisis-border: #F0D9D2;
+
+  /* Field-level validation (amber, never red) */
+  --afia-field-error-border: #C99A46;
+  --afia-field-error-text: #8A6410;
+
+  /* Precise text colours matching design */
+  --afia-text-1: #3A403C;
+  --afia-text-2: #565D5A;
+  --afia-text-3: #767D79;
+  --afia-text-4: #8A928D;
+
+  /* Severity band */
+  --afia-severity-low: #B7D8C6;
+  --afia-severity-mild: #D9E3A8;
+  --afia-severity-moderate: #B26A44;
+  --afia-severity-high: #E3B79A;
+  --afia-severity-vhigh: #DCA394;
+
+  /* Admin dark theme */
+  --afia-admin-bg: #1B2624;
+  --afia-admin-card: #232F2C;
+  --afia-admin-border: #33413D;
+  --afia-admin-text: #EAF3EF;
+  --afia-admin-text-muted: #9DB3AC;
 }
 
 /* ── Dark theme ──────────────────────────────────────────── */
@@ -176,4 +234,51 @@
   h6 {
     @apply font-heading;
   }
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+/* afiaBreathe: for loading dots (fast, 1.4s) */
+@keyframes afiaBreathe {
+  0%, 100% { transform: scale(0.93); opacity: 0.6; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+/* afiaBloom: for breathing visuals / calm tool (slow, 4s) */
+@keyframes afiaBloom {
+  0%, 100% { transform: scale(0.92); opacity: 0.72; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+.animate-breathe-dot {
+  animation: afiaBreathe 1.4s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: afiaBloom 4s ease-in-out infinite;
+}
+
+/* afiaWave: for loading bar indicators (audio-waveform style) */
+@keyframes afiaWave {
+  0%, 100% { transform: scaleY(0.45); opacity: 0.65; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+.animate-wave-bar {
+  animation: afiaWave 1.4s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathe-dot,
+  .animate-breathe,
+  .animate-wave-bar {
+    animation: none;
+  }
+}
+
+/* ── Background tile pattern ────────────────────────────────── */
+/* Vesica arch tile — used as subtle bg on public/screener screens */
+.bg-tile-afia {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F7A6D' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-size: 44px 60px;
 }

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AppBottomNav } from "@/components/layout/AppBottomNav";
 
-// Auth guard for all (app) routes.
-// Phase D: also check subscriptions.status here and redirect to /pricing if not active/trialing.
 export default async function AppLayout({
   children,
 }: {
@@ -27,5 +27,13 @@ export default async function AppLayout({
   //   redirect('/pricing')
   // }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen bg-background">
+      <AppSidebar userEmail={user.email} />
+      <div className="flex flex-1 flex-col min-w-0 pb-16 lg:pb-0">
+        {children}
+      </div>
+      <AppBottomNav />
+    </div>
+  );
 }

@@ -83,7 +83,7 @@ export async function logIn(data: {
     .single();
 
   if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
-    redirect('/dashboard');
+    redirect('/home');
   }
 
   redirect('/pricing');
