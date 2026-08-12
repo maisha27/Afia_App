@@ -1,11 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function PricingCard() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const isYearly = billing === 'yearly';
+
+  async function handleSubscribe() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing }),
+      });
+
+      if (res.status === 401) {
+        router.push('/sign-up');
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ?? 'Something went wrong. Please try again.');
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  }
 
   return (
     <div
@@ -55,28 +85,41 @@ export function PricingCard() {
         <span className="text-[#5F6863]">7 days free first</span>
       </p>
 
+      {/* Error message */}
+      {error && (
+        <p className="text-[12.5px] text-red-600 mb-3 text-center">{error}</p>
+      )}
+
       {/* CTA */}
-      <Link
-        href="/welcome"
-        className="flex items-center justify-center gap-2.5 bg-primary text-white font-heading text-[16px] font-semibold py-[16px] rounded-[12px] mb-[14px] hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      <button
+        type="button"
+        onClick={handleSubscribe}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2.5 bg-primary text-white font-heading text-[16px] font-semibold py-[16px] rounded-[12px] mb-[14px] hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 disabled:cursor-not-allowed"
         style={{ boxShadow: '0 12px 24px -10px rgba(47,122,109,.6)' }}
       >
-        Start my 7 days free
-        <svg
-          width="17"
-          height="17"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14" />
-          <path d="M13 6l6 6-6 6" />
-        </svg>
-      </Link>
+        {loading ? (
+          'Redirecting to checkout...'
+        ) : (
+          <>
+            Start my 7 days free
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="M13 6l6 6-6 6" />
+            </svg>
+          </>
+        )}
+      </button>
 
       {/* Reminder note */}
       <div className="flex items-center gap-2 justify-center text-[12.5px] text-[#5F6863] mb-[20px]">
