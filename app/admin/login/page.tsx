@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AdminLoginForm } from './AdminLoginForm';
 
 export const metadata: Metadata = { title: 'Admin login — Afia' };
 
@@ -68,57 +69,7 @@ export default function AdminLoginPage() {
           This area is restricted to the Afia team.
         </p>
 
-        <form className="flex flex-col gap-[14px]">
-          <div className="flex flex-col gap-[7px]">
-            <label
-              htmlFor="admin-email"
-              className="text-[12.5px] font-semibold"
-              style={{ color: '#7FB3A6' }}
-            >
-              Email
-            </label>
-            <input
-              id="admin-email"
-              type="email"
-              placeholder="you@afia.me"
-              autoComplete="email"
-              className="rounded-[10px] px-[14px] py-[12px] text-[14.5px] outline-none transition-colors placeholder:text-[#4E5E59] focus:border-[#4A786E]"
-              style={{
-                background: '#1B2523',
-                border: '1.5px solid #38463F',
-                color: '#EAF3EF',
-              }}
-            />
-          </div>
-          <div className="flex flex-col gap-[7px]">
-            <label
-              htmlFor="admin-password"
-              className="text-[12.5px] font-semibold"
-              style={{ color: '#7FB3A6' }}
-            >
-              Password
-            </label>
-            <input
-              id="admin-password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              className="rounded-[10px] px-[14px] py-[12px] text-[14.5px] outline-none transition-colors placeholder:text-[#4E5E59] focus:border-[#4A786E]"
-              style={{
-                background: '#1B2523',
-                border: '1.5px solid #38463F',
-                color: '#EAF3EF',
-              }}
-            />
-          </div>
-          <button
-            type="submit"
-            className="font-heading text-[15.5px] font-semibold text-white rounded-[10px] py-[14px] mt-[4px] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-            style={{ background: '#2F7A6D' }}
-          >
-            Log in
-          </button>
-        </form>
+        <AdminLoginForm />
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-[7px] mt-[22px]">

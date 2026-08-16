@@ -49,8 +49,17 @@ export async function GET(request: NextRequest) {
   const pending = cookieStore.get('afia_pending_result');
   if (pending) {
     try {
-      const { score, band } = JSON.parse(pending.value) as { score: number; band: string };
-      await supabase.from('screener_results').insert({ user_id: userId, score, band });
+      const { score, band, answers } = JSON.parse(pending.value) as {
+        score: number;
+        band: string;
+        answers?: number[] | null;
+      };
+      await supabase.from('screener_results').insert({
+        user_id: userId,
+        score,
+        band,
+        answers: answers ?? null,
+      });
     } catch {
       // Non-fatal — screener result can be added later
     } finally {

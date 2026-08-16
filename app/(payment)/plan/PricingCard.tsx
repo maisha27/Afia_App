@@ -87,7 +87,7 @@ export function PricingCard() {
 
       {/* Error message */}
       {error && (
-        <p className="text-[12.5px] text-red-600 mb-3 text-center">{error}</p>
+        <p className="text-[12.5px] text-[#C99A46] mb-3 text-center" role="alert">{error}</p>
       )}
 
       {/* CTA */}
@@ -121,7 +121,7 @@ export function PricingCard() {
         )}
       </button>
 
-      {/* Reminder note */}
+      {/* Trial reassurance */}
       <div className="flex items-center gap-2 justify-center text-[12.5px] text-[#5F6863] mb-[20px]">
         <svg
           width="15"
@@ -134,11 +134,9 @@ export function PricingCard() {
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z" />
-          <path d="M6 1v3M10 1v3M14 1v3" />
+          <path d="M20 6 9 17l-5-5" />
         </svg>
-        We&rsquo;ll remind you 2 days before your trial ends
+        Cancel anytime before your trial ends — no charge
       </div>
 
       {/* Footer assurances */}

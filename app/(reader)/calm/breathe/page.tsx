@@ -1,20 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { recordCalmSession } from '@/lib/actions/calm';
 
-const PETALS = [0, 45, 90, 135, 180, 225, 270, 315];
-
-const ROUNDS = [
-  { past: true },
-  { past: true },
-  { active: true },
-  {},
-  {},
-  {},
-];
-
+/* ─── Breathing pattern: box breathing 4-4-4-4 ─── */
 type Phase = 'breathe-in' | 'hold' | 'breathe-out' | 'rest';
+
+const PHASE_ORDER: Phase[] = ['breathe-in', 'hold', 'breathe-out', 'rest'];
+const PHASE_DURATION_MS = 4000;
+const PHASE_DURATION_S = 4;
+const TOTAL_ROUNDS = 6;
+const ROUND_DURATION_S = PHASE_ORDER.length * PHASE_DURATION_S; // 16s
+const TOTAL_DURATION_S = TOTAL_ROUNDS * ROUND_DURATION_S; // 96s
 
 const PHASE_LABELS: Record<Phase, { heading: string; sub: string }> = {
   'breathe-in': {
@@ -31,16 +29,179 @@ const PHASE_LABELS: Record<Phase, { heading: string; sub: string }> = {
   },
   rest: {
     heading: 'Rest',
-    sub: 'Pause here before the next breath. You\'re doing well.',
+    sub: "Pause here before the next breath. You're doing well.",
   },
 };
 
+const PETALS = [0, 45, 90, 135, 180, 225, 270, 315];
+
+function formatTime(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+
 export default function BreatheSessionPage() {
   const [paused, setPaused] = useState(false);
-  const [phase] = useState<Phase>('breathe-in');
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [round, setRound] = useState(1);
+  const [finished, setFinished] = useState(false);
+  const animationStartRef = useRef<number | null>(null);
 
+  const phase = PHASE_ORDER[phaseIndex];
   const { heading, sub } = PHASE_LABELS[phase];
   const animState = paused ? 'paused' : 'running';
+
+  /* ─── Phase timer ─── */
+  useEffect(() => {
+    if (paused || finished) return;
+
+    const id = setTimeout(() => {
+      const nextIndex = (phaseIndex + 1) % PHASE_ORDER.length;
+      if (nextIndex === 0) {
+        if (round >= TOTAL_ROUNDS) {
+          setFinished(true);
+          return;
+        }
+        setRound((r) => r + 1);
+      }
+      setPhaseIndex(nextIndex);
+    }, PHASE_DURATION_MS);
+
+    return () => clearTimeout(id);
+  }, [phaseIndex, paused, finished, round]);
+
+  /* ─── Record completed session ─── */
+  useEffect(() => {
+    if (!finished) return;
+    recordCalmSession('breathe');
+  }, [finished]);
+
+  /* ─── Sync animation start so CSS cycle stays in phase ─── */
+  useEffect(() => {
+    if (animationStartRef.current === null) {
+      animationStartRef.current = Date.now();
+    }
+  }, []);
+
+  /* ─── Progress display ─── */
+  const elapsedPhases = (round - 1) * PHASE_ORDER.length + phaseIndex;
+  const timeLeftSeconds = TOTAL_DURATION_S - elapsedPhases * PHASE_DURATION_S;
+
+  /* ─── Round dots ─── */
+  const roundDots = Array.from({ length: TOTAL_ROUNDS }, (_, i) => ({
+    past: i < round - 1,
+    active: i === round - 1,
+  }));
+
+  /* ─── Bloom layer style — animate-breath-cycle syncs with phase timer ─── */
+  const bloomBase = 'absolute rounded-full animate-breath-cycle';
+
+  /* ─── Finished screen ─── */
+  if (finished) {
+    return (
+      <div
+        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-10 text-center"
+        style={{
+          background: 'radial-gradient(120% 90% at 50% 34%, #3A5F56 0%, #2E4C45 46%, #213A34 100%)',
+        }}
+      >
+        {/* Ambient halo */}
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            top: -140,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 760,
+            height: 760,
+            background: 'radial-gradient(circle, rgba(159,201,188,.16), rgba(159,201,188,0) 62%)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 max-w-[400px]">
+          {/* Completion bloom — static */}
+          <div className="relative mx-auto mb-10" style={{ width: 160, height: 160 }}>
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{ background: 'rgba(159,201,188,.12)' }}
+            />
+            <div
+              className="absolute rounded-full"
+              style={{
+                inset: 20,
+                background: 'rgba(159,201,188,.18)',
+                border: '1px solid rgba(234,243,239,.22)',
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg width="80" height="80" viewBox="0 0 400 400" aria-hidden="true">
+                <g fill="#EAF3EF" fillOpacity=".9" stroke="none">
+                  {PETALS.map((deg) => (
+                    <path
+                      key={deg}
+                      d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
+                      transform={deg === 0 ? undefined : `rotate(${deg} 200 200)`}
+                    />
+                  ))}
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <p
+            className="text-[11px] font-semibold tracking-[0.16em] uppercase mb-3"
+            style={{ color: '#8FB3A8' }}
+          >
+            Session complete
+          </p>
+          <h1
+            className="font-heading text-[32px] font-semibold tracking-[-0.02em] mb-3"
+            style={{ color: '#FBFDFC' }}
+          >
+            Well done.
+          </h1>
+          <p
+            className="text-[16px] leading-[1.6] mb-9 [text-wrap:pretty]"
+            style={{ color: '#B9D2C9' }}
+          >
+            Six rounds of box breathing — {formatTime(TOTAL_DURATION_S)} of intentional calm. That
+            takes real effort.
+          </p>
+
+          {/* Round dots — all complete */}
+          <div className="flex items-center justify-center gap-[9px] mb-9">
+            {Array.from({ length: TOTAL_ROUNDS }, (_, i) => (
+              <span
+                key={i}
+                className="rounded-full"
+                style={{ width: 9, height: 9, background: '#9FC9BC' }}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 items-center">
+            <Link
+              href="/calm-tool"
+              className="inline-flex items-center gap-2 font-heading text-[15.5px] font-semibold px-[30px] py-[14px] rounded-[12px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              style={{ background: '#EAF3EF', color: '#2A473F' }}
+            >
+              Back to calm tools
+            </Link>
+            <Link
+              href="/home"
+              className="text-[14px] font-medium px-4 py-2 rounded-[10px] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              style={{ color: '#CADED6' }}
+            >
+              Go to home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -132,8 +293,10 @@ export default function BreatheSessionPage() {
         >
           {/* Layer 1 — outermost */}
           <div
-            className="absolute w-[300px] h-[300px] rounded-full animate-breathe"
+            className={bloomBase}
             style={{
+              width: 300,
+              height: 300,
               background: 'rgba(159,201,188,.10)',
               animationPlayState: animState,
             }}
@@ -141,8 +304,10 @@ export default function BreatheSessionPage() {
           />
           {/* Layer 2 */}
           <div
-            className="absolute w-[232px] h-[232px] rounded-full animate-breathe"
+            className={bloomBase}
             style={{
+              width: 232,
+              height: 232,
               background: 'rgba(159,201,188,.14)',
               animationDelay: '.12s',
               animationPlayState: animState,
@@ -151,8 +316,10 @@ export default function BreatheSessionPage() {
           />
           {/* Layer 3 */}
           <div
-            className="absolute w-[168px] h-[168px] rounded-full animate-breathe"
+            className={bloomBase}
             style={{
+              width: 168,
+              height: 168,
               background: 'rgba(234,243,239,.16)',
               border: '1px solid rgba(234,243,239,.22)',
               animationDelay: '.24s',
@@ -162,7 +329,7 @@ export default function BreatheSessionPage() {
           />
           {/* Centre quatrefoil */}
           <div
-            className="animate-breathe flex items-center justify-center"
+            className="animate-breath-cycle flex items-center justify-center"
             style={{ animationDelay: '.24s', animationPlayState: animState }}
             aria-hidden="true"
           >
@@ -182,13 +349,13 @@ export default function BreatheSessionPage() {
 
         {/* Phase cue */}
         <p
-          className="font-heading text-[34px] font-semibold tracking-[-0.02em] mb-2 text-center"
+          className="font-heading text-[34px] font-semibold tracking-[-0.02em] mb-2 text-center transition-opacity duration-500"
           style={{ color: '#FBFDFC' }}
         >
           {heading}
         </p>
         <p
-          className="text-[15px] leading-[1.55] text-center max-w-[340px] [text-wrap:pretty]"
+          className="text-[15px] leading-[1.55] text-center max-w-[340px] [text-wrap:pretty] transition-opacity duration-500"
           style={{ color: '#B9D2C9' }}
         >
           {sub}
@@ -199,20 +366,24 @@ export default function BreatheSessionPage() {
       <div className="relative z-10 px-10 pb-[34px]">
         {/* Round timeline */}
         <div className="flex flex-col items-center gap-3 mb-[26px]">
-          <div className="flex items-center gap-[9px]" aria-label="Round 3 of 6" role="img">
-            {ROUNDS.map((r, i) => (
+          <div
+            className="flex items-center gap-[9px]"
+            aria-label={`Round ${round} of ${TOTAL_ROUNDS}`}
+            role="img"
+          >
+            {roundDots.map((dot, i) => (
               <span
                 key={i}
-                className="rounded-full"
+                className="rounded-full transition-all duration-500"
                 style={
-                  r.active
+                  dot.active
                     ? {
                         width: 11,
                         height: 11,
                         background: '#EAF3EF',
                         boxShadow: '0 0 0 4px rgba(234,243,239,.14)',
                       }
-                    : r.past
+                    : dot.past
                     ? { width: 9, height: 9, background: '#9FC9BC' }
                     : { width: 9, height: 9, background: 'rgba(234,243,239,.22)' }
                 }
@@ -221,7 +392,7 @@ export default function BreatheSessionPage() {
             ))}
           </div>
           <div className="text-[12.5px] tracking-[0.02em]" style={{ color: '#8FB3A8' }}>
-            Round 3 of 6 · about 1:48 left
+            Round {round} of {TOTAL_ROUNDS} · about {formatTime(timeLeftSeconds)} left
           </div>
         </div>
 
@@ -234,7 +405,6 @@ export default function BreatheSessionPage() {
             style={{ background: '#EAF3EF', color: '#2A473F' }}
           >
             {paused ? (
-              /* Play icon */
               <>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#2A473F" stroke="none" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
@@ -242,7 +412,6 @@ export default function BreatheSessionPage() {
                 Resume
               </>
             ) : (
-              /* Pause icon */
               <>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#2A473F" stroke="none" aria-hidden="true">
                   <rect x="6" y="5" width="4" height="14" rx="1" />

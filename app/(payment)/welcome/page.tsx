@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: "You're all set — Afia" };
 
@@ -112,14 +113,36 @@ function BloomedQuatrefoil() {
   );
 }
 
-export default function WelcomePage() {
-  /* Compute trial end date (today + 7 days) */
-  const trialEnd = new Date();
-  trialEnd.setDate(trialEnd.getDate() + 7);
-  const trialEndStr = trialEnd.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-  });
+export default async function WelcomePage() {
+  /* Read trial end from subscription row; fall back to today + 7 if webhook hasn't fired yet */
+  let trialEndStr: string;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('current_period_end')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (sub?.current_period_end) {
+        trialEndStr = new Date(sub.current_period_end as string).toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+        });
+      } else {
+        throw new Error('no row yet');
+      }
+    } else {
+      throw new Error('no user');
+    }
+  } catch {
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() + 7);
+    trialEndStr = fallback.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+  }
 
   const TILE_BG = {
     backgroundImage:
@@ -155,8 +178,8 @@ export default function WelcomePage() {
 
           <p className="text-[16.5px] leading-[1.6] text-[#565D5A] max-w-[460px] mx-auto mb-[26px] [text-wrap:pretty]">
             Your plan is ready and waiting. You&rsquo;re free until{' '}
-            <strong className="text-[#3A403C] font-semibold">{trialEndStr}</strong> — we&rsquo;ll
-            send a gentle reminder two days before, so nothing is a surprise.
+            <strong className="text-[#3A403C] font-semibold">{trialEndStr}</strong> — cancel
+            any time before then and you won&rsquo;t be charged a thing.
           </p>
 
           {/* First step card */}

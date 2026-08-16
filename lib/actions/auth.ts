@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { Band } from '@/lib/scoring';
 
@@ -17,6 +18,7 @@ export async function signUp(data: {
   password: string;
   score: number | null;
   band: string | null;
+  answers: number[] | null;
 }): Promise<AuthActionResult> {
   const supabase = await createClient();
 
@@ -36,6 +38,11 @@ export async function signUp(data: {
     data.score <= 42 &&
     VALID_BANDS.includes(data.band as Band);
 
+  const hasValidAnswers =
+    Array.isArray(data.answers) &&
+    data.answers.length === 14 &&
+    data.answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3);
+
   if (authData.session) {
     // Email confirmation disabled — save screener result now while session is live
     if (hasValidResult) {
@@ -43,6 +50,7 @@ export async function signUp(data: {
         user_id: authData.user.id,
         score: data.score,
         band: data.band,
+        answers: hasValidAnswers ? data.answers : null,
       });
     }
     redirect('/pricing');
@@ -53,7 +61,11 @@ export async function signUp(data: {
     const cookieStore = await cookies();
     cookieStore.set(
       'afia_pending_result',
-      JSON.stringify({ score: data.score, band: data.band }),
+      JSON.stringify({
+        score: data.score,
+        band: data.band,
+        answers: hasValidAnswers ? data.answers : null,
+      }),
       { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60, path: '/' },
     );
   }
@@ -112,4 +124,35 @@ export async function resetPassword(data: {
   if (error) return { error: error.message };
 
   redirect('/log-in?reset=1');
+}
+
+export async function saveScreenerResult(data: {
+  score: number;
+  band: string;
+  answers: number[];
+}): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  if (
+    !Array.isArray(data.answers) ||
+    data.answers.length !== 14 ||
+    !data.answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3)
+  ) {
+    return { error: 'Invalid answers' };
+  }
+
+  const { error } = await supabase.from('screener_results').insert({
+    user_id: user.id,
+    score: data.score,
+    band: data.band,
+    answers: data.answers,
+  });
+
+  if (error) return { error: error.message };
+  revalidatePath('/progress');
+  return {};
 }

@@ -45,12 +45,13 @@ interface ToolCardProps {
   title: string;
   body: string;
   duration: string;
+  href: string;
 }
 
-function ToolCard({ iconBg, icon, title, body, duration }: ToolCardProps) {
+function ToolCard({ iconBg, icon, title, body, duration, href }: ToolCardProps) {
   return (
     <Link
-      href="/calm/breathe"
+      href={href}
       className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-sm transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span
@@ -78,6 +79,7 @@ const TOOLS: ToolCardProps[] = [
     title: 'Box breathing',
     body: 'Four counts in, hold, out, hold.',
     duration: '4 min',
+    href: '/calm/breathe',
   },
   {
     iconBg: 'bg-[#E3F1EE]',
@@ -90,6 +92,7 @@ const TOOLS: ToolCardProps[] = [
     title: 'Ocean breath',
     body: 'Long exhales, like a slow tide.',
     duration: '5 min',
+    href: '/calm/ocean-breath',
   },
   {
     iconBg: 'bg-[#F3EEE6]',
@@ -101,8 +104,9 @@ const TOOLS: ToolCardProps[] = [
       </svg>
     ),
     title: '5-4-3-2-1 senses',
-    body: 'Ground through what\'s around you.',
+    body: "Ground through what's around you.",
     duration: '3 min',
+    href: '/calm/grounding',
   },
   {
     iconBg: 'bg-[#F3EEE6]',
@@ -115,6 +119,7 @@ const TOOLS: ToolCardProps[] = [
     title: 'Body scan',
     body: 'Soften tension, head to toe.',
     duration: '8 min',
+    href: '/calm/body-scan',
   },
   {
     iconBg: 'bg-[#EDEBF3]',
@@ -126,6 +131,7 @@ const TOOLS: ToolCardProps[] = [
     title: 'Loving-kindness',
     body: 'A few warm words, toward yourself.',
     duration: '6 min',
+    href: '/calm/loving-kindness',
   },
   {
     iconBg: 'bg-[#EDEBF3]',
@@ -139,6 +145,7 @@ const TOOLS: ToolCardProps[] = [
     title: 'Safe place',
     body: 'Picture somewhere that feels held.',
     duration: '5 min',
+    href: '/calm/safe-place',
   },
 ];
 

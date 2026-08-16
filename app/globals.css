@@ -243,10 +243,20 @@
   50% { transform: scale(1.06); opacity: 1; }
 }
 
-/* afiaBloom: for breathing visuals / calm tool (slow, 4s) */
+/* afiaBloom: for breathing visuals / calm tool (slow, 4s) — kept for other uses */
 @keyframes afiaBloom {
   0%, 100% { transform: scale(0.92); opacity: 0.72; }
   50% { transform: scale(1.08); opacity: 1; }
+}
+
+/* afiaBreathCycle: 16s cycle matching the 4-phase box-breathing pattern (4s per phase)
+   0→25% breathe-in (expand), 25→50% hold (stay open), 50→75% breathe-out (contract), 75→100% rest (stay contracted) */
+@keyframes afiaBreathCycle {
+  0%   { transform: scale(0.92); opacity: 0.72; }
+  25%  { transform: scale(1.08); opacity: 1;    }
+  50%  { transform: scale(1.08); opacity: 1;    }
+  75%  { transform: scale(0.92); opacity: 0.72; }
+  100% { transform: scale(0.92); opacity: 0.72; }
 }
 
 .animate-breathe-dot {
@@ -255,6 +265,10 @@
 
 .animate-breathe {
   animation: afiaBloom 4s ease-in-out infinite;
+}
+
+.animate-breath-cycle {
+  animation: afiaBreathCycle 16s ease-in-out infinite;
 }
 
 /* afiaWave: for loading bar indicators (audio-waveform style) */
@@ -271,6 +285,7 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe-dot,
   .animate-breathe,
+  .animate-breath-cycle,
   .animate-wave-bar {
     animation: none;
   }

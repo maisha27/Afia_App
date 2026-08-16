@@ -26,11 +26,59 @@ function getDateLabel(): string {
   return `${weekday} · ${day} ${month}`;
 }
 
+/* ─── Streak helpers ─── */
+function toDateStr(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function calculateStreak(activeDates: Set<string>): number {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  // Streak is still alive if today OR yesterday has activity
+  const cursor = new Date(today);
+  if (!activeDates.has(toDateStr(cursor))) {
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+    if (!activeDates.has(toDateStr(cursor))) return 0;
+  }
+
+  let streak = 0;
+  while (activeDates.has(toDateStr(cursor))) {
+    streak++;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return streak;
+}
+
+/* ─── Daily rotating quotes ─── */
+const DAILY_NOTES = [
+  "Going gently is still going forward. There's no pace you're supposed to keep.",
+  "Worry is loudest when it stays vague. Naming it, even badly, is already working.",
+  "You don't have to feel calm to be coping. Sometimes doing the next small thing is enough.",
+  "One difficult week doesn't undo what you've already built. Progress doesn't disappear.",
+  "Reassurance feels like relief, but noticing the urge is the real skill. You're practising it.",
+  "Anxiety lies about urgency. Most things can wait the length of one slow breath.",
+  "You came back today. That's the whole thing — that's what this is built on.",
+  "It's okay if this feels hard. Hard and hopeless are not the same thing.",
+  "The goal isn't to stop worrying entirely. It's to let worry take up less of your day.",
+  "Every time you sit with uncertainty instead of checking, you're rewiring something real.",
+  "Being aware of your patterns is not the same as being stuck in them.",
+  "Small and consistent beats large and occasional, every time.",
+  "Your nervous system is doing what it thinks is helpful. You can gently teach it otherwise.",
+  "Rest is not falling behind. Rest is part of the plan.",
+] as const;
+
+function getDailyNote(): string {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000,
+  );
+  return DAILY_NOTES[dayOfYear % DAILY_NOTES.length];
+}
+
 /* ─── Progress ring constants ─── */
 const R = 52;
 const CIRC = +(2 * Math.PI * R).toFixed(2); // 326.73
-const PROGRESS = 0.095; // Day 2 of 21 ≈ 9.5%
-const DASH_OFFSET = +(CIRC * (1 - PROGRESS)).toFixed(2);
+const TOTAL_PROGRAMME_DAYS = 21;
 
 /* ─── Decorative quatrefoil ─── */
 function Quatrefoil({ size, opacity }: { size: number; opacity: number }) {
@@ -73,6 +121,53 @@ export default async function HomePage() {
   const greeting = getGreeting();
   const dateLabel = getDateLabel();
 
+  // Fetch exercises, progress, journal entries, and calm sessions in parallel
+  const [exercisesRes, progressRes, journalRes, calmRes] = await Promise.all([
+    supabase
+      .from('exercises')
+      .select('id, slug, title, description, sort_order, duration_minutes')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('user_exercise_progress')
+      .select('exercise_id, completed_date')
+      .eq('user_id', user!.id),
+    supabase
+      .from('journal_entries')
+      .select('id, created_at')
+      .eq('user_id', user!.id),
+    supabase
+      .from('calm_sessions')
+      .select('created_at')
+      .eq('user_id', user!.id),
+  ]);
+
+  const allExercises = exercisesRes.data ?? [];
+  const completedIds = new Set((progressRes.data ?? []).map((p) => p.exercise_id as string));
+  const firstIncomplete = allExercises.find((e) => !completedIds.has(e.id));
+  const currentExercise = firstIncomplete ?? null;
+
+  const currentSortOrder = currentExercise?.sort_order ?? allExercises.length;
+  const progressPct = Math.min(100, Math.round((currentSortOrder / TOTAL_PROGRAMME_DAYS) * 100));
+  const DASH_OFFSET = +(CIRC * (1 - progressPct / 100)).toFixed(2);
+
+  const journalEntries = journalRes.data ?? [];
+  const journalCount = journalEntries.length;
+
+  // Collect all activity dates into a Set for streak calculation
+  const activeDates = new Set<string>();
+  for (const row of progressRes.data ?? []) {
+    if (row.completed_date) activeDates.add(row.completed_date as string);
+  }
+  for (const row of journalEntries) {
+    activeDates.add((row.created_at as string).slice(0, 10));
+  }
+  for (const row of calmRes.data ?? []) {
+    activeDates.add((row.created_at as string).slice(0, 10));
+  }
+
+  const streak = calculateStreak(activeDates);
+
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
       {/* Corner quatrefoil — top right */}
@@ -96,92 +191,80 @@ export default async function HomePage() {
             </h1>
           </div>
           {/* Streak pill */}
-          <div className="flex items-center gap-2.5 bg-white border border-[#E7E2DA] rounded-full px-[15px] py-2 text-[13.5px] font-semibold text-[#3A403C] shadow-sm">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="#E0A93F"
-              aria-hidden="true"
-            >
-              <path d="M12 2c.4 3.6 2.4 5.6 6 6-3.6.4-5.6 2.4-6 6-.4-3.6-2.4-5.6-6-6 3.6-.4 5.6-2.4 6-6Z" />
-            </svg>
-            3-day streak
-          </div>
+          {streak > 0 && (
+            <div className="flex items-center gap-2.5 bg-white border border-[#E7E2DA] rounded-full px-[15px] py-2 text-[13.5px] font-semibold text-[#3A403C] shadow-sm">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="#E0A93F"
+                aria-hidden="true"
+              >
+                <path d="M12 2c.4 3.6 2.4 5.6 6 6-3.6.4-5.6 2.4-6 6-.4-3.6-2.4-5.6-6-6 3.6-.4 5.6-2.4 6-6Z" />
+              </svg>
+              {streak === 1 ? '1-day streak' : `${streak}-day streak`}
+            </div>
+          )}
         </div>
 
         {/* ── Plan hero card ── */}
-        <div
-          className="bg-[#2F5049] rounded-[20px] px-8 py-[30px] mb-[22px] relative overflow-hidden flex items-center gap-[30px]"
-        >
+        <div className="bg-[#2F5049] rounded-[20px] px-8 py-[30px] mb-[22px] relative overflow-hidden flex items-center gap-[30px]">
           <div className="flex-1 min-w-0">
             <span className="text-[11.5px] font-semibold tracking-[0.09em] uppercase text-[#9FC9BC]">
-              Your plan · Day 2 of 21
+              Your plan · Day {currentSortOrder} of {TOTAL_PROGRAMME_DAYS}
             </span>
-            <h2 className="font-heading text-[24px] font-semibold tracking-[-0.02em] text-white mt-2.5 mb-2">
-              Naming the worry
-            </h2>
-            <p className="text-[14.5px] leading-[1.55] text-[#D4E4DE] mb-5 max-w-[400px] [text-wrap:pretty]">
-              A short reading and a two-minute writing exercise to give this week&rsquo;s worry a
-              shape. Around 6 minutes.
-            </p>
-            <Link
-              href="/exercises"
-              className="inline-flex items-center gap-2.5 bg-white text-[#2F5049] font-heading text-[15px] font-semibold px-6 py-[13px] rounded-[11px] hover:bg-[#EAF3EF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Continue
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="M13 6l6 6-6 6" />
-              </svg>
-            </Link>
+            {currentExercise ? (
+              <>
+                <h2 className="font-heading text-[24px] font-semibold tracking-[-0.02em] text-white mt-2.5 mb-2">
+                  {currentExercise.title}
+                </h2>
+                <p className="text-[14.5px] leading-[1.55] text-[#D4E4DE] mb-5 max-w-[400px] [text-wrap:pretty]">
+                  {currentExercise.description ?? `A ${currentExercise.duration_minutes}-minute reading and writing exercise.`}
+                </p>
+                <Link
+                  href={`/plan/${currentExercise.slug}`}
+                  className="inline-flex items-center gap-2.5 bg-white text-[#2F5049] font-heading text-[15px] font-semibold px-6 py-[13px] rounded-[11px] hover:bg-[#EAF3EF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Continue
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="font-heading text-[24px] font-semibold tracking-[-0.02em] text-white mt-2.5 mb-2">
+                  Week 1 complete
+                </h2>
+                <p className="text-[14.5px] leading-[1.55] text-[#D4E4DE] mb-5 max-w-[400px] [text-wrap:pretty]">
+                  You&rsquo;ve finished all four exercises in Week 1. Week 2 is coming soon.
+                </p>
+                <Link
+                  href="/exercises"
+                  className="inline-flex items-center gap-2.5 bg-white text-[#2F5049] font-heading text-[15px] font-semibold px-6 py-[13px] rounded-[11px] hover:bg-[#EAF3EF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  View plan
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Progress ring */}
           <div
             className="flex-shrink-0 w-[120px] h-[120px] relative flex items-center justify-center"
-            aria-label="Plan progress: 10% complete"
+            aria-label={`Plan progress: ${progressPct}% complete`}
           >
-            <svg
-              width="120"
-              height="120"
-              viewBox="0 0 120 120"
-              aria-hidden="true"
-              style={{ transform: 'rotate(-90deg)' }}
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r={R}
-                fill="none"
-                stroke="white"
-                strokeOpacity=".18"
-                strokeWidth="9"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r={R}
-                fill="none"
-                stroke="#9FC9BC"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeDasharray={CIRC}
-                strokeDashoffset={DASH_OFFSET}
-              />
+            <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="60" cy="60" r={R} fill="none" stroke="white" strokeOpacity=".18" strokeWidth="9" />
+              <circle cx="60" cy="60" r={R} fill="none" stroke="#9FC9BC" strokeWidth="9" strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={DASH_OFFSET} />
             </svg>
             <div className="absolute text-center leading-none">
-              <div className="font-heading text-[26px] font-semibold text-white">10%</div>
+              <div className="font-heading text-[26px] font-semibold text-white">{progressPct}%</div>
               <div className="text-[10.5px] text-[#9FC9BC] mt-0.5">complete</div>
             </div>
           </div>
@@ -221,7 +304,7 @@ export default async function HomePage() {
 
           {/* Weekly check-in */}
           <Link
-            href="/progress"
+            href="/screener"
             className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-sm transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#F3EEE6] items-center justify-center mb-[14px]">
@@ -275,7 +358,9 @@ export default async function HomePage() {
               Your journal
             </div>
             <div className="text-[13px] leading-[1.5] text-[#767D79]">
-              4 reflections saved so far.
+              {journalCount === 0
+                ? 'No reflections yet — start writing.'
+                : `${journalCount} ${journalCount === 1 ? 'reflection' : 'reflections'} saved so far.`}
             </div>
           </Link>
         </div>
@@ -324,8 +409,7 @@ export default async function HomePage() {
               &ldquo;
             </span>
             <p className="font-heading text-[23px] leading-[1.42] font-medium italic tracking-[-0.012em] text-[#2F5049] max-w-[540px] mt-2 mb-4 [text-wrap:pretty]">
-              Going gently is still going forward. There&rsquo;s no pace you&rsquo;re supposed to
-              keep.
+              {getDailyNote()}
             </p>
             <span className="text-[11.5px] font-semibold tracking-[0.1em] uppercase text-[#8A928D]">
               A note for today

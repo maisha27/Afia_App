@@ -60,11 +60,15 @@ export async function POST(request: Request) {
       const sub = event.data.object as Stripe.Subscription;
       const priceId = sub.items.data[0]?.price.id ?? '';
 
-      await db.from('subscriptions').update({
-        status: sub.status,
-        plan: planFromPriceId(priceId),
-        current_period_end: getPeriodEnd(sub),
-      }).eq('stripe_subscription_id', sub.id);
+      await db
+        .from('subscriptions')
+        .update({
+          status: sub.status,
+          plan: planFromPriceId(priceId),
+          current_period_end: getPeriodEnd(sub),
+          cancel_at_period_end: sub.cancel_at_period_end,
+        })
+        .eq('stripe_subscription_id', sub.id);
       break;
     }
 

@@ -157,7 +157,7 @@ export function SignUpForm() {
         typeof window !== 'undefined'
           ? (JSON.parse(
               sessionStorage.getItem('afia_pending_result') ?? 'null',
-            ) as { score: number; band: string } | null)
+            ) as { score: number; band: string; answers?: number[] } | null)
           : null;
 
       const result = await signUp({
@@ -165,6 +165,7 @@ export function SignUpForm() {
         password: values.password,
         score: pendingResult?.score ?? null,
         band: pendingResult?.band ?? null,
+        answers: pendingResult?.answers ?? null,
       });
 
       if (result && 'error' in result) {

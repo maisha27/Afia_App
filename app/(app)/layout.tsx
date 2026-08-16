@@ -17,15 +17,15 @@ export default async function AppLayout({
     redirect("/log-in");
   }
 
-  // TODO: Phase D — subscription check
-  // const { data: sub } = await supabase
-  //   .from('subscriptions')
-  //   .select('status')
-  //   .eq('user_id', user.id)
-  //   .single()
-  // if (!sub || !['active', 'trialing'].includes(sub.status)) {
-  //   redirect('/pricing')
-  // }
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('status')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (!sub || !['active', 'trialing'].includes(sub.status)) {
+    redirect('/plan');
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useScreener } from './ScreenerProvider';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { saveScreenerResult } from '@/lib/actions/auth';
 import type { Band, ScoreResult } from '@/lib/scoring';
 
 // Band → coloured word in headline
@@ -130,11 +131,12 @@ function CornerDecor({ className }: { className?: string }) {
   );
 }
 
-export function ResultView() {
+export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const { isComplete, getResult, answers } = useScreener();
   const router = useRouter();
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (!isComplete) {
@@ -219,8 +221,18 @@ export function ResultView() {
   });
 
   const handleSeeHelp = () => {
+    if (isLoggedIn) {
+      startTransition(async () => {
+        await saveScreenerResult({ score, band, answers: answers.map((a) => a ?? 0) });
+        router.push('/progress');
+      });
+      return;
+    }
     try {
-      sessionStorage.setItem('afia_pending_result', JSON.stringify({ score, band }));
+      sessionStorage.setItem(
+        'afia_pending_result',
+        JSON.stringify({ score, band, answers: answers.map((a) => a ?? 0) }),
+      );
     } catch {
       // sessionStorage unavailable — sign-up still works
     }
@@ -282,13 +294,16 @@ export function ResultView() {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={handleSeeHelp}
-                  className="inline-flex items-center gap-2.5 rounded-[12px] bg-primary px-7 py-4 font-heading text-[16px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  disabled={isPending}
+                  className="inline-flex items-center gap-2.5 rounded-[12px] bg-primary px-7 py-4 font-heading text-[16px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-70"
                   style={{ boxShadow: '0 12px 24px -10px rgba(47,110,122,0.6)' }}
                 >
-                  See what could help
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
+                  {isPending ? 'Saving…' : isLoggedIn ? 'Save my check-in' : 'See what could help'}
+                  {!isPending && (
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  )}
                 </button>
                 <Link
                   href="/screener/1"
