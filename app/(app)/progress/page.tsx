@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { ProgressChart } from '@/components/progress/ProgressChart';
+import { AnimatedDomainBars } from '@/components/progress/AnimatedDomainBars';
+import { AnimatedStatTiles } from '@/components/progress/AnimatedStatTiles';
 
 export const metadata: Metadata = { title: 'Your progress — Afia' };
 
-/* ─── Domain groupings (same as ResultView INSIGHT_GROUPS) ─── */
+/* ─── Domain groupings ─── */
 const DOMAIN_GROUPS = [
   {
     label: 'Persistent worry',
@@ -29,7 +32,6 @@ const DOMAIN_GROUPS = [
   },
 ] as const;
 
-/* ─── Band display labels ─── */
 const BAND_DISPLAY: Record<string, string> = {
   Low: 'Low',
   Mild: 'Mild',
@@ -63,7 +65,6 @@ function domainPct(answers: number[], indices: readonly number[]): number {
 }
 
 function scoreToY(score: number): number {
-  // Higher on screen (lower svgY) = better (lower anxiety score)
   return Math.round(40 + (score / 42) * 120);
 }
 
@@ -76,7 +77,7 @@ function formatCheckInDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-/* ─── Sub-components ─── */
+/* ─── Decorative ─── */
 function MiniQuatrefoil() {
   return (
     <svg width="28" height="28" viewBox="0 0 400 400" aria-hidden="true" className="flex-shrink-0">
@@ -97,65 +98,6 @@ function MiniQuatrefoil() {
         ))}
       </g>
     </svg>
-  );
-}
-
-function StatTile({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="bg-white border border-[#E7E2DA] rounded-[14px] px-[18px] py-4">
-      <div className="font-heading text-[26px] font-semibold text-[#2F5049]">{value}</div>
-      <div className="text-[12.5px] text-[#767D79] mt-0.5">{label}</div>
-    </div>
-  );
-}
-
-interface DomainRowProps {
-  label: string;
-  beforePct: number | null;
-  afterPct: number;
-  beforeColor: string;
-  afterColor: string;
-  fromLabel: string | null;
-  toLabel: string;
-  toColor: string;
-}
-
-function DomainRow({
-  label,
-  beforePct,
-  afterPct,
-  beforeColor,
-  afterColor,
-  fromLabel,
-  toLabel,
-  toColor,
-}: DomainRowProps) {
-  return (
-    <div className="grid items-center gap-4" style={{ gridTemplateColumns: '140px 1fr auto' }}>
-      <span className="text-[14.5px] font-semibold text-[#3A403C]">{label}</span>
-      <div className="h-[8px] rounded-full bg-[#EFEAE2] relative">
-        {beforePct !== null && (
-          <div
-            className="h-full rounded-full absolute top-0 left-0"
-            style={{ width: `${beforePct}%`, background: beforeColor }}
-          />
-        )}
-        <div
-          className="h-full rounded-full absolute top-0 left-0"
-          style={{ width: `${Math.max(4, afterPct)}%`, background: afterColor }}
-        />
-      </div>
-      <span className="text-[12.5px] font-semibold text-[#8A928D] whitespace-nowrap">
-        {fromLabel ? (
-          <>
-            {fromLabel} <span className="text-[#C9C3B8]">→</span>{' '}
-            <span style={{ color: toColor }}>{toLabel}</span>
-          </>
-        ) : (
-          <span style={{ color: toColor }}>{toLabel}</span>
-        )}
-      </span>
-    </div>
   );
 }
 
@@ -213,15 +155,17 @@ export default async function ProgressPage() {
   const improving = hasMultiple && firstResult!.score > latestResult!.score + 2;
   const worsening = hasMultiple && latestResult!.score > firstResult!.score + 2;
 
-  /* ─── Trend subtitle ─── */
   const weeksApart =
     hasMultiple
-      ? Math.max(1, Math.round(
-          (new Date(latestResult!.created_at).getTime() - new Date(firstResult!.created_at).getTime()) /
-            (7 * 24 * 60 * 60 * 1000),
-        ))
+      ? Math.max(
+          1,
+          Math.round(
+            (new Date(latestResult!.created_at).getTime() -
+              new Date(firstResult!.created_at).getTime()) /
+              (7 * 24 * 60 * 60 * 1000),
+          ),
+        )
       : 0;
-
   const weekLabel = weeksApart === 1 ? 'one week' : `${weeksApart} weeks`;
 
   let trendSubtitle: string;
@@ -237,7 +181,7 @@ export default async function ProgressPage() {
     trendSubtitle = `Holding steady over ${weekLabel}`;
   }
 
-  /* ─── SVG chart points ─── */
+  /* ─── Chart data (computed server-side, passed to client) ─── */
   const chartPoints = checkIns.map((ci, i) => ({
     x: xForIndex(i, checkIns.length),
     y: scoreToY(ci.score),
@@ -246,9 +190,7 @@ export default async function ProgressPage() {
 
   let linePath = '';
   let areaPath = '';
-  if (chartPoints.length === 1) {
-    // No path, just the dot
-  } else if (chartPoints.length >= 2) {
+  if (chartPoints.length >= 2) {
     linePath = chartPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ');
     areaPath =
       linePath +
@@ -268,7 +210,9 @@ export default async function ProgressPage() {
         : null;
 
     return {
-      ...domain,
+      label: domain.label,
+      beforeColor: domain.beforeColor,
+      afterColor: domain.afterColor,
       afterPct: currentPct,
       beforePct: priorPct,
       toLabel: currentIntensity?.label ?? '—',
@@ -277,7 +221,7 @@ export default async function ProgressPage() {
     };
   });
 
-  /* ─── Gentle note text ─── */
+  /* ─── Gentle note ─── */
   let gentleNote: string;
   if (!hasCheckIns) {
     gentleNote =
@@ -293,43 +237,52 @@ export default async function ProgressPage() {
       "A harder week doesn't undo the work you've done. Just notice what feels different — that's insight you can use.";
   } else {
     gentleNote =
-      "Staying steady is its own kind of progress. Notice what you’re doing to hold that ground — it’s already working.";
+      "Staying steady is its own kind of progress. Notice what you're doing to hold that ground — it's already working.";
   }
 
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
       <div className="relative max-w-[680px]">
-        {/* ── Header ── */}
-        <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-          From your weekly check-ins
-        </span>
-        <div className="flex items-end justify-between mb-6 mt-2 gap-4 flex-wrap">
-          <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29]">
-            Your progress
-          </h1>
-          <Link
-            href="/screener/1"
-            className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary border border-primary/30 px-4 py-2 rounded-[10px] hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring flex-shrink-0"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+
+        {/* ── Header ── stagger-0 */}
+        <div
+          className="animate-fade-up"
+          style={{ animationDelay: '0ms' }}
+        >
+          <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+            From your weekly check-ins
+          </span>
+          <div className="flex items-end justify-between mb-6 mt-2 gap-4 flex-wrap">
+            <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29]">
+              Your progress
+            </h1>
+            <Link
+              href="/screener/1"
+              className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary border border-primary/30 px-4 py-2 rounded-[10px] hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring flex-shrink-0"
             >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            New check-in
-          </Link>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              New check-in
+            </Link>
+          </div>
         </div>
 
-        {/* ── Trend card ── */}
-        <div className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5">
+        {/* ── Trend card ── stagger-1 */}
+        <div
+          className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5 animate-fade-up"
+          style={{ animationDelay: '80ms' }}
+        >
           <div className="flex items-start justify-between mb-[18px]">
             <div>
               <div className="font-heading text-[17px] font-semibold text-[#3A403C]">
@@ -363,82 +316,11 @@ export default async function ProgressPage() {
           </div>
 
           {hasCheckIns ? (
-            <>
-              <svg
-                viewBox="0 0 640 210"
-                width="100%"
-                height="180"
-                aria-label="Progress trend chart"
-                style={{ display: 'block' }}
-              >
-                <defs>
-                  <linearGradient id="progFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#2F6E7A" stopOpacity=".22" />
-                    <stop offset="1" stopColor="#2F6E7A" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <line x1="30" y1="40" x2="640" y2="40" stroke="#EFEAE2" strokeWidth="1" />
-                <line x1="30" y1="100" x2="640" y2="100" stroke="#EFEAE2" strokeWidth="1" />
-                <line x1="30" y1="160" x2="640" y2="160" stroke="#EFEAE2" strokeWidth="1" />
-
-                {areaPath && (
-                  <path d={areaPath} fill="url(#progFill)" />
-                )}
-                {linePath && (
-                  <path
-                    d={linePath}
-                    fill="none"
-                    stroke="#2F6E7A"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                )}
-
-                {chartPoints.map((p, i) => {
-                  const isLast = i === chartPoints.length - 1;
-                  return isLast ? (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r="7"
-                      fill="#2F6E7A"
-                      stroke="#fff"
-                      strokeWidth="3"
-                    />
-                  ) : (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r="6"
-                      fill="#fff"
-                      stroke="#2F6E7A"
-                      strokeWidth="3"
-                    />
-                  );
-                })}
-              </svg>
-
-              <div className="flex pt-1.5" style={{ paddingLeft: 56, paddingRight: 40 }}>
-                {chartPoints.map((p, i) => {
-                  const isFirst = i === 0;
-                  const isLast = i === chartPoints.length - 1;
-                  return (
-                    <span
-                      key={i}
-                      className="text-[12px] font-semibold text-[#9AA29C] flex-1"
-                      style={{
-                        textAlign: isFirst ? 'left' : isLast ? 'right' : 'center',
-                      }}
-                    >
-                      {isFirst ? 'Start' : p.date}
-                    </span>
-                  );
-                })}
-              </div>
-            </>
+            <ProgressChart
+              points={chartPoints}
+              linePath={linePath}
+              areaPath={areaPath}
+            />
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
               <div
@@ -473,9 +355,12 @@ export default async function ProgressPage() {
           )}
         </div>
 
-        {/* ── Domain shifts card ── */}
+        {/* ── Domain shifts card ── stagger-2 */}
         {hasCheckIns && (
-          <div className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5">
+          <div
+            className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5 animate-fade-up"
+            style={{ animationDelay: '160ms' }}
+          >
             <div className="flex items-start justify-between mb-5">
               <div>
                 <div className="font-heading text-[17px] font-semibold text-[#3A403C]">
@@ -495,26 +380,10 @@ export default async function ProgressPage() {
             </div>
 
             {hasAnswers ? (
-              <div className="flex flex-col gap-5">
-                {domainData.map((domain) => (
-                  <DomainRow
-                    key={domain.label}
-                    label={domain.label}
-                    beforePct={domain.beforePct}
-                    afterPct={domain.afterPct}
-                    beforeColor={domain.beforeColor}
-                    afterColor={domain.afterColor}
-                    fromLabel={domain.fromLabel}
-                    toLabel={domain.toLabel}
-                    toColor={domain.toColor}
-                  />
-                ))}
-                {!hasMultiple && (
-                  <p className="text-[12.5px] text-[#8A928D] pt-1">
-                    After your next check-in you&rsquo;ll see before and after for each area.
-                  </p>
-                )}
-              </div>
+              <AnimatedDomainBars
+                domains={domainData}
+                hasMultiple={hasMultiple}
+              />
             ) : (
               <div className="py-6 text-center">
                 <p className="text-[14px] text-[#8A928D]">
@@ -525,21 +394,27 @@ export default async function ProgressPage() {
           </div>
         )}
 
-        {/* ── Stat tiles ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-[14px] mb-[22px]">
-          <StatTile value={checkIns.length} label="Check-ins" />
-          <StatTile value={planSteps} label="Plan steps" />
-          <StatTile value={calmCount} label="Calm sessions" />
-          <StatTile value={journalCount} label="Journal notes" />
-        </div>
+        {/* ── Stat tiles ── stagger-3 (individual tiles stagger internally) */}
+        <AnimatedStatTiles
+          tiles={[
+            { value: checkIns.length, label: 'Check-ins' },
+            { value: planSteps, label: 'Plan steps' },
+            { value: calmCount, label: 'Calm sessions' },
+            { value: journalCount, label: 'Journal notes' },
+          ]}
+        />
 
-        {/* ── Gentle note ── */}
-        <div className="flex items-center gap-[14px] bg-[#EAF3EF] border border-[#D4E7DF] rounded-[16px] px-[22px] py-[18px]">
+        {/* ── Gentle note ── stagger-4 */}
+        <div
+          className="flex items-center gap-[14px] bg-[#EAF3EF] border border-[#D4E7DF] rounded-[16px] px-[22px] py-[18px] animate-fade-up"
+          style={{ animationDelay: '460ms' }}
+        >
           <MiniQuatrefoil />
           <p className="text-[14.5px] leading-[1.55] text-[#2F5049] [text-wrap:pretty]">
             {gentleNote}
           </p>
         </div>
+
       </div>
     </main>
   );

@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'motion/react';
 import { useScreener } from './ScreenerProvider';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
 import { saveScreenerResult } from '@/lib/actions/auth';
 import type { Band, ScoreResult } from '@/lib/scoring';
 
-// Band → coloured word in headline
+// ── Band display maps ────────────────────────────────────────────────────────
+
 const BAND_COLORS: Record<Band, string> = {
   Low: '#2F6E7A',
   Mild: '#6B7D2C',
@@ -17,7 +20,6 @@ const BAND_COLORS: Record<Band, string> = {
   'Very High': '#B0503F',
 };
 
-// Band → ring colour on severity bar thumb
 const THUMB_RING: Record<Band, string> = {
   Low: '#2F6E7A',
   Mild: '#6B7D2C',
@@ -26,7 +28,6 @@ const THUMB_RING: Record<Band, string> = {
   'Very High': '#B0503F',
 };
 
-// Band → display text in h2
 const BAND_LABEL: Record<Band, string> = {
   Low: 'minimal',
   Mild: 'mild',
@@ -35,7 +36,6 @@ const BAND_LABEL: Record<Band, string> = {
   'Very High': 'high',
 };
 
-// Descriptive bridging message per band
 const BRIDGE: Record<Band, string> = {
   Low: "These patterns tend to stay manageable. Afia's tools can help you keep it that way — catching worry early before it has a chance to build.",
   Mild: "At this level, gentle daily habits make a real difference. Afia's short practices are built for exactly where you are right now.",
@@ -46,7 +46,8 @@ const BRIDGE: Record<Band, string> = {
     "At this level, self-help works best alongside professional support. Afia's programme can be part of that — a private, structured companion to your care.",
 };
 
-// Grouped question indices (0-based) for the "What stood out" insight card
+// ── Insight groups ───────────────────────────────────────────────────────────
+
 const INSIGHT_GROUPS = [
   { label: 'Persistent worry', indices: [0, 4, 6, 11] },
   { label: 'Checking & reassurance', indices: [2, 7, 8] },
@@ -72,7 +73,8 @@ function barColor(avg: number): string {
   return '#C86452';
 }
 
-// Severity gradient bar — thumb positioned by raw score (0-42)
+// ── Severity bar ─────────────────────────────────────────────────────────────
+
 const SEVERITY_GRADIENT =
   'linear-gradient(90deg, #B7D8C6 0%, #D9E3A8 34%, #EBD3A0 60%, #E3B79A 82%, #DCA394 100%)';
 
@@ -80,40 +82,10 @@ function thumbLeft(score: number): number {
   return Math.min(92, Math.max(8, (score / 42) * 100));
 }
 
-// ── Breathing quatrefoil (loading state) ────────────────────────────────────
-function BreathingQuatrefoil() {
-  const ROTATIONS = [0, 45, 90, 135, 180, 225, 270, 315];
-  return (
-    <div className="relative w-[240px] h-[240px] mx-auto">
-      {/* Halo */}
-      <div
-        className="absolute -inset-6 rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at 50% 47%, rgba(47,110,122,0.18), rgba(47,110,122,0) 66%)',
-        }}
-      />
-      <div className="absolute inset-0 flex items-center justify-center animate-breathe motion-reduce:animate-none">
-        <svg width="250" height="250" viewBox="0 0 400 400" aria-hidden="true">
-          <g fill="#2F6E7A" fillOpacity="0.07" stroke="#2F6E7A" strokeOpacity="0.38" strokeWidth="2" strokeLinejoin="round">
-            {ROTATIONS.map((r) => (
-              <path key={r} d="M200 200 Q167 128 200 58 Q233 128 200 200 Z" transform={r ? `rotate(${r} 200 200)` : undefined} />
-            ))}
-          </g>
-          <g transform="rotate(22.5 200 200)" fill="#2F6E7A" fillOpacity="0.10" stroke="#2F6E7A" strokeOpacity="0.30" strokeWidth="1.6" strokeLinejoin="round">
-            {ROTATIONS.map((r) => (
-              <path key={r} d="M200 200 Q179 158 200 108 Q221 158 200 200 Z" transform={r ? `rotate(${r} 200 200)` : undefined} />
-            ))}
-          </g>
-          <circle cx="200" cy="200" r="7" fill="#2F6E7A" fillOpacity="0.55" />
-        </svg>
-      </div>
-    </div>
-  );
-}
+// ── Corner decoration ────────────────────────────────────────────────────────
 
-// ── Corner quatrefoil decoration ────────────────────────────────────────────
 function CornerDecor({ className }: { className?: string }) {
-  const ROTATIONS = [0, 45, 90, 135, 180, 225, 270, 315];
+  const ROTS = [0, 45, 90, 135, 180, 225, 270, 315];
   return (
     <svg
       width="440"
@@ -122,105 +94,97 @@ function CornerDecor({ className }: { className?: string }) {
       aria-hidden="true"
       className={`pointer-events-none ${className ?? ''}`}
     >
-      <g fill="#2F6E7A" fillOpacity="0.05" stroke="#2F6E7A" strokeOpacity="0.28" strokeWidth="1.4" strokeLinejoin="round">
-        {ROTATIONS.map((r) => (
-          <path key={r} d="M200 200 Q167 128 200 58 Q233 128 200 200 Z" transform={r ? `rotate(${r} 200 200)` : undefined} />
+      <g
+        fill="#2F6E7A"
+        fillOpacity="0.05"
+        stroke="#2F6E7A"
+        strokeOpacity="0.28"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      >
+        {ROTS.map((r) => (
+          <path
+            key={r}
+            d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
+            transform={r ? `rotate(${r} 200 200)` : undefined}
+          />
         ))}
       </g>
     </svg>
   );
 }
 
+// ── Easing constant ──────────────────────────────────────────────────────────
+const EASE_CALM: [number, number, number, number] = [0.25, 0, 0.15, 1];
+const EASE_SPRING: [number, number, number, number] = [0.34, 1.0, 0.64, 1.0];
+
+// ── ResultView ───────────────────────────────────────────────────────────────
+
 export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const { isComplete, getResult, answers } = useScreener();
   const router = useRouter();
+
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [thumbPos, setThumbPos] = useState(0);
+  const [barsReady, setBarsReady] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  const rafRef = useRef<number | null>(null);
+
+  // ── Drive the loading counter ──────────────────────────────────────────────
   useEffect(() => {
     if (!isComplete) {
       router.replace('/screener');
       return;
     }
+
     const computed = getResult();
-    const timer = setTimeout(() => {
-      setResult(computed);
-      setLoading(false);
-    }, 1800);
-    return () => clearTimeout(timer);
+    const START = performance.now();
+    const DURATION_MS = 1750;
+    let lastPct = -1;
+
+    const tick = (now: number) => {
+      const elapsed = now - START;
+      const pct = Math.min(100, Math.round((elapsed / DURATION_MS) * 100));
+
+      if (pct !== lastPct) {
+        lastPct = pct;
+        setProgress(pct);
+      }
+
+      if (pct < 100) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        setTimeout(() => {
+          setResult(computed);
+          setLoading(false);
+        }, 220);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, [isComplete, getResult, router]);
 
-  // ── Loading state (QST-002) ─────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <SiteHeader variant="screener" />
+  // ── Animate severity thumb + insight bars once result arrives ──────────────
+  useEffect(() => {
+    if (!result) return;
+    const t1 = setTimeout(() => setThumbPos(thumbLeft(result.score)), 130);
+    const t2 = setTimeout(() => setBarsReady(true), 280);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [result]);
 
-        <div className="relative overflow-hidden flex-1">
-          {/* Tile bg with radial fade */}
-          <div
-            className="absolute inset-0 opacity-[0.1] pointer-events-none"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
-              backgroundSize: '44px 60px',
-              WebkitMaskImage: 'radial-gradient(circle at 50% 42%, #000, transparent 68%)',
-              maskImage: 'radial-gradient(circle at 50% 42%, #000, transparent 68%)',
-            }}
-          />
-
-          <div
-            className="relative max-w-[560px] mx-auto px-6 py-[88px] pb-[96px] text-center"
-            role="status"
-            aria-live="polite"
-          >
-            <BreathingQuatrefoil />
-
-            <div className="mt-10">
-              <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-                Almost there
-              </span>
-              <h1 className="font-heading text-[32px] leading-[1.15] font-semibold tracking-[-0.025em] mt-3 mb-3.5">
-                Reading your answers
-              </h1>
-              <p className="text-[16.5px] leading-[1.6] text-text-2 max-w-[440px] mx-auto mb-[26px] [text-wrap:pretty]">
-                We're gathering your responses into one calm, honest reflection. This only takes a
-                moment.
-              </p>
-
-              {/* Wave bars */}
-              <div className="flex items-end justify-center gap-1.5 h-11" aria-hidden="true">
-                <span className="w-2 rounded-full bg-primary animate-wave-bar" style={{ height: '18px', animationDelay: '0s' }} />
-                <span className="w-2 rounded-full bg-primary animate-wave-bar" style={{ height: '30px', animationDelay: '0.16s' }} />
-                <span className="w-2 rounded-full bg-primary animate-wave-bar" style={{ height: '30px', animationDelay: '0.32s' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!result) return null;
-
-  const { score, band, interpretation } = result;
-  const bandColor = BAND_COLORS[band];
-  const thumbRing = THUMB_RING[band];
-  const label = BAND_LABEL[band];
-  const bridge = BRIDGE[band];
-  const left = thumbLeft(score);
-
-  // Compute insight category data
-  const insights = INSIGHT_GROUPS.map(({ label: catLabel, indices }) => {
-    const avg = avgScore(answers, indices);
-    const pct = Math.max(10, Math.round((avg / 3) * 100));
-    const { label: intLabel, color: intColor } = intensityLabel(avg);
-    const barCol = barColor(avg);
-    return { label: catLabel, pct, intLabel, intColor, barCol };
-  });
-
+  // ── CTA handler ───────────────────────────────────────────────────────────
   const handleSeeHelp = () => {
+    if (!result) return;
+    const { score, band } = result;
     if (isLoggedIn) {
       startTransition(async () => {
         await saveScreenerResult({ score, band, answers: answers.map((a) => a ?? 0) });
@@ -239,130 +203,274 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
     router.push('/sign-up');
   };
 
-  // ── Result state (RES-001) ──────────────────────────────────────────────
+  // ── Shared page shell (header never re-mounts) ────────────────────────────
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader variant="screener" />
 
-      <div className="relative overflow-hidden px-6 py-[56px] pb-[72px] sm:px-11">
-        {/* Corner decorations */}
-        <CornerDecor className="absolute top-[-186px] right-[-150px] rotate-[14deg] opacity-50" />
-        <CornerDecor className="absolute bottom-[-186px] left-[-150px] rotate-[14deg] opacity-50" />
+      <AnimatePresence mode="wait">
+        {/* ── Loading screen ── */}
+        {loading && (
+          <motion.div
+            key="loading"
+            className="relative overflow-hidden flex-1"
+            exit={{ opacity: 0, transition: { duration: 0.22 } }}
+          >
+            {/* Tile bg with radial fade */}
+            <div
+              className="absolute inset-0 opacity-[0.1] pointer-events-none"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
+                backgroundSize: '44px 60px',
+                WebkitMaskImage: 'radial-gradient(circle at 50% 42%, #000, transparent 68%)',
+                maskImage: 'radial-gradient(circle at 50% 42%, #000, transparent 68%)',
+              }}
+            />
 
-        <div className="relative max-w-[940px] mx-auto">
-          <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-[1.15fr_0.85fr]">
+            <div
+              className="relative max-w-[560px] mx-auto px-6 py-[88px] pb-[96px] text-center"
+              role="status"
+              aria-live="polite"
+            >
+              {/* Sequential petal bloom */}
+              <div className="flex justify-center mb-10">
+                <AnimatedQuatrefoil
+                  size={240}
+                  withHalo
+                  haloColor="47,110,122"
+                />
+              </div>
 
-            {/* ── Left: The reflection ───────────────────────────────── */}
-            <div>
               <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-                Your reflection
+                Almost there
               </span>
-              <h1 className="font-heading text-[34px] leading-[1.16] font-semibold tracking-[-0.025em] mt-3 mb-4 [text-wrap:pretty]">
-                Your answers point to{' '}
-                <span style={{ color: bandColor }}>{label}</span>{' '}
-                signs of anxiety.
+              <h1 className="font-heading text-[32px] leading-[1.15] font-semibold tracking-[-0.025em] mt-3 mb-3">
+                Reading your answers
               </h1>
-              <p className="text-[16.5px] leading-[1.62] text-text-2 max-w-[480px] mb-[30px] [text-wrap:pretty]">
-                {interpretation}
+              <p className="text-[16.5px] leading-[1.6] text-text-2 max-w-[440px] mx-auto mb-[28px] [text-wrap:pretty]">
+                We&rsquo;re gathering your responses into one calm, honest reflection.
               </p>
 
-              {/* Severity gradient bar */}
-              <div className="mb-[34px] max-w-[480px]">
-                <div className="relative h-3.5 rounded-full" style={{ background: SEVERITY_GRADIENT }}>
+              {/* Progress bar + percentage */}
+              <div className="max-w-[440px] mx-auto">
+                <div className="h-[3px] w-full rounded-full bg-[#E7E2DA] overflow-hidden mb-3">
                   <div
-                    className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-[26px] h-[26px] rounded-full bg-white"
+                    className="h-full rounded-full bg-primary"
                     style={{
-                      left: `${left}%`,
-                      boxShadow: `0 3px 10px -2px rgba(20,24,22,0.4), 0 0 0 3px ${thumbRing}`,
+                      width: `${progress}%`,
+                      transition: 'width 80ms linear',
                     }}
                   />
                 </div>
-                <div className="flex justify-between mt-3 text-[12px] font-semibold tracking-[0.02em] text-text-4">
-                  <span>Minimal</span>
-                  <span>Mild</span>
-                  <span style={band === 'Moderate' ? { color: bandColor } : undefined}>Moderate</span>
-                  <span style={band === 'High' ? { color: bandColor } : undefined}>Significant</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12.5px] text-text-3">Analysing your patterns</span>
+                  <span className="font-heading text-[14px] font-semibold text-primary tabular-nums">
+                    {progress}%
+                  </span>
                 </div>
               </div>
-
-              {/* Bridge message */}
-              <p className="text-[15px] leading-[1.6] text-text-2 max-w-[480px] mb-[30px] [text-wrap:pretty]">
-                {bridge}
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleSeeHelp}
-                  disabled={isPending}
-                  className="inline-flex items-center gap-2.5 rounded-[12px] bg-primary px-7 py-4 font-heading text-[16px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-70"
-                  style={{ boxShadow: '0 12px 24px -10px rgba(47,110,122,0.6)' }}
-                >
-                  {isPending ? 'Saving…' : isLoggedIn ? 'Save my check-in' : 'See what could help'}
-                  {!isPending && (
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  )}
-                </button>
-                <Link
-                  href="/screener/1"
-                  className="inline-flex items-center gap-2 rounded-[12px] border border-[#D9E0DA] bg-white px-[26px] py-4 font-heading text-[16px] font-semibold text-[#2F5049] hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Retake the check-in
-                </Link>
-              </div>
             </div>
+          </motion.div>
+        )}
 
-            {/* ── Right: What stood out ──────────────────────────────── */}
-            <div className="rounded-[18px] border border-[#E7E2DA] bg-white px-[26px] py-7" style={{ boxShadow: '0 20px 44px -30px rgba(20,24,22,0.35)' }}>
-              <h2 className="font-heading text-[16px] font-semibold mb-1">What stood out</h2>
-              <p className="text-[13.5px] leading-[1.55] text-text-3 mb-[22px]">
-                The areas your answers touched most.
-              </p>
+        {/* ── Result screen ── */}
+        {!loading && result && (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.38, ease: EASE_CALM }}
+            className="relative overflow-hidden px-6 py-[56px] pb-[72px] sm:px-11"
+          >
+            {/* Corner decorations */}
+            <CornerDecor className="absolute top-[-186px] right-[-150px] rotate-[14deg] opacity-50" />
+            <CornerDecor className="absolute bottom-[-186px] left-[-150px] rotate-[14deg] opacity-50" />
 
-              <div className="flex flex-col gap-5">
-                {insights.map(({ label: catLabel, pct, intLabel, intColor, barCol }) => (
-                  <div key={catLabel}>
-                    <div className="flex justify-between items-baseline mb-2.5">
-                      <span className="text-[14.5px] font-semibold text-text-1">{catLabel}</span>
-                      <span className="text-[12.5px] font-semibold" style={{ color: intColor }}>{intLabel}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#EFEAE2] overflow-hidden">
+            <div className="relative max-w-[940px] mx-auto">
+              <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-[1.15fr_0.85fr]">
+
+                {/* ── Left: The reflection ── */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.52, delay: 0.06, ease: EASE_CALM }}
+                >
+                  <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+                    Your reflection
+                  </span>
+                  <h1 className="font-heading text-[34px] leading-[1.16] font-semibold tracking-[-0.025em] mt-3 mb-4 [text-wrap:pretty]">
+                    Your answers point to{' '}
+                    <span style={{ color: BAND_COLORS[result.band] }}>{BAND_LABEL[result.band]}</span>{' '}
+                    signs of anxiety.
+                  </h1>
+                  <p className="text-[16.5px] leading-[1.62] text-text-2 max-w-[480px] mb-[30px] [text-wrap:pretty]">
+                    {result.interpretation}
+                  </p>
+
+                  {/* Severity gradient bar */}
+                  <div className="mb-[34px] max-w-[480px]">
+                    <div
+                      className="relative h-3.5 rounded-full"
+                      style={{ background: SEVERITY_GRADIENT }}
+                    >
                       <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${pct}%`, background: barCol }}
+                        className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-[26px] h-[26px] rounded-full bg-white"
+                        style={{
+                          left: `${thumbPos}%`,
+                          transition: 'left 800ms cubic-bezier(0.34, 1.0, 0.64, 1.0)',
+                          boxShadow: `0 3px 10px -2px rgba(20,24,22,0.4), 0 0 0 3px ${THUMB_RING[result.band]}`,
+                        }}
                       />
                     </div>
+                    <div className="flex justify-between mt-3 text-[12px] font-semibold tracking-[0.02em] text-text-4">
+                      <span>Minimal</span>
+                      <span>Mild</span>
+                      <span
+                        style={
+                          result.band === 'Moderate'
+                            ? { color: BAND_COLORS[result.band] }
+                            : undefined
+                        }
+                      >
+                        Moderate
+                      </span>
+                      <span
+                        style={
+                          result.band === 'High'
+                            ? { color: BAND_COLORS[result.band] }
+                            : undefined
+                        }
+                      >
+                        Significant
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Footer: disclaimer + crisis link */}
-          <div className="mt-10 flex flex-col gap-2 border-t border-[#EFEAE2] pt-8">
-            <p className="text-[12px] leading-[1.55] text-text-4">
-              This is a self-reflection tool, not a medical or psychological diagnosis. Results are
-              based on your self-reported responses and are intended to help you understand your
-              patterns, not to confirm or rule out any condition.{' '}
-              <Link href="/disclaimer" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                Medical disclaimer
-              </Link>
-            </p>
-            <p className="text-[12px] text-text-4">
-              If you are in distress right now,{' '}
-              <Link
-                href="/crisis-support"
-                className="font-medium text-crisis hover:text-crisis/80 underline-offset-2 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                  {/* Bridge message */}
+                  <p className="text-[15px] leading-[1.6] text-text-2 max-w-[480px] mb-[30px] [text-wrap:pretty]">
+                    {BRIDGE[result.band]}
+                  </p>
+
+                  {/* CTAs */}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handleSeeHelp}
+                      disabled={isPending}
+                      className="inline-flex items-center gap-2.5 rounded-[12px] bg-primary px-7 py-4 font-heading text-[16px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-70"
+                      style={{ boxShadow: '0 12px 24px -10px rgba(47,110,122,0.6)' }}
+                    >
+                      {isPending
+                        ? 'Saving…'
+                        : isLoggedIn
+                        ? 'Save my check-in'
+                        : 'See what could help'}
+                      {!isPending && (
+                        <svg
+                          width="17"
+                          height="17"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      )}
+                    </button>
+                    <Link
+                      href="/screener/1"
+                      className="inline-flex items-center gap-2 rounded-[12px] border border-[#D9E0DA] bg-white px-[26px] py-4 font-heading text-[16px] font-semibold text-[#2F5049] hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Retake the check-in
+                    </Link>
+                  </div>
+                </motion.div>
+
+                {/* ── Right: What stood out ── */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.52, delay: 0.18, ease: EASE_CALM }}
+                  className="rounded-[18px] border border-[#E7E2DA] bg-white px-[26px] py-7"
+                  style={{ boxShadow: '0 20px 44px -30px rgba(20,24,22,0.35)' }}
+                >
+                  <h2 className="font-heading text-[16px] font-semibold mb-1">What stood out</h2>
+                  <p className="text-[13.5px] leading-[1.55] text-text-3 mb-[22px]">
+                    The areas your answers touched most.
+                  </p>
+
+                  <div className="flex flex-col gap-5">
+                    {INSIGHT_GROUPS.map(({ label: catLabel, indices }) => {
+                      const avg = avgScore(answers, indices);
+                      const pct = Math.max(10, Math.round((avg / 3) * 100));
+                      const { label: intLabel, color: intColor } = intensityLabel(avg);
+                      const barCol = barColor(avg);
+                      return (
+                        <div key={catLabel}>
+                          <div className="flex justify-between items-baseline mb-2.5">
+                            <span className="text-[14.5px] font-semibold text-text-1">
+                              {catLabel}
+                            </span>
+                            <span
+                              className="text-[12.5px] font-semibold"
+                              style={{ color: intColor }}
+                            >
+                              {intLabel}
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full bg-[#EFEAE2] overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: barsReady ? `${pct}%` : '0%',
+                                background: barCol,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Footer: disclaimer + crisis link */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.35, ease: EASE_CALM }}
+                className="mt-10 flex flex-col gap-2 border-t border-[#EFEAE2] pt-8"
               >
-                find support here
-              </Link>
-              .
-            </p>
-          </div>
-        </div>
-      </div>
+                <p className="text-[12px] leading-[1.55] text-text-4">
+                  This is a self-reflection tool, not a medical or psychological diagnosis. Results
+                  are based on your self-reported responses and are intended to help you understand
+                  your patterns, not to confirm or rule out any condition.{' '}
+                  <Link
+                    href="/disclaimer"
+                    className="underline underline-offset-2 hover:text-foreground transition-colors"
+                  >
+                    Medical disclaimer
+                  </Link>
+                </p>
+                <p className="text-[12px] text-text-4">
+                  If you are in distress right now,{' '}
+                  <Link
+                    href="/crisis-support"
+                    className="font-medium text-crisis hover:text-crisis/80 underline-offset-2 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                  >
+                    find support here
+                  </Link>
+                  .
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

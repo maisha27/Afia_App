@@ -74,19 +74,21 @@ export default function ScreenerIntroPage() {
           }}
         />
         <div className="relative max-w-[600px] mx-auto text-center">
-          <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
-            Before you begin
-          </span>
-          <h1 className="font-heading text-[40px] leading-[1.1] font-semibold tracking-[-0.025em] mt-3 mb-4 [text-wrap:balance]">
-            A few honest questions, just for you
-          </h1>
-          <p className="text-[17px] leading-[1.65] text-text-2 max-w-[500px] mx-auto mb-[30px] [text-wrap:pretty]">
-            This short check-in helps you notice the patterns behind health anxiety more clearly.
-            There are no right or wrong answers — only what feels true for you right now.
-          </p>
+          <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
+            <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
+              Before you begin
+            </span>
+            <h1 className="font-heading text-[40px] leading-[1.1] font-semibold tracking-[-0.025em] mt-3 mb-4 [text-wrap:balance]">
+              A few honest questions, just for you
+            </h1>
+            <p className="text-[17px] leading-[1.65] text-text-2 max-w-[500px] mx-auto mb-[30px] [text-wrap:pretty]">
+              This short check-in helps you notice the patterns behind health anxiety more clearly.
+              There are no right or wrong answers — only what feels true for you right now.
+            </p>
+          </div>
 
           {/* Info pills */}
-          <div className="flex flex-wrap justify-center gap-2.5">
+          <div className="flex flex-wrap justify-center gap-2.5 animate-fade-up" style={{ animationDelay: '80ms' }}>
             <span className="inline-flex items-center gap-[7px] rounded-full border border-[#CFE7E0] bg-tint px-[15px] py-2 text-[13.5px] text-[#276358]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" />
@@ -114,7 +116,7 @@ export default function ScreenerIntroPage() {
       </div>
 
       {/* How it works card with corner quatrefoils */}
-      <div className="relative overflow-hidden px-11 pt-5 pb-[60px]">
+      <div className="relative overflow-hidden px-11 pt-5 pb-[60px] animate-fade-up" style={{ animationDelay: '160ms' }}>
         {/* Top-left quatrefoil */}
         <QuatrefoilDecor className="absolute top-[-188px] left-[-172px] rotate-[-17deg]" />
         {/* Bottom-right quatrefoil */}
@@ -153,7 +155,7 @@ export default function ScreenerIntroPage() {
       </div>
 
       {/* CTA */}
-      <div className="px-11 pb-[66px] text-center">
+      <div className="px-11 pb-[66px] text-center animate-fade-up" style={{ animationDelay: '260ms' }}>
         <Link
           href="/screener/1"
           className="inline-flex items-center justify-center rounded-[10px] bg-primary px-[68px] py-[19px] text-[18px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

@@ -167,6 +167,15 @@
   --afia-admin-border: #33413D;
   --afia-admin-text: #EAF3EF;
   --afia-admin-text-muted: #9DB3AC;
+
+  /* ── Motion timing tokens ──────────────────────────────────── */
+  /* Use these in inline styles / JS animations for consistency  */
+  --duration-fast: 200ms;
+  --duration-calm: 500ms;
+  --duration-slow: 800ms;
+  --ease-calm: cubic-bezier(0.25, 0, 0.15, 1);
+  --ease-breathe: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.0, 0.64, 1.0);
 }
 
 /* ── Dark theme ──────────────────────────────────────────── */
@@ -282,11 +291,121 @@
   transform-origin: bottom;
 }
 
+/* ── Tool-specific calm animations ─────────────────────────── */
+
+/* afiaOceanWave: sinusoidal y-rise for Ocean breath */
+@keyframes afiaOceanWave {
+  0%   { transform: translateY(0) scaleY(1); }
+  50%  { transform: translateY(-10px) scaleY(1.07); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+.animate-ocean-wave {
+  animation: afiaOceanWave 3.5s var(--ease-breathe, cubic-bezier(0.45, 0, 0.55, 1)) infinite;
+}
+
+/* afiaScanBeam: top-to-bottom sweep for Body scan */
+@keyframes afiaScanBeam {
+  0%   { transform: translateY(-120%); opacity: 0; }
+  8%   { opacity: 0.85; }
+  92%  { opacity: 0.85; }
+  100% { transform: translateY(120%); opacity: 0; }
+}
+.animate-scan-beam {
+  animation: afiaScanBeam 8s var(--ease-breathe, cubic-bezier(0.45, 0, 0.55, 1)) infinite;
+}
+
+/* afiaHeartbeat: gentle lub-dub for Loving-kindness */
+@keyframes afiaHeartbeat {
+  0%   { transform: scale(1); }
+  15%  { transform: scale(1.11); }
+  30%  { transform: scale(1.02); }
+  45%  { transform: scale(1.08); }
+  60%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+.animate-heartbeat {
+  animation: afiaHeartbeat 1.6s ease-in-out infinite;
+}
+
+/* afiaPulseRing: expanding ring for Grounding / 5-4-3-2-1 Senses */
+@keyframes afiaPulseRing {
+  0%   { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(2.0); opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: afiaPulseRing 2.4s ease-out infinite;
+}
+
+/* afiaPetalReveal: scale+fade each petal in for the sequential bloom */
+@keyframes afiaPetalReveal {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* Applied inline per-petal with individual animation-delay values */
+.animate-petal-reveal {
+  animation: afiaPetalReveal 0.45s var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+}
+
+/* afiaPetalFade: reverse — petals fade out after full bloom */
+@keyframes afiaPetalFade {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.4); }
+}
+.animate-petal-fade {
+  animation: afiaPetalFade 0.35s var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+}
+
+/* afiaScaleIn: scale + fade for earned moments (streak pill, badges) */
+@keyframes afiaScaleIn {
+  from { opacity: 0; transform: scale(0.78); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: afiaScaleIn var(--duration-calm, 500ms) var(--ease-spring, cubic-bezier(0.34, 1.0, 0.64, 1.0)) both;
+}
+
+/* afiaSlowRotate: barely-perceptible decorative rotation (landing page, etc.) */
+@keyframes afiaSlowRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-slow-rotate {
+  animation: afiaSlowRotate 60s linear infinite;
+}
+
+/* afiaFadeUp: CSS-only entrance for elements that don't need JS orchestration */
+@keyframes afiaFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: afiaFadeUp var(--duration-calm, 500ms) var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+}
+
+/* afiaCountUp helper: used with a CSS animation-delay stagger on digits */
+@keyframes afiaSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: afiaSlideUp var(--duration-calm, 500ms) var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe-dot,
   .animate-breathe,
   .animate-breath-cycle,
-  .animate-wave-bar {
+  .animate-wave-bar,
+  .animate-ocean-wave,
+  .animate-scan-beam,
+  .animate-heartbeat,
+  .animate-pulse-ring,
+  .animate-petal-reveal,
+  .animate-petal-fade,
+  .animate-slow-rotate,
+  .animate-fade-up,
+  .animate-slide-up,
+  .animate-scale-in {
     animation: none;
   }
 }

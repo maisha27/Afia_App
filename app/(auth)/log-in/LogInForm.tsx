@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'motion/react';
 import { Logo } from '@/components/brand/Logo';
 import { logIn } from '@/lib/actions/auth';
 
@@ -29,6 +30,7 @@ function inputCls(hasError: boolean) {
 }
 
 export function LogInForm() {
+  const reduced = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -56,9 +58,12 @@ export function LogInForm() {
       <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={TILE_BG} />
 
       {/* Card */}
-      <div
+      <motion.div
         className="relative w-full max-w-[452px] bg-white rounded-[22px] border border-[#EDE8E0] px-10 pt-10 pb-[34px]"
         style={{ boxShadow: '0 30px 60px -34px rgba(30,36,33,0.35)' }}
+        initial={{ opacity: 0, y: reduced ? 0 : 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.25, 0, 0.15, 1] }}
       >
         {/* Logo */}
         <div className="flex justify-center mb-5">
@@ -190,7 +195,7 @@ export function LogInForm() {
             Take the free test
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

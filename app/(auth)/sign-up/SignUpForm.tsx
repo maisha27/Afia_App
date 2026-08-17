@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'motion/react';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { signUp } from '@/lib/actions/auth';
 
@@ -139,6 +140,7 @@ function inputCls(hasError: boolean) {
 }
 
 export function SignUpForm() {
+  const reduced = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
@@ -185,11 +187,16 @@ export function SignUpForm() {
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
             backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
             backgroundSize: '44px 60px',
           }}
         />
-        <div className="relative w-full max-w-[392px] bg-white rounded-[22px] border border-[#EDE8E0] shadow-[0_30px_60px_-34px_rgba(30,36,33,0.32)] px-[34px] py-[36px] text-center">
+        <motion.div
+          className="relative w-full max-w-[392px] bg-white rounded-[22px] border border-[#EDE8E0] shadow-[0_30px_60px_-34px_rgba(30,36,33,0.32)] px-[34px] py-[36px] text-center"
+          initial={{ opacity: 0, y: reduced ? 0 : 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0, 0.15, 1] }}
+        >
           <div className="mx-auto mb-5 w-[50px] h-[50px] rounded-[14px] bg-[#E3F1EE] flex items-center justify-center">
             <svg
               width="22"
@@ -219,7 +226,7 @@ export function SignUpForm() {
           >
             Back to log in
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -249,7 +256,12 @@ export function SignUpForm() {
         <div className="w-full max-w-[940px] grid grid-cols-1 lg:grid-cols-2 gap-[52px] items-center">
 
           {/* Left column — reflection preview */}
-          <div className="hidden lg:block">
+          <motion.div
+            className="hidden lg:block"
+            initial={{ opacity: 0, y: reduced ? 0 : 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0, 0.15, 1], delay: 0.05 }}
+          >
             <p className="text-[13.5px] italic text-[#767D79] mb-3">Keep this with you</p>
             <h2 className="font-heading text-[32px] font-semibold tracking-[-0.025em] text-[#262B29] leading-[1.18] mb-4">
               A private space,<br />just for your mind.
@@ -259,12 +271,15 @@ export function SignUpForm() {
               only you can see.
             </p>
             <ReflectionPreview />
-          </div>
+          </motion.div>
 
           {/* Right column — form card */}
-          <div
+          <motion.div
             className="w-full bg-white rounded-[20px] border border-[#E7E2DA] px-[32px] py-[34px]"
             style={{ boxShadow: '0 24px 50px -32px rgba(20,24,22,.4)' }}
+            initial={{ opacity: 0, y: reduced ? 0 : 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0, 0.15, 1], delay: 0.15 }}
           >
             {/* Social buttons (visual-only) */}
             <div className="flex gap-2.5 mb-5">
@@ -409,7 +424,7 @@ export function SignUpForm() {
                 Log in
               </Link>
             </p>
-          </div>
+          </motion.div>
         </div>
       </main>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { saveJournalEntry, deleteJournalEntry } from '@/lib/actions/journal';
 
 export interface JournalEntry {
@@ -27,6 +28,7 @@ function wordCount(text: string): number {
 }
 
 export function JournalClient({ initialEntries, dailyPrompt }: Props) {
+  const reduced = useReducedMotion();
   const [entries, setEntries] = useState<JournalEntry[]>(initialEntries);
   const [content, setContent] = useState('');
   const [isSaving, startSave] = useTransition();
@@ -34,7 +36,9 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Auto-grow textarea */
   useEffect(() => {
@@ -44,6 +48,9 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
     ta.style.height = `${Math.max(140, ta.scrollHeight)}px`;
   }, [content]);
 
+  /* Clean up timer on unmount */
+  useEffect(() => () => { if (savedTimerRef.current) clearTimeout(savedTimerRef.current); }, []);
+
   const handleSave = () => {
     setSaveError(null);
     startSave(async () => {
@@ -52,13 +59,16 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
         setSaveError(result.error);
         return;
       }
-      // Optimistically prepend the new entry
       const now = new Date().toISOString();
       setEntries((prev) => [
         { id: result.id!, content: content.trim(), created_at: now },
         ...prev,
       ]);
       setContent('');
+
+      // Brief "Saved" flash
+      setJustSaved(true);
+      savedTimerRef.current = setTimeout(() => setJustSaved(false), 900);
     });
   };
 
@@ -79,6 +89,8 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
   const words = wordCount(content);
   const chars = content.length;
   const canSave = content.trim().length > 0 && chars <= 10000;
+
+  const EASE: [number, number, number, number] = [0.25, 0, 0.15, 1];
 
   return (
     <div className="flex flex-col gap-7">
@@ -110,9 +122,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
             </svg>
           </span>
           <div>
-            <div className="font-heading text-[15px] font-semibold text-[#3A403C]">
-              New entry
-            </div>
+            <div className="font-heading text-[15px] font-semibold text-[#3A403C]">New entry</div>
             <div className="text-[12.5px] italic text-[#8A928D] mt-[1px]">{dailyPrompt}</div>
           </div>
         </div>
@@ -153,7 +163,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                 {saveError}
               </p>
             )}
-            {content.trim().length > 0 && (
+            {content.trim().length > 0 && !isSaving && (
               <button
                 type="button"
                 onClick={() => setContent('')}
@@ -162,15 +172,47 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                 Clear
               </button>
             )}
-            <button
+            <motion.button
               type="button"
               onClick={handleSave}
               disabled={!canSave || isSaving}
-              className="font-heading text-[14px] font-semibold px-[20px] py-[10px] rounded-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: '#2F6E7A', color: '#fff' }}
+              whileTap={reduced || !canSave || isSaving ? {} : { scale: 0.96 }}
+              transition={{ duration: 0.1 }}
+              className="font-heading text-[14px] font-semibold px-[20px] py-[10px] rounded-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden"
+              style={{
+                background: justSaved ? '#3B9B72' : '#2F6E7A',
+                color: '#fff',
+                minWidth: 100,
+              }}
             >
-              {isSaving ? 'Saving…' : 'Save entry'}
-            </button>
+              <AnimatePresence mode="wait" initial={false}>
+                {justSaved ? (
+                  <motion.span
+                    key="saved"
+                    className="flex items-center justify-center gap-1.5"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    Saved
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="idle"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    {isSaving ? 'Saving…' : 'Save entry'}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -196,57 +238,63 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
           )}
 
           <div className="flex flex-col gap-3">
-            {entries.map((entry) => (
-              <div
-                key={entry.id}
-                className="bg-white rounded-[16px] border border-[#E7E2DA] px-[22px] py-[18px]"
-                style={{ boxShadow: '0 2px 12px -4px rgba(20,24,22,.05)' }}
-              >
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <time
-                    dateTime={entry.created_at}
-                    className="text-[12px] font-semibold text-[#8A928D]"
-                  >
-                    {formatEntryDate(entry.created_at)}
-                  </time>
-
-                  {/* Delete controls */}
-                  {confirmDeleteId === entry.id ? (
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="text-[12.5px] text-[#767D79]">Delete this entry?</span>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(entry.id)}
-                        disabled={isDeleting}
-                        className="text-[12.5px] font-semibold text-[#B0503F] hover:opacity-75 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-                      >
-                        {isDeleting ? 'Deleting…' : 'Delete'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDeleteId(null)}
-                        className="text-[12.5px] text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => { setConfirmDeleteId(entry.id); setDeleteError(null); }}
-                      className="text-[12px] text-[#B0B8B2] hover:text-[#767D79] transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-                      aria-label="Delete this entry"
+            <AnimatePresence initial={false}>
+              {entries.map((entry) => (
+                <motion.div
+                  key={entry.id}
+                  layout
+                  initial={{ opacity: 0, y: reduced ? 0 : -14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: reduced ? 0 : -20, transition: { duration: 0.22 } }}
+                  transition={{ duration: 0.35, ease: EASE }}
+                  className="bg-white rounded-[16px] border border-[#E7E2DA] px-[22px] py-[18px]"
+                  style={{ boxShadow: '0 2px 12px -4px rgba(20,24,22,.05)' }}
+                >
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <time
+                      dateTime={entry.created_at}
+                      className="text-[12px] font-semibold text-[#8A928D]"
                     >
-                      Delete
-                    </button>
-                  )}
-                </div>
+                      {formatEntryDate(entry.created_at)}
+                    </time>
 
-                <p className="text-[14.5px] leading-[1.7] text-[#565D5A] whitespace-pre-wrap">
-                  {entry.content}
-                </p>
-              </div>
-            ))}
+                    {confirmDeleteId === entry.id ? (
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="text-[12.5px] text-[#767D79]">Delete this entry?</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(entry.id)}
+                          disabled={isDeleting}
+                          className="text-[12.5px] font-semibold text-[#B0503F] hover:opacity-75 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                        >
+                          {isDeleting ? 'Deleting…' : 'Delete'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-[12.5px] text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { setConfirmDeleteId(entry.id); setDeleteError(null); }}
+                        className="text-[12px] text-[#B0B8B2] hover:text-[#767D79] transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                        aria-label="Delete this entry"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-[14.5px] leading-[1.7] text-[#565D5A] whitespace-pre-wrap">
+                    {entry.content}
+                  </p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       ) : (

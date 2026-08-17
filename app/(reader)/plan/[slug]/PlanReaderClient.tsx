@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { saveExerciseProgress } from '@/lib/actions/exercises';
 
 export interface PlanExercise {
@@ -63,9 +64,11 @@ export default function PlanReaderClient({
   initialResponse,
 }: PlanReaderClientProps) {
   const router = useRouter();
+  const reduced = useReducedMotion();
   const [response, setResponse] = useState(initialResponse);
   const [isPending, startTransition] = useTransition();
   const [saveError, setSaveError] = useState('');
+  const [saved, setSaved] = useState(false);
 
   function handleSave() {
     setSaveError('');
@@ -75,7 +78,10 @@ export default function PlanReaderClient({
         setSaveError(result.error);
         return;
       }
-      router.push(nextSlug ? `/plan/${nextSlug}` : '/exercises');
+      setSaved(true);
+      setTimeout(() => {
+        router.push(nextSlug ? `/plan/${nextSlug}` : '/exercises');
+      }, 480);
     });
   }
 
@@ -265,29 +271,65 @@ export default function PlanReaderClient({
             </svg>
             Back
           </Link>
-          <button
+          <motion.button
             type="button"
             onClick={handleSave}
-            disabled={isPending}
-            className="inline-flex items-center gap-[9px] bg-primary text-white font-heading text-[15.5px] font-semibold px-[26px] py-[14px] rounded-[12px] hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-            style={{ boxShadow: '0 12px 24px -10px rgba(47,122,109,.6)' }}
+            disabled={isPending || saved}
+            whileTap={reduced || isPending || saved ? {} : { scale: 0.97 }}
+            transition={{ duration: 0.1 }}
+            className="inline-flex items-center gap-[9px] text-white font-heading text-[15.5px] font-semibold px-[26px] py-[14px] rounded-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed overflow-hidden"
+            style={{
+              background: saved ? '#3B9B72' : 'var(--color-primary)',
+              boxShadow: saved
+                ? '0 12px 24px -10px rgba(59,155,114,.55)'
+                : '0 12px 24px -10px rgba(47,122,109,.6)',
+            }}
           >
-            {isPending ? 'Saving…' : nextSlug ? 'Save & continue' : 'Mark as done'}
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14" />
-              <path d="M13 6l6 6-6 6" />
-            </svg>
-          </button>
+            <AnimatePresence mode="wait" initial={false}>
+              {saved ? (
+                <motion.span
+                  key="done"
+                  className="flex items-center gap-[9px]"
+                  initial={{ opacity: 0, scale: reduced ? 1 : 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, ease: [0.25, 0, 0.15, 1] }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  Done!
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="idle"
+                  className="flex items-center gap-[9px]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {isPending ? 'Saving…' : nextSlug ? 'Save & continue' : 'Mark as done'}
+                  {!isPending && (
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="M13 6l6 6-6 6" />
+                    </svg>
+                  )}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
       </footer>
     </div>

@@ -1,42 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
+import { StaggerList, StaggerItem } from '@/components/motion';
 
 export const metadata: Metadata = { title: 'Calm tools — Afia' };
-
-/* ─── Breathing bloom for the hero card (pure CSS, no JS) ─── */
-function BreathingBloom() {
-  const petals = [0, 45, 90, 135, 180, 225, 270, 315];
-  return (
-    <div className="flex-shrink-0 w-[150px] h-[150px] relative flex items-center justify-center">
-      {/* Outer ring */}
-      <div
-        className="absolute w-[150px] h-[150px] rounded-full animate-breathe"
-        style={{ background: 'rgba(159,201,188,.14)' }}
-        aria-hidden="true"
-      />
-      {/* Middle ring */}
-      <div
-        className="absolute w-[104px] h-[104px] rounded-full animate-breathe"
-        style={{ background: 'rgba(159,201,188,.20)', animationDelay: '.2s' }}
-        aria-hidden="true"
-      />
-      {/* Centre quatrefoil — animate with it */}
-      <div className="animate-breathe flex items-center justify-center" aria-hidden="true">
-        <svg width="76" height="76" viewBox="0 0 400 400" aria-hidden="true">
-          <g fill="#EAF3EF" fillOpacity=".9" stroke="none">
-            {petals.map((deg) => (
-              <path
-                key={deg}
-                d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
-                transform={deg === 0 ? undefined : `rotate(${deg} 200 200)`}
-              />
-            ))}
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Tool grid card ─── */
 interface ToolCardProps {
@@ -52,7 +19,7 @@ function ToolCard({ iconBg, icon, title, body, duration, href }: ToolCardProps) 
   return (
     <Link
       href={href}
-      className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-sm transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span
         className={`flex w-[38px] h-[38px] rounded-[11px] ${iconBg} items-center justify-center mb-[14px]`}
@@ -150,7 +117,6 @@ const TOOLS: ToolCardProps[] = [
 ];
 
 export default function CalmToolPage() {
-  const petals = [0, 45, 90, 135, 180, 225, 270, 315];
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
       <div className="relative">
@@ -195,15 +161,31 @@ export default function CalmToolPage() {
               </svg>
             </Link>
           </div>
-          <BreathingBloom />
+
+          {/* Sequential petal bloom — replaces the old static BreathingBloom */}
+          <AnimatedQuatrefoil
+            size={150}
+            fill="#EAF3EF"
+            fillOpacity={0.78}
+            stroke="#EAF3EF"
+            strokeOpacity={0.55}
+            withHalo
+            haloColor="234,243,239"
+          />
         </div>
 
-        {/* ── Tool grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ── Tool grid — staggered entrance ── */}
+        <StaggerList
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          delay={0.1}
+          stagger={0.06}
+        >
           {TOOLS.map((tool) => (
-            <ToolCard key={tool.title} {...tool} />
+            <StaggerItem key={tool.title}>
+              <ToolCard {...tool} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerList>
       </div>
     </main>
   );

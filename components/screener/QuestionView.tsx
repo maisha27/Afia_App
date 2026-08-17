@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { motion } from 'motion/react';
 import { useScreener } from './ScreenerProvider';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import type { Question } from '@/lib/data/questions';
@@ -54,7 +55,12 @@ export function QuestionView({ question, step }: Props) {
           }}
         />
 
-        <div className="relative max-w-[640px] mx-auto">
+        <motion.div
+          className="relative max-w-[640px] mx-auto"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.34, ease: [0.25, 0, 0.15, 1] }}
+        >
           {/* Progress header */}
           <div className="flex items-center justify-between mb-3">
             <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
@@ -144,7 +150,7 @@ export function QuestionView({ question, step }: Props) {
               </svg>
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

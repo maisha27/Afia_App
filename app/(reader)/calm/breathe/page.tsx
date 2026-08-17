@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { recordCalmSession } from '@/lib/actions/calm';
+import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
 
 /* ─── Breathing pattern: box breathing 4-4-4-4 ─── */
 type Phase = 'breathe-in' | 'hold' | 'breathe-out' | 'rest';
@@ -121,33 +122,17 @@ export default function BreatheSessionPage() {
         />
 
         <div className="relative z-10 max-w-[400px]">
-          {/* Completion bloom — static */}
-          <div className="relative mx-auto mb-10" style={{ width: 160, height: 160 }}>
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{ background: 'rgba(159,201,188,.12)' }}
+          {/* Completion bloom — animated sequential petal reveal */}
+          <div className="relative mx-auto mb-10 flex items-center justify-center" style={{ width: 160, height: 160 }}>
+            <AnimatedQuatrefoil
+              size={160}
+              fill="#EAF3EF"
+              fillOpacity={0.88}
+              stroke="#EAF3EF"
+              strokeOpacity={0.5}
+              withHalo
+              haloColor="159,201,188"
             />
-            <div
-              className="absolute rounded-full"
-              style={{
-                inset: 20,
-                background: 'rgba(159,201,188,.18)',
-                border: '1px solid rgba(234,243,239,.22)',
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg width="80" height="80" viewBox="0 0 400 400" aria-hidden="true">
-                <g fill="#EAF3EF" fillOpacity=".9" stroke="none">
-                  {PETALS.map((deg) => (
-                    <path
-                      key={deg}
-                      d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
-                      transform={deg === 0 ? undefined : `rotate(${deg} 200 200)`}
-                    />
-                  ))}
-                </g>
-              </svg>
-            </div>
           </div>
 
           <p

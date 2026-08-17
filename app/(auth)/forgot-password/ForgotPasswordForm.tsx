@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { forgotPassword } from '@/lib/actions/auth';
 
 const schema = z.object({
@@ -26,6 +27,7 @@ function inputCls(hasError: boolean) {
 }
 
 export function ForgotPasswordForm() {
+  const reduced = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
@@ -54,11 +56,17 @@ export function ForgotPasswordForm() {
       {/* Tile background */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={TILE_BG} />
 
+      <AnimatePresence mode="wait">
       {sent ? (
         /* ── Success state ── */
-        <div
+        <motion.div
+          key="sent"
           className="relative w-full max-w-[392px] bg-white rounded-[22px] border border-[#EDE8E0] px-[34px] py-[36px] text-center"
           style={{ boxShadow: '0 30px 60px -34px rgba(30,36,33,0.32)' }}
+          initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: reduced ? 0 : -10 }}
+          transition={{ duration: 0.38, ease: [0.25, 0, 0.15, 1] }}
         >
           <div className="mx-auto mb-5 flex h-[50px] w-[50px] items-center justify-center rounded-[14px] bg-[#E3F1EE]">
             <svg
@@ -100,12 +108,17 @@ export function ForgotPasswordForm() {
           >
             Didn&rsquo;t get it? Send again
           </button>
-        </div>
+        </motion.div>
       ) : (
         /* ── Input state ── */
-        <div
+        <motion.div
+          key="form"
           className="relative w-full max-w-[392px] bg-white rounded-[22px] border border-[#EDE8E0] px-[34px] py-[36px]"
           style={{ boxShadow: '0 30px 60px -34px rgba(30,36,33,0.32)' }}
+          initial={{ opacity: 0, y: reduced ? 0 : 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: reduced ? 0 : -10 }}
+          transition={{ duration: 0.45, ease: [0.25, 0, 0.15, 1] }}
         >
           <div className="mb-5 flex h-[50px] w-[50px] items-center justify-center rounded-[14px] bg-[#E3F1EE]">
             <svg
@@ -173,8 +186,9 @@ export function ForgotPasswordForm() {
               Back to log in
             </Link>
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }

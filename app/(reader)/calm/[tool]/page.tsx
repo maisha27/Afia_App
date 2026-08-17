@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { GuidedSessionClient, type GuidedSessionProps, type Step } from './GuidedSessionClient';
+import {
+  OceanWaveAnimation,
+  GroundingAnimation,
+  BodyScanAnimation,
+  LovingKindnessAnimation,
+  SafePlaceAnimation,
+} from '@/components/calm/tools';
 
 /* ─── Step builder for repeating breathing cycles ─── */
 function breathCycles(
@@ -70,7 +77,7 @@ function HomeIcon() {
 /* ─── Tool configs ─── */
 type ToolId = 'ocean-breath' | 'grounding' | 'body-scan' | 'loving-kindness' | 'safe-place';
 
-type ToolConfig = Omit<GuidedSessionProps, 'icon'> & { icon: React.ReactNode };
+type ToolConfig = Omit<GuidedSessionProps, 'icon'> & { icon: React.ReactNode; centerVisual: React.ReactNode };
 
 const CONFIGS: Record<ToolId, ToolConfig> = {
   'ocean-breath': {
@@ -91,6 +98,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'Well done.',
     completionDetail: 'Twenty rounds of ocean breathing — five minutes of slow, intentional calm. Your nervous system notices every exhale.',
     icon: <OceanIcon />,
+    centerVisual: <OceanWaveAnimation accentRgb="159,201,188" />,
   },
 
   grounding: {
@@ -129,6 +137,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'You did it.',
     completionDetail: "Three minutes with all five senses. Grounding moves you out of your head and back into the room you're actually in.",
     icon: <HandIcon />,
+    centerVisual: <GroundingAnimation accentRgb="208,167,128" />,
   },
 
   'body-scan': {
@@ -192,6 +201,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'Well done.',
     completionDetail: 'Eight minutes travelling through your whole body. Awareness is the first step to softening.',
     icon: <BodyIcon />,
+    centerVisual: <BodyScanAnimation accentRgb="208,167,128" />,
   },
 
   'loving-kindness': {
@@ -225,6 +235,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'That was generous.',
     completionDetail: 'Six minutes of compassion — including for yourself. That is not always easy, and you did it.',
     icon: <HeartIcon />,
+    centerVisual: <LovingKindnessAnimation accentRgb="180,170,220" />,
   },
 
   'safe-place': {
@@ -263,6 +274,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'That place is yours.',
     completionDetail: 'Five minutes in somewhere safe. You can return here whenever you need it — it takes less than a second to arrive.',
     icon: <HomeIcon />,
+    centerVisual: <SafePlaceAnimation accentRgb="180,170,220" />,
   },
 };
 

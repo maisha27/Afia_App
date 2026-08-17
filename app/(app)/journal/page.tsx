@@ -35,19 +35,21 @@ export default async function JournalPage() {
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
       <div className="relative max-w-[680px]">
         {/* ── Header ── */}
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-            Private · only you can see this
-          </span>
-          <span
-            className="w-[6px] h-[6px] rounded-full flex-shrink-0"
-            style={{ background: '#6A5FA0' }}
-            aria-hidden="true"
-          />
+        <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+              Private · only you can see this
+            </span>
+            <span
+              className="w-[6px] h-[6px] rounded-full flex-shrink-0"
+              style={{ background: '#6A5FA0' }}
+              aria-hidden="true"
+            />
+          </div>
+          <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mb-7">
+            Your journal
+          </h1>
         </div>
-        <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mb-7">
-          Your journal
-        </h1>
 
         <JournalClient initialEntries={entries} dailyPrompt={dailyPrompt} />
       </div>

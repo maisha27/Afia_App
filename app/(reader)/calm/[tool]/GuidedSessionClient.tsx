@@ -20,6 +20,9 @@ export interface GuidedSessionProps {
   accentRgb: string;
   cycleLength: number;
   icon: React.ReactNode;
+  // Tool-specific animated visual. When provided it replaces the generic
+  // two-ring bloom in the centre of the session screen.
+  centerVisual?: React.ReactNode;
 }
 
 function formatTime(s: number): string {
@@ -38,6 +41,7 @@ export function GuidedSessionClient({
   accentRgb,
   cycleLength,
   icon,
+  centerVisual,
 }: GuidedSessionProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -189,29 +193,33 @@ export function GuidedSessionClient({
 
       {/* ── Center visual + step cue ── */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-10 pt-2 pb-5">
-        <div
-          className="relative flex items-center justify-center mb-[34px]"
-          style={{ width: 260, height: 260 }}
-          aria-hidden="true"
-        >
-          <div
-            className="absolute inset-0 rounded-full animate-breathe"
-            style={{ background: `rgba(${accentRgb},.08)` }}
-          />
-          <div
-            className="absolute rounded-full animate-breathe"
-            style={{ inset: 32, background: `rgba(${accentRgb},.13)`, animationDelay: '.3s' }}
-          />
-          <div
-            className="absolute rounded-full flex items-center justify-center"
-            style={{
-              inset: 72,
-              background: `rgba(${accentRgb},.20)`,
-              border: `1px solid rgba(${accentRgb},.30)`,
-            }}
-          >
-            {icon}
-          </div>
+        {/* Tool-specific animation if provided, otherwise generic bloom */}
+        <div className="mb-[34px]" aria-hidden="true">
+          {centerVisual ?? (
+            <div
+              className="relative flex items-center justify-center"
+              style={{ width: 260, height: 260 }}
+            >
+              <div
+                className="absolute inset-0 rounded-full animate-breathe"
+                style={{ background: `rgba(${accentRgb},.08)` }}
+              />
+              <div
+                className="absolute rounded-full animate-breathe"
+                style={{ inset: 32, background: `rgba(${accentRgb},.13)`, animationDelay: '.3s' }}
+              />
+              <div
+                className="absolute rounded-full flex items-center justify-center"
+                style={{
+                  inset: 72,
+                  background: `rgba(${accentRgb},.20)`,
+                  border: `1px solid rgba(${accentRgb},.30)`,
+                }}
+              >
+                {icon}
+              </div>
+            </div>
+          )}
         </div>
 
         <p

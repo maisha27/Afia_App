@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -83,7 +84,16 @@ export function AppBottomNav() {
             )}
             aria-current={active ? 'page' : undefined}
           >
-            {icon(active)}
+            <div className="relative flex items-center justify-center">
+              {icon(active)}
+              {active && (
+                <motion.div
+                  layoutId="bottom-tab-dot"
+                  className="absolute -bottom-[6px] w-[5px] h-[5px] rounded-full bg-primary"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+            </div>
             <span>{label}</span>
           </Link>
         );

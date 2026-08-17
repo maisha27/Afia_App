@@ -192,14 +192,17 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-12 lg:px-10">
       <div className="relative max-w-[600px] mx-auto">
-        <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-          Yours to control
-        </span>
-        <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-7">
-          Account &amp; privacy
-        </h1>
+        <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
+          <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+            Yours to control
+          </span>
+          <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-7">
+            Account &amp; privacy
+          </h1>
+        </div>
 
         {/* ── Account ── */}
+        <div className="animate-fade-up" style={{ animationDelay: '60ms' }}>
         <SectionLabel>Account</SectionLabel>
         <SettingsCard className="mb-7">
           {/* Email row */}
@@ -286,8 +289,10 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
             </div>
           )}
         </SettingsCard>
+        </div>
 
         {/* ── Reminders ── */}
+        <div className="animate-fade-up" style={{ animationDelay: '130ms' }}>
         <SectionLabel>Gentle reminders</SectionLabel>
         <SettingsCard className="mb-7">
           <SettingsRow
@@ -317,8 +322,10 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
             }
           />
         </SettingsCard>
+        </div>
 
         {/* ── Your data ── */}
+        <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
         <SectionLabel>Your data</SectionLabel>
         <div className="flex gap-3 mb-2">
           <button
@@ -380,8 +387,10 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
         {deleteError && (
           <p className="text-[12.5px] text-[#B0503F] mb-5 mt-1">{deleteError}</p>
         )}
+        </div>
 
         {/* ── Subscription ── */}
+        <div className="animate-fade-up" style={{ animationDelay: '270ms' }}>
         <SectionLabel>Subscription</SectionLabel>
         <SettingsCard>
           <div className="flex items-center justify-between px-[22px] py-5">
@@ -411,6 +420,7 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
             </Link>
           </div>
         </SettingsCard>
+        </div>
       </div>
     </main>
   );
