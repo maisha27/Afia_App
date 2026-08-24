@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { InViewReveal, StaggerList, StaggerItem } from '@/components/motion';
@@ -69,7 +71,23 @@ const APPROACH_CARDS = [
   },
 ] as const;
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
+      redirect('/home');
+    }
+    redirect('/plan');
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader variant="landing" />
@@ -77,7 +95,7 @@ export default function LandingPage() {
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-tile-afia opacity-10 pointer-events-none" />
-        <div className="relative mx-auto max-w-[1060px] px-11 py-16 lg:py-[64px]">
+        <div className="relative mx-auto max-w-[1060px] px-5 sm:px-11 py-16 lg:py-[64px]">
           <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-[1.34fr_0.82fr]">
 
             {/* Left: text — each element fades up independently */}
@@ -175,7 +193,7 @@ export default function LandingPage() {
 
       {/* ── Our Approach ────────────────────────────────────────── */}
       <section id="approach" className="py-3 pb-[60px]">
-        <div className="mx-auto max-w-[1000px] px-11">
+        <div className="mx-auto max-w-[1000px] px-5 sm:px-11">
 
           <InViewReveal className="text-center mb-[34px]">
             <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
@@ -210,7 +228,7 @@ export default function LandingPage() {
 
       {/* ── Founder band ────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden py-[66px] px-11"
+        className="relative overflow-hidden py-[66px] px-5 sm:px-11"
         style={{ background: '#1B2320', color: '#F3F1EC' }}
       >
         {/* Vesica tile overlay — always visible, no animation */}
@@ -228,9 +246,9 @@ export default function LandingPage() {
             <Image
               src="/Images/Official_Logo.png"
               alt=""
-              width={40}
-              height={40}
-              className="h-[40px] w-auto mx-auto mb-[22px] opacity-90 object-contain"
+              width={45}
+              height={45}
+              className="h-[45px] w-auto mx-auto mb-[22px] opacity-90 object-contain"
             />
             <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-[#8FB4AB]">
               Why Afia exists
@@ -257,7 +275,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Crisis support prompt ────────────────────────────────── */}
-      <section className="px-11 pt-10 pb-2">
+      <section className="px-5 sm:px-11 pt-10 pb-2">
         <div className="mx-auto max-w-[1000px]">
           <InViewReveal y={16} duration={0.5}>
             <div className="flex items-center gap-[18px] rounded-[16px] border border-[#D8EBE5] bg-[#F1F8F6] px-[26px] py-[22px]">
@@ -295,7 +313,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Closing CTA ─────────────────────────────────────────── */}
-      <section className="relative overflow-hidden px-11 py-[60px] pb-[66px] text-center">
+      <section className="relative overflow-hidden px-5 sm:px-11 py-[60px] pb-[66px] text-center">
         <div className="absolute inset-0 bg-tile-afia opacity-10 pointer-events-none" />
         <div className="relative max-w-[560px] mx-auto">
           <InViewReveal y={20} duration={0.6}>

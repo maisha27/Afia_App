@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
+import { signOut } from '@/lib/actions/auth';
 
 const NAV_ITEMS = [
   {
@@ -67,6 +69,7 @@ interface AppSidebarNavProps {
 
 export function AppSidebarNav({ displayName, displayInitial }: AppSidebarNavProps) {
   const pathname = usePathname();
+  const [, startTransition] = useTransition();
 
   return (
     <>
@@ -85,7 +88,7 @@ export function AppSidebarNav({ displayName, displayInitial }: AppSidebarNavProp
                   : 'text-[#5F6863] font-medium hover:bg-secondary/50 hover:text-secondary-foreground'
               )}
             >
-              <span className={active ? 'text-secondary-foreground' : 'text-[#8A928D]'}>
+              <span className={active ? 'text-secondary-foreground' : 'text-[#5F6863]'}>
                 {icon}
               </span>
               {label}
@@ -119,6 +122,21 @@ export function AppSidebarNav({ displayName, displayInitial }: AppSidebarNavProp
           </span>
           <span className="truncate">{displayName}</span>
         </Link>
+
+        <button
+          type="button"
+          onClick={() => startTransition(() => signOut())}
+          className="flex w-full items-center gap-3 px-3 py-[11px] rounded-[10px] text-[14.5px] font-medium text-primary hover:bg-tint transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <span className="text-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </span>
+          Sign out
+        </button>
       </div>
     </>
   );

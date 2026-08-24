@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <footer className="border-t border-[#EDE8E0] py-3.5 text-center">
         <Link
           href="/crisis-support"
-          className="text-[12px] text-[#8A928D] hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+          className="text-[12px] text-[#6E7672] hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
         >
           Need support? Find crisis resources
         </Link>

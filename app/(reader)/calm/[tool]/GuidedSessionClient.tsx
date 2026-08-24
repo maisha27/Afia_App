@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { recordCalmSession } from '@/lib/actions/calm';
+import CalmRings from '@/components/calm/CalmRings';
 
 export interface Step {
   heading: string;
@@ -97,13 +98,9 @@ export function GuidedSessionClient({
         />
 
         <div className="relative z-10 max-w-[400px]">
-          <div className="relative mx-auto mb-10" style={{ width: 140, height: 140 }}>
-            <div className="absolute inset-0 rounded-full" style={{ background: `rgba(${accentRgb},.12)` }} />
-            <div
-              className="absolute rounded-full"
-              style={{ inset: 18, background: `rgba(${accentRgb},.20)`, border: `1px solid rgba(${accentRgb},.30)` }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative mx-auto mb-10" style={{ width: 160, height: 160 }}>
+            <CalmRings size={160} />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               {icon}
             </div>
           </div>
@@ -160,7 +157,7 @@ export function GuidedSessionClient({
       <div className="relative z-10 flex items-center justify-between px-[26px] py-[22px]">
         <Link
           href="/calm-tool"
-          className="flex items-center gap-[9px] text-[13.5px] font-medium px-[10px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex items-center gap-[9px] text-[13.5px] font-medium px-[10px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 relative z-10"
           style={{ color: '#CADED6', background: 'rgba(255,255,255,.06)' }}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#CADED6" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -169,18 +166,20 @@ export function GuidedSessionClient({
           Leave
         </Link>
 
-        <div className="text-center leading-[1.3]">
-          <div className="text-[10.5px] font-semibold tracking-[0.16em] uppercase" style={{ color: '#8FB3A8' }}>
-            Calm tool
-          </div>
-          <div className="font-heading text-[15px] font-semibold tracking-[-0.01em]" style={{ color: '#EAF3EF' }}>
-            {title}
+        <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+          <div className="text-center leading-[1.3]">
+            <div className="text-[10.5px] font-semibold tracking-[0.16em] uppercase" style={{ color: '#8FB3A8' }}>
+              Calm tool
+            </div>
+            <div className="font-heading text-[15px] font-semibold tracking-[-0.01em]" style={{ color: '#EAF3EF' }}>
+              {title}
+            </div>
           </div>
         </div>
 
         <Link
           href="/crisis-support"
-          className="flex items-center gap-2 text-[13px] font-semibold px-[13px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex items-center gap-2 text-[13px] font-semibold px-[13px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 relative z-10"
           style={{ color: '#E7BFB6', background: 'rgba(224,176,172,.14)' }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E7BFB6" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -196,26 +195,9 @@ export function GuidedSessionClient({
         {/* Tool-specific animation if provided, otherwise generic bloom */}
         <div className="mb-[34px]" aria-hidden="true">
           {centerVisual ?? (
-            <div
-              className="relative flex items-center justify-center"
-              style={{ width: 260, height: 260 }}
-            >
-              <div
-                className="absolute inset-0 rounded-full animate-breathe"
-                style={{ background: `rgba(${accentRgb},.08)` }}
-              />
-              <div
-                className="absolute rounded-full animate-breathe"
-                style={{ inset: 32, background: `rgba(${accentRgb},.13)`, animationDelay: '.3s' }}
-              />
-              <div
-                className="absolute rounded-full flex items-center justify-center"
-                style={{
-                  inset: 72,
-                  background: `rgba(${accentRgb},.20)`,
-                  border: `1px solid rgba(${accentRgb},.30)`,
-                }}
-              >
+            <div className="relative" style={{ width: 280, height: 280 }}>
+              <CalmRings size={280} />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {icon}
               </div>
             </div>

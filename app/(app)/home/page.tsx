@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { PlanRing } from '@/components/home/PlanRing';
+import { InViewReveal, StaggerList, StaggerItem } from '@/components/motion';
 
 export const metadata: Metadata = { title: 'Home — Afia' };
 
@@ -13,7 +14,8 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-function getDisplayName(email: string | undefined): string {
+function getDisplayName(firstName: string | null | undefined, email: string | undefined): string {
+  if (firstName?.trim()) return firstName.trim();
   if (!email) return 'there';
   const local = email.split('@')[0].split('.')[0];
   return local.charAt(0).toUpperCase() + local.slice(1);
@@ -66,6 +68,59 @@ const DAILY_NOTES = [
   "Small and consistent beats large and occasional, every time.",
   "Your nervous system is doing what it thinks is helpful. You can gently teach it otherwise.",
   "Rest is not falling behind. Rest is part of the plan.",
+  "A symptom noticed is not a symptom confirmed. Your mind and body talk — sometimes they bluff.",
+  "Uncertainty isn't danger. It's just information you don't have yet, and that's okay.",
+  "The urge to check will pass whether you check or not. Waiting it out is the practice.",
+  "You've survived every difficult day so far. Today is just another one of those.",
+  "Avoidance keeps anxiety alive. Approaching what you fear, gently, is how it softens.",
+  "Your thoughts about your health aren't medical evidence. They're anxiety doing its job too well.",
+  "Kindness toward yourself isn't weakness — it's the ground that recovery is built on.",
+  "It's okay to have a bad day in the middle of getting better. That's still getting better.",
+  "The pattern you're changing took years to build. Patience isn't optional; it's the method.",
+  "Checking in is not the same as checking out. Noticing how you feel is different from spiralling.",
+  "Body sensations are not predictions. Noticing a flutter in your chest is not a diagnosis.",
+  "You don't need certainty to move forward. Most good things were done without it.",
+  "Courage with anxiety doesn't look dramatic. It looks like you, doing the next ordinary thing.",
+  "Every time you resist a compulsion, you're building trust in yourself — not just breaking a habit.",
+  "Reassurance from others can feel like relief but it feeds the cycle. You already know this.",
+  "A hard morning doesn't mean a hard day. Anxiety lies about time spans too.",
+  "Being gentle with your progress is not the same as being complacent about it.",
+  "Health anxiety is not about being weak or strange. It's a pattern — and patterns can shift.",
+  "Your brain overestimates risk. That's not a character flaw; it's a habit that can change.",
+  "The present moment is the only one where anything can actually happen. The rest is projection.",
+  "You don't have to believe your thoughts to notice them and let them pass.",
+  "Exposure isn't about proving anxiety wrong — it's about proving you can cope when it's there.",
+  "One hour of sitting with discomfort teaches more than a year of avoiding it.",
+  "There's no perfect way to do this. Imperfect and consistent beats perfect and occasional.",
+  "Your worth is not measured by how anxious you are or aren't today.",
+  "Feeling anxious doesn't mean something is wrong with you. It means you're human.",
+  "The days you don't feel like doing this and do it anyway — those are the important ones.",
+  "Anxiety feels urgent because it evolved to. But urgency is a feeling, not a fact.",
+  "Grief about having anxiety is valid. And underneath it, recovery is still possible.",
+  "When worry spirals, your body braces. When you breathe slowly, it unbracers. That's real.",
+  "You're not trying to eliminate fear — you're learning to walk alongside it.",
+  "Good enough is genuinely good enough. Perfection in recovery is still just anxiety in a nicer coat.",
+  "The more you practise tolerating uncertainty, the less threatening it becomes. This is neuroplasticity.",
+  "Intrusive thoughts are not wishes or warnings. They're noise. You don't have to answer them.",
+  "You've already shown up. The hardest part for anxious minds is beginning — and you've begun.",
+  "Healing isn't linear. A difficult week after good ones is not a relapse; it's normal variation.",
+  "Something small done with care is worth more than something large done in panic.",
+  "Noticing the spiral early is a skill. You're building it every time you recognise what's happening.",
+  "Your body is not your enemy. Anxiety makes it feel that way — but your body is working for you.",
+  "Safety behaviours feel protective and are secretly costly. You're learning to tell the difference.",
+  "You are more than your health anxiety. It's one part of you, not the whole story.",
+  "The quiet days are doing work too. Rest, routine, small steps — these all count.",
+  "If it were happening to a friend, you'd be kind. Try some of that kindness on yourself today.",
+  "Anxiety spikes and then it settles — every single time, if you let it. That's the biology.",
+  "Checking a symptom twice doesn't make you safer. It makes the symptom feel more significant.",
+  "Your instinct to seek certainty is understandable. Your practice is learning to sit without it.",
+  "Each session here is a vote for the version of you that handles this differently.",
+  "The work you're doing is quiet and hard and largely invisible. That makes it no less real.",
+  "Unhelpful thoughts can be noticed without being believed. That gap — noticing — is everything.",
+  "Recovery has bad weeks. That doesn't make it not recovery.",
+  "You are building something. Some days you can see it clearly, some days not at all. Both are true.",
+  "Worry about tomorrow is still happening today, in your body. It's always worth asking: what about now?",
+  "You came back. That's not nothing — it's everything this is made of.",
 ] as const;
 
 function getDailyNote(): string {
@@ -76,7 +131,7 @@ function getDailyNote(): string {
 }
 
 /* ─── Constants ─── */
-const TOTAL_PROGRAMME_DAYS = 21;
+const TOTAL_PROGRAMME_DAYS = 42;
 
 /* ─── Decorative quatrefoil ─── */
 function Quatrefoil({ size, opacity }: { size: number; opacity: number }) {
@@ -115,7 +170,13 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const name = getDisplayName(user?.email);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name')
+    .eq('id', user?.id ?? '')
+    .maybeSingle();
+
+  const name = getDisplayName(profile?.first_name, user?.email);
   const greeting = getGreeting();
   const dateLabel = getDateLabel();
 
@@ -206,7 +267,7 @@ export default async function HomePage() {
 
         {/* ── Plan hero card ── stagger-1 */}
         <div
-          className="bg-[#2F5049] rounded-[20px] px-8 py-[30px] mb-[22px] relative overflow-hidden flex items-center gap-[30px] animate-fade-up"
+          className="bg-[#2F5049] rounded-[20px] px-5 py-5 sm:px-8 sm:py-[30px] mb-[22px] relative overflow-hidden flex items-center gap-[30px] animate-fade-up"
           style={{ animationDelay: '80ms' }}
         >
           <div className="flex-1 min-w-0">
@@ -276,84 +337,93 @@ export default async function HomePage() {
           </div>
 
           {/* Animated progress ring — client component */}
-          <PlanRing progressPct={progressPct} />
+          <div className="hidden sm:block flex-shrink-0">
+            <PlanRing progressPct={progressPct} />
+          </div>
         </div>
 
-        {/* ── Support tiles ── stagger-2, each tile cascades */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-[22px]">
-
+        {/* ── Support tiles ── stagger in on scroll */}
+        <StaggerList
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-[22px]"
+          triggerOnView
+          stagger={0.1}
+          delay={0.05}
+        >
           {/* Calm tools */}
-          <Link
-            href="/calm-tool"
-            className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring animate-fade-up"
-            style={{ animationDelay: '160ms' }}
-          >
-            <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#E3F1EE] items-center justify-center mb-[14px]">
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2F6E7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="2.3" />
-                <path d="M7.4 12a4.6 4.6 0 0 1 9.2 0" />
-                <path d="M3.5 12a8.5 8.5 0 0 1 17 0" />
-              </svg>
-            </span>
-            <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
-              Calm tools
-            </div>
-            <div className="text-[13px] leading-[1.5] text-[#767D79]">
-              Breathe or ground when worry spikes.
-            </div>
-          </Link>
+          <StaggerItem>
+            <Link
+              href="/calm-tool"
+              className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#E3F1EE] items-center justify-center mb-[14px]">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2F6E7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="2.3" />
+                  <path d="M7.4 12a4.6 4.6 0 0 1 9.2 0" />
+                  <path d="M3.5 12a8.5 8.5 0 0 1 17 0" />
+                </svg>
+              </span>
+              <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
+                Calm tools
+              </div>
+              <div className="text-[13px] leading-[1.5] text-[#767D79]">
+                Breathe or ground when worry spikes.
+              </div>
+            </Link>
+          </StaggerItem>
 
           {/* Weekly check-in */}
-          <Link
-            href="/screener"
-            className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring animate-fade-up"
-            style={{ animationDelay: '210ms' }}
-          >
-            <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#F3EEE6] items-center justify-center mb-[14px]">
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#B26A44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3.5" y="5" width="17" height="16" rx="3" />
-                <path d="M8 3v4M16 3v4M3.5 10h17" />
-                <path d="M12 13.4c-1-1.2-3-.7-3 .9 0 1.3 1.8 2.4 3 3.2 1.2-.8 3-1.9 3-3.2 0-1.6-2-2.1-3-.9Z" />
-              </svg>
-            </span>
-            <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
-              Weekly check-in
-            </div>
-            <div className="text-[13px] leading-[1.5] text-[#767D79]">
-              Due Friday · see what&rsquo;s shifting.
-            </div>
-          </Link>
+          <StaggerItem>
+            <Link
+              href="/screener"
+              className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#F3EEE6] items-center justify-center mb-[14px]">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#B26A44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="16" rx="3" />
+                  <path d="M8 3v4M16 3v4M3.5 10h17" />
+                  <path d="M12 13.4c-1-1.2-3-.7-3 .9 0 1.3 1.8 2.4 3 3.2 1.2-.8 3-1.9 3-3.2 0-1.6-2-2.1-3-.9Z" />
+                </svg>
+              </span>
+              <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
+                Weekly check-in
+              </div>
+              <div className="text-[13px] leading-[1.5] text-[#767D79]">
+                Due Friday · see what&rsquo;s shifting.
+              </div>
+            </Link>
+          </StaggerItem>
 
           {/* Journal */}
-          <Link
-            href="/journal"
-            className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring animate-fade-up"
-            style={{ animationDelay: '260ms' }}
-          >
-            <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#EDEBF3] items-center justify-center mb-[14px]">
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6A5FA0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M20 4C11 5 6 10 5 19l3-3c6-1 10-5 12-12Z" />
-                <path d="M8.5 15.5c2.6-2.6 4.6-4.8 6.5-8" />
-                <path d="M4 20l3.5-3.5" />
-              </svg>
-            </span>
-            <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
-              Your journal
-            </div>
-            <div className="text-[13px] leading-[1.5] text-[#767D79]">
-              {journalCount === 0
-                ? 'No reflections yet — start writing.'
-                : `${journalCount} ${journalCount === 1 ? 'reflection' : 'reflections'} saved so far.`}
-            </div>
-          </Link>
-        </div>
+          <StaggerItem>
+            <Link
+              href="/journal"
+              className="bg-white border border-[#E7E2DA] rounded-[16px] p-5 block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex w-[38px] h-[38px] rounded-[11px] bg-[#EDEBF3] items-center justify-center mb-[14px]">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6A5FA0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 4C11 5 6 10 5 19l3-3c6-1 10-5 12-12Z" />
+                  <path d="M8.5 15.5c2.6-2.6 4.6-4.8 6.5-8" />
+                  <path d="M4 20l3.5-3.5" />
+                </svg>
+              </span>
+              <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">
+                Your journal
+              </div>
+              <div className="text-[13px] leading-[1.5] text-[#767D79]">
+                {journalCount === 0
+                  ? 'No reflections yet — start writing.'
+                  : `${journalCount} ${journalCount === 1 ? 'reflection' : 'reflections'} saved so far.`}
+              </div>
+            </Link>
+          </StaggerItem>
+        </StaggerList>
 
-        {/* ── Gentle note ── stagger-3 */}
+        {/* ── Gentle note ── reveals on scroll */}
+        <InViewReveal y={14} duration={0.6}>
         <div
-          className="relative overflow-hidden rounded-[18px] border border-[#E2E6DD] px-[38px] py-[32px] animate-fade-up"
+          className="relative overflow-hidden rounded-[18px] border border-[#E2E6DD] px-[38px] py-[32px]"
           style={{
             background: 'linear-gradient(115deg, #EAF3EF 0%, #F4EFE7 100%)',
-            animationDelay: '320ms',
           }}
         >
           {/* Decorative quatrefoil bottom-right */}
@@ -385,11 +455,12 @@ export default async function HomePage() {
             <p className="font-heading text-[23px] leading-[1.42] font-medium italic tracking-[-0.012em] text-[#2F5049] max-w-[540px] mt-2 mb-4 [text-wrap:pretty]">
               {getDailyNote()}
             </p>
-            <span className="text-[11.5px] font-semibold tracking-[0.1em] uppercase text-[#8A928D]">
+            <span className="text-[11.5px] font-semibold tracking-[0.1em] uppercase text-[#6E7672]">
               A note for today
             </span>
           </div>
         </div>
+        </InViewReveal>
 
       </div>
     </main>

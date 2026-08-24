@@ -13,8 +13,8 @@ const configs = {
   mark: {
     src: '/Images/Official_Logo.png',
     alt: 'Afia',
-    width: 48,
-    height: 48,
+    width: 45,
+    height: 45,
   },
   wordmark: {
     src: '/Images/Official_WordMark.png',

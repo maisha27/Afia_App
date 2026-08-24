@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -80,7 +80,7 @@ export function PricingCard() {
         </span>
         <span className="text-[15px] text-[#767D79]">/ month</span>
       </div>
-      <p className="text-[13px] text-[#8A928D] mb-[22px]">
+      <p className="text-[13px] text-[#6E7672] mb-[22px]">
         {isYearly ? 'Billed £69.99 yearly' : 'Billed monthly'} ·{' '}
         <span className="text-[#5F6863]">7 days free first</span>
       </p>

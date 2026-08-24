@@ -123,7 +123,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
           </span>
           <div>
             <div className="font-heading text-[15px] font-semibold text-[#3A403C]">New entry</div>
-            <div className="text-[12.5px] italic text-[#8A928D] mt-[1px]">{dailyPrompt}</div>
+            <div className="text-[12.5px] italic text-[#6E7672] mt-[1px]">{dailyPrompt}</div>
           </div>
         </div>
 
@@ -167,7 +167,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
               <button
                 type="button"
                 onClick={() => setContent('')}
-                className="text-[13px] text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                className="text-[13px] text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               >
                 Clear
               </button>
@@ -253,7 +253,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <time
                       dateTime={entry.created_at}
-                      className="text-[12px] font-semibold text-[#8A928D]"
+                      className="text-[12px] font-semibold text-[#6E7672]"
                     >
                       {formatEntryDate(entry.created_at)}
                     </time>
@@ -272,7 +272,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                         <button
                           type="button"
                           onClick={() => setConfirmDeleteId(null)}
-                          className="text-[12.5px] text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                          className="text-[12.5px] text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
                         >
                           Cancel
                         </button>
@@ -299,7 +299,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
         </div>
       ) : (
         <div className="text-center py-10">
-          <p className="text-[14px] text-[#8A928D] leading-[1.6]">
+          <p className="text-[14px] text-[#6E7672] leading-[1.6]">
             No entries yet. Your first reflection is already waiting to be written.
           </p>
         </div>

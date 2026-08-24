@@ -79,8 +79,8 @@ export function AppBottomNav() {
             key={href}
             href={href}
             className={cn(
-              'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              active ? 'text-primary' : 'text-[#8A928D]'
+              'flex flex-1 flex-col items-center gap-1 py-3 text-[12px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              active ? 'text-primary' : 'text-[#5F6863]'
             )}
             aria-current={active ? 'page' : undefined}
           >

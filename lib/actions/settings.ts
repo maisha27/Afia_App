@@ -48,7 +48,8 @@ export async function saveNotificationPrefs(prefs: NotificationPrefs): Promise<{
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  const { error } = await supabase
+  const service = createServiceClient();
+  const { error } = await service
     .from('profiles')
     .upsert({ id: user.id, notification_prefs: prefs }, { onConflict: 'id' });
 
@@ -97,6 +98,23 @@ export async function exportUserData(): Promise<
     journalEntries: journalRes.data ?? [],
     calmSessions: calmRes.data ?? [],
   };
+}
+
+export async function updateDisplayName(firstName: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  const trimmed = firstName.trim();
+  if (!trimmed || trimmed.length > 50) return { error: 'Name must be between 1 and 50 characters.' };
+
+  const service = createServiceClient();
+  const { error } = await service
+    .from('profiles')
+    .upsert({ id: user.id, first_name: trimmed }, { onConflict: 'id' });
+
+  if (error) return { error: error.message };
+  return {};
 }
 
 export async function deleteAccount(): Promise<{ error?: string }> {

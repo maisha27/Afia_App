@@ -10,7 +10,7 @@ export default async function SettingsPage() {
   if (!user) redirect('/log-in');
 
   const [profileRes, subRes] = await Promise.all([
-    supabase.from('profiles').select('notification_prefs').eq('id', user.id).maybeSingle(),
+    supabase.from('profiles').select('notification_prefs, first_name').eq('id', user.id).maybeSingle(),
     supabase
       .from('subscriptions')
       .select('plan, status, current_period_end, cancel_at_period_end')
@@ -38,6 +38,7 @@ export default async function SettingsPage() {
   return (
     <SettingsClient
       email={user.email ?? ''}
+      firstName={profileRes.data?.first_name ?? null}
       initialPrefs={notificationPrefs}
       subscription={subscription}
     />

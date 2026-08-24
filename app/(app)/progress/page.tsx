@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { InViewReveal } from '@/components/motion';
 import { ProgressChart } from '@/components/progress/ProgressChart';
 import { AnimatedDomainBars } from '@/components/progress/AnimatedDomainBars';
 import { AnimatedStatTiles } from '@/components/progress/AnimatedStatTiles';
@@ -242,7 +243,7 @@ export default async function ProgressPage() {
 
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
-      <div className="relative max-w-[680px]">
+      <div className="relative">
 
         {/* ── Header ── stagger-0 */}
         <div
@@ -278,17 +279,17 @@ export default async function ProgressPage() {
           </div>
         </div>
 
-        {/* ── Trend card ── stagger-1 */}
+        {/* ── Trend card ── reveals on scroll */}
+        <InViewReveal y={14} duration={0.55}>
         <div
-          className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5 animate-fade-up"
-          style={{ animationDelay: '80ms' }}
+          className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5"
         >
           <div className="flex items-start justify-between mb-[18px]">
             <div>
               <div className="font-heading text-[17px] font-semibold text-[#3A403C]">
                 How you&rsquo;ve been feeling
               </div>
-              <div className="text-[13px] text-[#8A928D] mt-[3px]">{trendSubtitle}</div>
+              <div className="text-[13px] text-[#6E7672] mt-[3px]">{trendSubtitle}</div>
             </div>
             {hasCheckIns && (
               <span className="inline-flex items-center gap-[7px] text-[12.5px] font-semibold text-[#2F6E7A] bg-[#E3F1EE] px-3 py-1.5 rounded-full flex-shrink-0 ml-4">
@@ -354,12 +355,13 @@ export default async function ProgressPage() {
             </div>
           )}
         </div>
+        </InViewReveal>
 
-        {/* ── Domain shifts card ── stagger-2 */}
+        {/* ── Domain shifts card ── reveals on scroll */}
         {hasCheckIns && (
+          <InViewReveal y={14} duration={0.55} delay={0.05}>
           <div
-            className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5 animate-fade-up"
-            style={{ animationDelay: '160ms' }}
+            className="bg-white border border-[#E7E2DA] rounded-[18px] px-[26px] py-[24px] mb-5"
           >
             <div className="flex items-start justify-between mb-5">
               <div>
@@ -367,13 +369,13 @@ export default async function ProgressPage() {
                   Where it&rsquo;s shifting
                 </div>
                 {!hasAnswers && (
-                  <p className="text-[13px] text-[#8A928D] mt-1 max-w-[380px]">
+                  <p className="text-[13px] text-[#6E7672] mt-1 max-w-[380px]">
                     Domain breakdowns are available for check-ins taken within the app.
                   </p>
                 )}
               </div>
               {hasMultiple && hasAnswers && (
-                <span className="text-[11.5px] font-semibold text-[#8A928D] flex-shrink-0 ml-4 mt-0.5">
+                <span className="text-[11.5px] font-semibold text-[#6E7672] flex-shrink-0 ml-4 mt-0.5">
                   {checkIns.length} check-ins
                 </span>
               )}
@@ -386,12 +388,13 @@ export default async function ProgressPage() {
               />
             ) : (
               <div className="py-6 text-center">
-                <p className="text-[14px] text-[#8A928D]">
+                <p className="text-[14px] text-[#6E7672]">
                   Take a new check-in to unlock domain tracking.
                 </p>
               </div>
             )}
           </div>
+          </InViewReveal>
         )}
 
         {/* ── Stat tiles ── stagger-3 (individual tiles stagger internally) */}
@@ -404,16 +407,17 @@ export default async function ProgressPage() {
           ]}
         />
 
-        {/* ── Gentle note ── stagger-4 */}
+        {/* ── Gentle note ── reveals on scroll */}
+        <InViewReveal y={12} duration={0.5} delay={0.05}>
         <div
-          className="flex items-center gap-[14px] bg-[#EAF3EF] border border-[#D4E7DF] rounded-[16px] px-[22px] py-[18px] animate-fade-up"
-          style={{ animationDelay: '460ms' }}
+          className="flex items-center gap-[14px] bg-[#EAF3EF] border border-[#D4E7DF] rounded-[16px] px-[22px] py-[18px]"
         >
           <MiniQuatrefoil />
           <p className="text-[14.5px] leading-[1.55] text-[#2F5049] [text-wrap:pretty]">
             {gentleNote}
           </p>
         </div>
+        </InViewReveal>
 
       </div>
     </main>

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useScreener } from './ScreenerProvider';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
-import { saveScreenerResult } from '@/lib/actions/auth';
+import { saveScreenerResult, setPendingScreenerResult } from '@/lib/actions/auth';
 import type { Band, ScoreResult } from '@/lib/scoring';
 
 // ── Band display maps ────────────────────────────────────────────────────────
@@ -192,15 +192,14 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
       });
       return;
     }
-    try {
-      sessionStorage.setItem(
-        'afia_pending_result',
-        JSON.stringify({ score, band, answers: answers.map((a) => a ?? 0) }),
-      );
-    } catch {
-      // sessionStorage unavailable — sign-up still works
-    }
-    router.push('/sign-up');
+    startTransition(async () => {
+      try {
+        await setPendingScreenerResult({ score, band, answers: answers.map((a) => a ?? 0) });
+      } catch {
+        // cookie unavailable — sign-up still works without screener result
+      }
+      router.push('/sign-up');
+    });
   };
 
   // ── Shared page shell (header never re-mounts) ────────────────────────────

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -206,7 +206,7 @@ export default async function AdminUsersPage({
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-[16px]">
-            <span className="text-[13px]" style={{ color: '#8A928D' }}>
+            <span className="text-[13px]" style={{ color: '#6E7672' }}>
               Page {currentPage} of {totalPages} &middot; {total.toLocaleString()} users
             </span>
             <div className="flex items-center gap-[6px]">

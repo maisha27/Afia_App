@@ -33,66 +33,76 @@ export async function POST(request: Request) {
 
   const db = createServiceClient();
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.user_id;
-      if (!userId || !session.subscription || !session.customer) break;
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.user_id;
+        if (!userId || !session.subscription || !session.customer) break;
 
-      const sub = await stripe.subscriptions.retrieve(session.subscription as string);
-      const priceId = sub.items.data[0]?.price.id ?? '';
+        const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+        const priceId = sub.items.data[0]?.price.id ?? '';
 
-      await db.from('subscriptions').upsert(
-        {
-          user_id: userId,
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: sub.id,
-          status: sub.status,
-          plan: planFromPriceId(priceId),
-          current_period_end: getPeriodEnd(sub),
-        },
-        { onConflict: 'user_id' }
-      );
-      break;
+        const { error } = await db.from('subscriptions').upsert(
+          {
+            user_id: userId,
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: sub.id,
+            status: sub.status,
+            plan: planFromPriceId(priceId),
+            current_period_end: getPeriodEnd(sub),
+          },
+          { onConflict: 'user_id' }
+        );
+        if (error) throw error;
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const sub = event.data.object as Stripe.Subscription;
+        const priceId = sub.items.data[0]?.price.id ?? '';
+
+        const { error } = await db
+          .from('subscriptions')
+          .update({
+            status: sub.status,
+            plan: planFromPriceId(priceId),
+            current_period_end: getPeriodEnd(sub),
+            cancel_at_period_end: sub.cancel_at_period_end,
+          })
+          .eq('stripe_subscription_id', sub.id);
+        if (error) throw error;
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object as Stripe.Subscription;
+        const { error } = await db
+          .from('subscriptions')
+          .update({ status: 'canceled', current_period_end: getPeriodEnd(sub) })
+          .eq('stripe_subscription_id', sub.id);
+        if (error) throw error;
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        // In 2026-07-29.dahlia, Invoice.subscription is now Invoice.parent.subscription_details.subscription
+        const invoice = event.data.object as Stripe.Invoice;
+        const subRef = invoice.parent?.subscription_details?.subscription;
+        if (!subRef) break;
+        const subscriptionId = typeof subRef === 'string' ? subRef : subRef.id;
+
+        const { error } = await db
+          .from('subscriptions')
+          .update({ status: 'past_due' })
+          .eq('stripe_subscription_id', subscriptionId);
+        if (error) throw error;
+        break;
+      }
     }
-
-    case 'customer.subscription.updated': {
-      const sub = event.data.object as Stripe.Subscription;
-      const priceId = sub.items.data[0]?.price.id ?? '';
-
-      await db
-        .from('subscriptions')
-        .update({
-          status: sub.status,
-          plan: planFromPriceId(priceId),
-          current_period_end: getPeriodEnd(sub),
-          cancel_at_period_end: sub.cancel_at_period_end,
-        })
-        .eq('stripe_subscription_id', sub.id);
-      break;
-    }
-
-    case 'customer.subscription.deleted': {
-      const sub = event.data.object as Stripe.Subscription;
-      await db.from('subscriptions').update({
-        status: 'canceled',
-        current_period_end: getPeriodEnd(sub),
-      }).eq('stripe_subscription_id', sub.id);
-      break;
-    }
-
-    case 'invoice.payment_failed': {
-      // In 2026-07-29.dahlia, Invoice.subscription is now Invoice.parent.subscription_details.subscription
-      const invoice = event.data.object as Stripe.Invoice;
-      const subRef = invoice.parent?.subscription_details?.subscription;
-      if (!subRef) break;
-      const subscriptionId = typeof subRef === 'string' ? subRef : subRef.id;
-
-      await db.from('subscriptions').update({
-        status: 'past_due',
-      }).eq('stripe_subscription_id', subscriptionId);
-      break;
-    }
+  } catch (err) {
+    console.error('[stripe-webhook] event processing failed:', event.type, err);
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useTransition, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -143,7 +143,7 @@ export function LogInForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? 'Hide' : 'Show'}
@@ -186,7 +186,7 @@ export function LogInForm() {
           </button>
         </form>
 
-        <p className="mt-5 text-center text-[13.5px] text-[#8A928D]">
+        <p className="mt-5 text-center text-[13.5px] text-[#6E7672]">
           New to Afia?{' '}
           <Link
             href="/screener"

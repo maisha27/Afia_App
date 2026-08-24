@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { saveNotificationPrefs, exportUserData, deleteAccount, changeEmail, changePassword } from '@/lib/actions/settings';
+import { saveNotificationPrefs, exportUserData, deleteAccount, changeEmail, changePassword, updateDisplayName } from '@/lib/actions/settings';
+import { signOut } from '@/lib/actions/auth';
 
 /* ─── Shared UI pieces ─── */
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -38,7 +39,7 @@ function SettingsRow({
     >
       <div className="max-w-[380px]">
         <div className="text-[14.5px] font-semibold text-[#3A403C]">{title}</div>
-        {sub && <div className="text-[13px] text-[#8A928D] mt-0.5">{sub}</div>}
+        {sub && <div className="text-[13px] text-[#6E7672] mt-0.5">{sub}</div>}
       </div>
       {right}
     </div>
@@ -76,6 +77,7 @@ function Toggle({
 /* ─── Props ─── */
 export interface SettingsClientProps {
   email: string;
+  firstName: string | null;
   initialPrefs: {
     daily: boolean;
     weekly: boolean;
@@ -97,13 +99,18 @@ function formatDate(iso: string) {
   });
 }
 
-export default function SettingsClient({ email, initialPrefs, subscription }: SettingsClientProps) {
+export default function SettingsClient({ email, firstName, initialPrefs, subscription }: SettingsClientProps) {
   const [daily, setDaily] = useState(initialPrefs.daily);
   const [weekly, setWeekly] = useState(initialPrefs.weekly);
   const [encourage, setEncourage] = useState(initialPrefs.encourage);
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+
+  // Display name change
+  const [nameFormOpen, setNameFormOpen] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [nameStatus, setNameStatus] = useState<{ error?: string; success?: boolean } | null>(null);
 
   // Email change
   const [emailFormOpen, setEmailFormOpen] = useState(false);
@@ -115,6 +122,16 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
   const [newPassword, setNewPassword] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [passwordStatus, setPasswordStatus] = useState<{ error?: string; success?: boolean } | null>(null);
+
+  function handleNameSubmit() {
+    setNameStatus(null);
+    startTransition(async () => {
+      const result = await updateDisplayName(newName);
+      if (result.error) { setNameStatus({ error: result.error }); return; }
+      setNameStatus({ success: true });
+      setNewName('');
+    });
+  }
 
   function handleEmailSubmit() {
     setEmailStatus(null);
@@ -153,13 +170,8 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
     startTransition(async () => {
       const result = await exportUserData();
       if ('error' in result) return;
-      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'afia-my-data.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      const { generatePDF } = await import('@/lib/export/generatePDF');
+      generatePDF({ ...result, firstName });
     });
   }
 
@@ -205,6 +217,45 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
         <div className="animate-fade-up" style={{ animationDelay: '60ms' }}>
         <SectionLabel>Account</SectionLabel>
         <SettingsCard className="mb-7">
+          {/* Display name row */}
+          <SettingsRow
+            title="Your name"
+            sub={nameStatus?.success ? 'Name updated.' : (firstName ?? 'Not set — add your first name')}
+            right={
+              <button
+                type="button"
+                onClick={() => { setNameFormOpen((o) => !o); setNameStatus(null); setNewName(''); }}
+                className="text-[13.5px] font-semibold text-primary hover:text-primary/80 transition-colors flex-shrink-0"
+              >
+                {nameFormOpen ? 'Cancel' : 'Change'}
+              </button>
+            }
+          />
+          {nameFormOpen && !nameStatus?.success && (
+            <div className="px-[22px] pb-[18px] flex flex-col gap-[10px]">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Your first name"
+                autoFocus
+                maxLength={50}
+                className="w-full rounded-[10px] px-[14px] py-[11px] text-[14px] border border-[#E0DACF] bg-[#FAFAF8] text-[#2E332F] placeholder:text-[#B3B7B0] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+              />
+              {nameStatus?.error && (
+                <p className="text-[12.5px] text-[#B0503F]">{nameStatus.error}</p>
+              )}
+              <button
+                type="button"
+                onClick={handleNameSubmit}
+                disabled={isPending || !newName.trim()}
+                className="self-start inline-flex items-center gap-2 bg-[#2F5049] text-white font-heading text-[14px] font-semibold px-5 py-[10px] rounded-[10px] hover:bg-[#263F38] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              >
+                {isPending ? 'Saving…' : 'Save name'}
+              </button>
+            </div>
+          )}
+
           {/* Email row */}
           <SettingsRow
             title="Email"
@@ -327,46 +378,39 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
         {/* ── Your data ── */}
         <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
         <SectionLabel>Your data</SectionLabel>
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={isPending}
+          className="w-full inline-flex items-center justify-center gap-[9px] bg-white border border-[#D9E0DA] text-[#2F5049] font-heading text-[14.5px] font-semibold py-[14px] rounded-[12px] hover:bg-[#F5FAF8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 mb-3"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5049" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3v12M8 11l4 4 4-4" />
+            <path d="M4 19h16" />
+          </svg>
+          Export my data
+        </button>
         <div className="flex gap-3 mb-2">
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isPending}
-            className="flex-1 inline-flex items-center justify-center gap-[9px] bg-white border border-[#D9E0DA] text-[#2F5049] font-heading text-[14.5px] font-semibold py-[14px] rounded-[12px] hover:bg-[#F5FAF8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2F5049"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          <form action={signOut} className="flex-1">
+            <button
+              type="submit"
+              className="w-full inline-flex items-center justify-center gap-[9px] bg-white border border-[#D9E0DA] text-[#2F6E7A] font-heading text-[14.5px] font-semibold py-[14px] rounded-[12px] hover:bg-tint transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <path d="M12 3v12M8 11l4 4 4-4" />
-              <path d="M4 19h16" />
-            </svg>
-            Export my data
-          </button>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F6E7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Sign out
+            </button>
+          </form>
           <button
             type="button"
             onClick={handleDelete}
             disabled={isPending}
             className="flex-1 inline-flex items-center justify-center gap-[9px] bg-white border border-[#F0D9D2] text-[#B0503F] font-heading text-[14.5px] font-semibold py-[14px] rounded-[12px] hover:bg-[#FBF3F1] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#B0503F"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0503F" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13h10l1-13" />
             </svg>
             {confirmDelete ? 'Tap again to confirm' : 'Delete my account'}
@@ -410,7 +454,7 @@ export default function SettingsClient({ email, initialPrefs, subscription }: Se
                   </span>
                 )}
               </div>
-              <div className="text-[13px] text-[#8A928D] mt-1">{subDateText}</div>
+              <div className="text-[13px] text-[#6E7672] mt-1">{subDateText}</div>
             </div>
             <Link
               href="/subscription"

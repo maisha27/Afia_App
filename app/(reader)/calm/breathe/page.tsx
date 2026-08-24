@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { recordCalmSession } from '@/lib/actions/calm';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
+import CalmRings from '@/components/calm/CalmRings';
 
 /* ─── Breathing pattern: box breathing 4-4-4-4 ─── */
 type Phase = 'breathe-in' | 'hold' | 'breathe-out' | 'rest';
@@ -47,7 +48,6 @@ export default function BreatheSessionPage() {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [round, setRound] = useState(1);
   const [finished, setFinished] = useState(false);
-  const animationStartRef = useRef<number | null>(null);
 
   const phase = PHASE_ORDER[phaseIndex];
   const { heading, sub } = PHASE_LABELS[phase];
@@ -78,13 +78,6 @@ export default function BreatheSessionPage() {
     recordCalmSession('breathe');
   }, [finished]);
 
-  /* ─── Sync animation start so CSS cycle stays in phase ─── */
-  useEffect(() => {
-    if (animationStartRef.current === null) {
-      animationStartRef.current = Date.now();
-    }
-  }, []);
-
   /* ─── Progress display ─── */
   const elapsedPhases = (round - 1) * PHASE_ORDER.length + phaseIndex;
   const timeLeftSeconds = TOTAL_DURATION_S - elapsedPhases * PHASE_DURATION_S;
@@ -94,9 +87,6 @@ export default function BreatheSessionPage() {
     past: i < round - 1,
     active: i === round - 1,
   }));
-
-  /* ─── Bloom layer style — animate-breath-cycle syncs with phase timer ─── */
-  const bloomBase = 'absolute rounded-full animate-breath-cycle';
 
   /* ─── Finished screen ─── */
   if (finished) {
@@ -213,7 +203,7 @@ export default function BreatheSessionPage() {
       <div className="relative z-10 flex items-center justify-between px-[26px] py-[22px]">
         <Link
           href="/calm-tool"
-          className="flex items-center gap-[9px] text-[13.5px] font-medium px-[10px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex items-center gap-[9px] text-[13.5px] font-medium px-[10px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 relative z-10"
           style={{ color: '#CADED6', background: 'rgba(255,255,255,.06)' }}
         >
           <svg
@@ -232,21 +222,23 @@ export default function BreatheSessionPage() {
           Leave
         </Link>
 
-        <div className="text-center leading-[1.3]">
-          <div className="text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#8FB3A8]">
-            Breathing
-          </div>
-          <div
-            className="font-heading text-[15px] font-semibold tracking-[-0.01em]"
-            style={{ color: '#EAF3EF' }}
-          >
-            Take a breath
+        <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+          <div className="text-center leading-[1.3]">
+            <div className="text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#8FB3A8]">
+              Breathing
+            </div>
+            <div
+              className="font-heading text-[15px] font-semibold tracking-[-0.01em]"
+              style={{ color: '#EAF3EF' }}
+            >
+              Take a breath
+            </div>
           </div>
         </div>
 
         <Link
           href="/crisis-support"
-          className="flex items-center gap-2 text-[13px] font-semibold px-[13px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="flex items-center gap-2 text-[13px] font-semibold px-[13px] py-2 rounded-[10px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 relative z-10"
           style={{ color: '#E7BFB6', background: 'rgba(224,176,172,.14)' }}
         >
           <svg
@@ -271,64 +263,30 @@ export default function BreatheSessionPage() {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-10 pt-2 pb-5">
         {/* Bloom container */}
         <div
-          className="relative flex items-center justify-center mb-[34px]"
+          className="relative mb-[34px]"
           style={{ width: 300, height: 300 }}
           aria-label={heading}
           role="img"
         >
-          {/* Layer 1 — outermost */}
-          <div
-            className={bloomBase}
-            style={{
-              width: 300,
-              height: 300,
-              background: 'rgba(159,201,188,.10)',
-              animationPlayState: animState,
-            }}
-            aria-hidden="true"
-          />
-          {/* Layer 2 */}
-          <div
-            className={bloomBase}
-            style={{
-              width: 232,
-              height: 232,
-              background: 'rgba(159,201,188,.14)',
-              animationDelay: '.12s',
-              animationPlayState: animState,
-            }}
-            aria-hidden="true"
-          />
-          {/* Layer 3 */}
-          <div
-            className={bloomBase}
-            style={{
-              width: 168,
-              height: 168,
-              background: 'rgba(234,243,239,.16)',
-              border: '1px solid rgba(234,243,239,.22)',
-              animationDelay: '.24s',
-              animationPlayState: animState,
-            }}
-            aria-hidden="true"
-          />
+          <CalmRings size={300} />
           {/* Centre quatrefoil */}
-          <div
-            className="animate-breath-cycle flex items-center justify-center"
-            style={{ animationDelay: '.24s', animationPlayState: animState }}
-            aria-hidden="true"
-          >
-            <svg width="120" height="120" viewBox="0 0 400 400" aria-hidden="true">
-              <g fill="#EAF3EF" fillOpacity=".92" stroke="none">
-                {PETALS.map((deg) => (
-                  <path
-                    key={deg}
-                    d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
-                    transform={deg === 0 ? undefined : `rotate(${deg} 200 200)`}
-                  />
-                ))}
-              </g>
-            </svg>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+            <div
+              className="animate-breath-cycle flex items-center justify-center"
+              style={{ animationPlayState: animState }}
+            >
+              <svg width="110" height="110" viewBox="0 0 400 400" aria-hidden="true">
+                <g fill="#EAF3EF" fillOpacity=".92" stroke="none">
+                  {PETALS.map((deg) => (
+                    <path
+                      key={deg}
+                      d="M200 200 Q167 128 200 58 Q233 128 200 200 Z"
+                      transform={deg === 0 ? undefined : `rotate(${deg} 200 200)`}
+                    />
+                  ))}
+                </g>
+              </svg>
+            </div>
           </div>
         </div>
 

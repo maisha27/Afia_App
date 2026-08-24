@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
 import { StaggerList, StaggerItem } from '@/components/motion';
@@ -28,7 +28,7 @@ function ToolCard({ iconBg, icon, title, body, duration, href }: ToolCardProps) 
       </span>
       <div className="font-heading text-[16px] font-semibold text-[#3A403C] mb-1">{title}</div>
       <div className="text-[13px] leading-[1.5] text-[#767D79] mb-3">{body}</div>
-      <span className="text-[12px] font-semibold text-[#8A928D] bg-[#F3EEE6] px-[10px] py-[4px] rounded-full">
+      <span className="text-[12px] font-semibold text-[#6E7672] bg-[#F3EEE6] px-[10px] py-[4px] rounded-full">
         {duration}
       </span>
     </Link>
@@ -132,7 +132,7 @@ export default function CalmToolPage() {
         </p>
 
         {/* ── Featured breathing tool ── */}
-        <div className="bg-[#2F5049] rounded-[20px] px-[34px] py-[30px] mb-[26px] relative overflow-hidden flex items-center gap-[34px]">
+        <div className="bg-[#2F5049] rounded-[20px] px-[22px] py-[22px] sm:px-[34px] sm:py-[30px] mb-[26px] relative overflow-hidden flex flex-col sm:flex-row sm:items-center gap-[22px] sm:gap-[34px]">
           <div className="flex-1 min-w-0">
             <span className="text-[11.5px] font-semibold tracking-[0.09em] uppercase text-[#9FC9BC]">
               Suggested right now
@@ -163,15 +163,17 @@ export default function CalmToolPage() {
           </div>
 
           {/* Sequential petal bloom — replaces the old static BreathingBloom */}
-          <AnimatedQuatrefoil
-            size={150}
-            fill="#EAF3EF"
-            fillOpacity={0.78}
-            stroke="#EAF3EF"
-            strokeOpacity={0.55}
-            withHalo
-            haloColor="234,243,239"
-          />
+          <div className="hidden sm:block flex-shrink-0">
+            <AnimatedQuatrefoil
+              size={150}
+              fill="#EAF3EF"
+              fillOpacity={0.78}
+              stroke="#EAF3EF"
+              strokeOpacity={0.55}
+              withHalo
+              haloColor="234,243,239"
+            />
+          </div>
         </div>
 
         {/* ── Tool grid — staggered entrance ── */}

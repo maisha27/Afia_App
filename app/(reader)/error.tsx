@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { captureException } from '@/lib/monitoring';
 
 export default function ReaderError({
   error,
@@ -11,7 +12,7 @@ export default function ReaderError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    captureException(error, { digest: error.digest });
   }, [error]);
 
   return (

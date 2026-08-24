@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-nudge",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-checkin",
+      "schedule": "0 9 * * 0"
+    },
+    {
+      "path": "/api/cron/encourage",
+      "schedule": "0 10 * * 3"
+    }
+  ]
+}

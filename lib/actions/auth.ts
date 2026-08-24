@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import type { Band } from '@/lib/scoring';
 
 export type AuthActionResult =
@@ -16,11 +17,16 @@ const VALID_BANDS: Band[] = ['Low', 'Mild', 'Moderate', 'High', 'Very High'];
 export async function signUp(data: {
   email: string;
   password: string;
-  score: number | null;
-  band: string | null;
-  answers: number[] | null;
+  firstName: string;
 }): Promise<AuthActionResult> {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+
+  // Read screener result from httpOnly cookie (set by setPendingScreenerResult before routing to /sign-up)
+  const pendingRaw = cookieStore.get('afia_pending_result')?.value ?? null;
+  const pending = pendingRaw
+    ? (JSON.parse(pendingRaw) as { score: number; band: string; answers: number[] | null })
+    : null;
 
   const { data: authData, error } = await supabase.auth.signUp({
     email: data.email,
@@ -30,47 +36,78 @@ export async function signUp(data: {
   if (error) return { error: error.message };
   if (!authData.user) return { error: 'Something went wrong. Please try again.' };
 
+  // Save first name — service client bypasses RLS so this works before email confirmation too
+  const trimmedName = data.firstName.trim();
+  if (trimmedName) {
+    const service = createServiceClient();
+    await service
+      .from('profiles')
+      .upsert({ id: authData.user.id, first_name: trimmedName }, { onConflict: 'id' });
+  }
+
   const hasValidResult =
-    data.score !== null &&
-    data.band !== null &&
-    Number.isInteger(data.score) &&
-    data.score >= 0 &&
-    data.score <= 42 &&
-    VALID_BANDS.includes(data.band as Band);
+    pending !== null &&
+    Number.isInteger(pending.score) &&
+    pending.score >= 0 &&
+    pending.score <= 42 &&
+    VALID_BANDS.includes(pending.band as Band);
 
   const hasValidAnswers =
-    Array.isArray(data.answers) &&
-    data.answers.length === 14 &&
-    data.answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3);
+    Array.isArray(pending?.answers) &&
+    pending.answers!.length === 14 &&
+    pending.answers!.every((a) => Number.isInteger(a) && a >= 0 && a <= 3);
 
   if (authData.session) {
     // Email confirmation disabled — save screener result now while session is live
     if (hasValidResult) {
       await supabase.from('screener_results').insert({
         user_id: authData.user.id,
-        score: data.score,
-        band: data.band,
-        answers: hasValidAnswers ? data.answers : null,
+        score: pending!.score,
+        band: pending!.band,
+        answers: hasValidAnswers ? pending!.answers : null,
       });
     }
+    cookieStore.delete('afia_pending_result');
     redirect('/pricing');
   }
 
-  // Email confirmation required — stash result in a short-lived cookie
-  if (hasValidResult) {
-    const cookieStore = await cookies();
-    cookieStore.set(
-      'afia_pending_result',
-      JSON.stringify({
-        score: data.score,
-        band: data.band,
-        answers: hasValidAnswers ? data.answers : null,
-      }),
-      { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60, path: '/' },
-    );
-  }
-
+  // Email confirmation required — cookie stays; auth/callback reads and clears it
   return { success: 'check-email' };
+}
+
+export async function setPendingScreenerResult(data: {
+  score: number;
+  band: string;
+  answers: number[];
+}): Promise<void> {
+  const hasValidResult =
+    Number.isInteger(data.score) &&
+    data.score >= 0 &&
+    data.score <= 42 &&
+    VALID_BANDS.includes(data.band as Band);
+  if (!hasValidResult) return;
+
+  const hasValidAnswers =
+    Array.isArray(data.answers) &&
+    data.answers.length === 14 &&
+    data.answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3);
+
+  const cookieStore = await cookies();
+  cookieStore.set(
+    'afia_pending_result',
+    JSON.stringify({
+      score: data.score,
+      band: data.band,
+      answers: hasValidAnswers ? data.answers : null,
+    }),
+    { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60, path: '/' },
+  );
+}
+
+export async function signOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect('/log-in');
 }
 
 export async function logIn(data: {

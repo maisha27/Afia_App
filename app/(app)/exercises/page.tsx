@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { InViewReveal } from '@/components/motion';
 
 export const metadata: Metadata = { title: 'My plan — Afia' };
 
@@ -9,9 +10,12 @@ const WEEK_TITLES: Record<number, string> = {
   1: 'Understanding worry',
   2: 'Tools that help',
   3: 'Living with uncertainty',
+  4: 'Facing your fears',
+  5: 'Breaking the cycle',
+  6: 'Building resilience',
 };
 
-const TOTAL_PROGRAMME_DAYS = 21;
+const TOTAL_PROGRAMME_DAYS = 42;
 
 /* ─── Icons ─── */
 function CornerQuatrefoil() {
@@ -120,7 +124,7 @@ export default async function ExercisesPage() {
         <CornerQuatrefoil />
       </div>
 
-      <div className="relative max-w-[620px]">
+      <div className="relative">
         {/* ── Header ── */}
         <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
           Shaped from your check-in
@@ -148,7 +152,7 @@ export default async function ExercisesPage() {
           const weekTitle = WEEK_TITLES[weekNum] ?? `Week ${weekNum}`;
 
           return (
-            <div key={weekNum}>
+            <InViewReveal key={weekNum} y={12} duration={0.55}>
               <div className="flex items-center gap-3 mb-[18px]">
                 <span className="font-heading text-[13px] font-semibold tracking-[0.08em] uppercase text-[#2F5049]">
                   Week {weekNum} · {weekTitle}
@@ -227,7 +231,7 @@ export default async function ExercisesPage() {
                           <div className="font-heading text-[17px] font-semibold text-[#2F5049] mt-[3px]">
                             {exercise.title}
                           </div>
-                          <div className="text-[12.5px] text-[#8A928D] mt-[3px]">
+                          <div className="text-[12.5px] text-[#6E7672] mt-[3px]">
                             {exercise.duration_minutes} min · reading + writing
                           </div>
                         </div>
@@ -259,7 +263,7 @@ export default async function ExercisesPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </InViewReveal>
           );
         })}
 
@@ -276,7 +280,7 @@ export default async function ExercisesPage() {
                 Unlocks Day {unlockDay}
               </span>
             </div>
-            <div className="bg-[#FBF9F5] border border-dashed border-[#E0DACF] rounded-[14px] px-[22px] py-[18px] text-[13.5px] leading-[1.55] text-[#8A928D] [text-wrap:pretty]">
+            <div className="bg-[#FBF9F5] border border-dashed border-[#E0DACF] rounded-[14px] px-[22px] py-[18px] text-[13.5px] leading-[1.55] text-[#6E7672] [text-wrap:pretty]">
               More exercises are on their way. These open once the current week feels settled — no
               need to rush ahead.
             </div>

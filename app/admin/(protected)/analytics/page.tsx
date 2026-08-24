@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -43,7 +43,7 @@ function MetricCard({
 }) {
   return (
     <div className="rounded-[14px] p-[22px]" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
-      <div className="text-[12.5px] font-semibold tracking-[0.02em] mb-3" style={{ color: '#8A928D' }}>
+      <div className="text-[12.5px] font-semibold tracking-[0.02em] mb-3" style={{ color: '#6E7672' }}>
         {label}
       </div>
       <div className="flex items-baseline gap-[10px] mb-[6px]">

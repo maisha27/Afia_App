@@ -5,6 +5,19 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
+async function requireAdmin(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 'Not authenticated.';
+  const { data: adminUser } = await supabase
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .single();
+  if (!adminUser) return 'Admin access required.';
+  return null;
+}
+
 export async function adminLogin(data: {
   email: string;
   password: string;
@@ -42,6 +55,8 @@ export async function setExercisePublished(
   id: string,
   published: boolean,
 ): Promise<{ error?: string }> {
+  const adminError = await requireAdmin();
+  if (adminError) return { error: adminError };
   const service = createServiceClient();
   const { error } = await service
     .from('exercises')
@@ -56,6 +71,8 @@ export async function setExercisePublished(
 }
 
 export async function deleteExercise(id: string): Promise<{ error?: string }> {
+  const adminError = await requireAdmin();
+  if (adminError) return { error: adminError };
   const service = createServiceClient();
   const { error } = await service.from('exercises').delete().eq('id', id);
   if (error) return { error: error.message };
@@ -90,6 +107,7 @@ export async function createExercise(data: {
   error?: string;
 }> {
   if (!data.title.trim()) return { error: 'Title is required.' };
+  if (data.title.trim().length > 100) return { error: 'Title must be 100 characters or fewer.' };
   if (!data.slug.trim()) return { error: 'Slug is required.' };
   if (!/^[a-z0-9-]+$/.test(data.slug.trim())) {
     return { error: 'Slug must only contain lowercase letters, numbers, and hyphens.' };
@@ -100,6 +118,12 @@ export async function createExercise(data: {
   if (data.duration_minutes < 1 || data.duration_minutes > 120) {
     return { error: 'Duration must be between 1 and 120 minutes.' };
   }
+  if ((data.description ?? '').length > 500) return { error: 'Description must be 500 characters or fewer.' };
+  if ((data.content ?? '').length > 10000) return { error: 'Content must be 10,000 characters or fewer.' };
+  if ((data.writing_prompt ?? '').length > 500) return { error: 'Writing prompt must be 500 characters or fewer.' };
+
+  const adminError = await requireAdmin();
+  if (adminError) return { error: adminError };
 
   const service = createServiceClient();
   const { data: created, error } = await service
@@ -140,9 +164,16 @@ export async function updateExercise(
   },
 ): Promise<{ error?: string }> {
   if (!data.title.trim()) return { error: 'Title is required.' };
+  if (data.title.trim().length > 100) return { error: 'Title must be 100 characters or fewer.' };
   if (data.duration_minutes < 1 || data.duration_minutes > 120) {
     return { error: 'Duration must be between 1 and 120 minutes.' };
   }
+  if ((data.description ?? '').length > 500) return { error: 'Description must be 500 characters or fewer.' };
+  if ((data.content ?? '').length > 10000) return { error: 'Content must be 10,000 characters or fewer.' };
+  if ((data.writing_prompt ?? '').length > 500) return { error: 'Writing prompt must be 500 characters or fewer.' };
+
+  const adminError = await requireAdmin();
+  if (adminError) return { error: adminError };
 
   const service = createServiceClient();
   const { error } = await service

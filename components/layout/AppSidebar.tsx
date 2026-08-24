@@ -4,28 +4,25 @@ import { AppSidebarNav } from './AppSidebarNav';
 
 interface AppSidebarProps {
   userEmail: string | undefined;
+  firstName?: string | null;
 }
 
-function getDisplayName(email: string | undefined): string {
+function getDisplayName(firstName: string | null | undefined, email: string | undefined): string {
+  if (firstName?.trim()) return firstName.trim();
   if (!email) return 'You';
   const local = email.split('@')[0];
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
-function getDisplayInitial(email: string | undefined): string {
+function getDisplayInitial(firstName: string | null | undefined, email: string | undefined): string {
+  if (firstName?.trim()) return firstName.trim().charAt(0).toUpperCase();
   if (!email) return '?';
   return email.charAt(0).toUpperCase();
 }
 
-/**
- * Left sidebar for all authenticated app screens (desktop).
- * 236px wide, white background, right border.
- * Server Component wrapper — passes derived display name to the
- * Client Component nav (which needs usePathname for active state).
- */
-export function AppSidebar({ userEmail }: AppSidebarProps) {
-  const displayName = getDisplayName(userEmail);
-  const displayInitial = getDisplayInitial(userEmail);
+export function AppSidebar({ userEmail, firstName }: AppSidebarProps) {
+  const displayName = getDisplayName(firstName, userEmail);
+  const displayInitial = getDisplayInitial(firstName, userEmail);
 
   return (
     <aside
@@ -40,15 +37,15 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
         <Image
           src="/Images/Official_Logo.png"
           alt="Afia"
-          width={28}
-          height={28}
-          className="h-[28px] w-auto object-contain"
+          width={45}
+          height={45}
+          className="h-[45px] w-auto object-contain"
         />
         <div className="flex flex-col leading-none gap-[3px]">
-          <span className="font-heading text-[18px] font-semibold text-primary tracking-[-0.01em]">
+          <span className="font-heading text-[19px] font-semibold text-primary tracking-[-0.01em]">
             afia
           </span>
-          <span className="text-[7px] font-semibold tracking-[0.22em] uppercase text-[#6B827A]">
+          <span className="text-[7px] font-semibold tracking-[0.22em] uppercase text-[#577169]">
             calm in mind
           </span>
         </div>

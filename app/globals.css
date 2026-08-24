@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -152,7 +152,7 @@
   --afia-text-1: #3A403C;
   --afia-text-2: #565D5A;
   --afia-text-3: #767D79;
-  --afia-text-4: #8A928D;
+  --afia-text-4: #6E7672;
 
   /* Severity band */
   --afia-severity-low: #B7D8C6;
@@ -379,7 +379,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-up {
-  animation: afiaFadeUp var(--duration-calm, 500ms) var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+  animation: afiaFadeUp var(--duration-calm, 700ms) var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
 }
 
 /* afiaCountUp helper: used with a CSS animation-delay stagger on digits */
@@ -389,6 +389,29 @@
 }
 .animate-slide-up {
   animation: afiaSlideUp var(--duration-calm, 500ms) var(--ease-calm, cubic-bezier(0.25, 0, 0.15, 1)) both;
+}
+
+/* ── CalmRings — pure-CSS animated rings (replaces Three.js MagicRings) ─── */
+.calm-rings {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.calm-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  border: 1.5px solid #9FC9BC;
+  animation: calmRingExpand 3.5s ease-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes calmRingExpand {
+  0%   { transform: translate(-50%, -50%) scale(0.4);  opacity: 0;    border-color: #9FC9BC; }
+  5%   { opacity: 0.85; }
+  100% { transform: translate(-50%, -50%) scale(4.55); opacity: 0;    border-color: #C8E2DC; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -405,7 +428,8 @@
   .animate-slow-rotate,
   .animate-fade-up,
   .animate-slide-up,
-  .animate-scale-in {
+  .animate-scale-in,
+  .calm-ring {
     animation: none;
   }
 }

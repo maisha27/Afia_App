@@ -13,7 +13,7 @@ interface SiteHeaderProps {
 export function SiteHeader({ variant = 'screener' }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-[#EFEAE2] bg-background">
-      <div className="flex items-center justify-between px-6 py-5 sm:px-11">
+      <div className="flex items-center justify-between px-6 py-3 sm:px-11">
         <Link
           href="/"
           className="inline-flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
@@ -21,16 +21,16 @@ export function SiteHeader({ variant = 'screener' }: SiteHeaderProps) {
           <Image
             src="/Images/Official_Logo.png"
             alt="Afia"
-            width={40}
-            height={40}
-            className="h-[40px] w-auto object-contain"
+            width={45}
+            height={45}
+            className="h-[45px] w-auto object-contain"
             priority
           />
           <div className="flex flex-col leading-none gap-[3px]">
-            <span className="font-heading text-[22px] font-semibold text-primary tracking-[-0.01em]">
+            <span className="font-heading text-[24px] font-semibold text-primary tracking-[-0.01em]">
               afia
             </span>
-            <span className="text-[8px] font-semibold tracking-[0.22em] uppercase text-[#6B827A]">
+            <span className="text-[8px] font-semibold tracking-[0.22em] uppercase text-[#577169]">
               calm in mind
             </span>
           </div>

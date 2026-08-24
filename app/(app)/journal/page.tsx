@@ -33,7 +33,7 @@ export default async function JournalPage() {
 
   return (
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
-      <div className="relative max-w-[680px]">
+      <div className="relative">
         {/* ── Header ── */}
         <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
           <div className="flex items-center gap-3 mb-2">

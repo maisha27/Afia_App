@@ -146,6 +146,48 @@ function FieldTextarea({
   );
 }
 
+function GuideBox() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-[18px] rounded-[12px] border" style={{ background: '#F0F7F5', borderColor: '#C9E0DB' }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-[16px] py-[12px] text-left"
+      >
+        <span className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: '#276358' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#276358" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
+          </svg>
+          How to add Week 2 / 3 content
+        </span>
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A9B8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          style={{ transform: open ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-[16px] pb-[16px] text-[13px] leading-[1.6]" style={{ color: '#3A5C55' }}>
+          <ol className="list-decimal list-inside space-y-[6px] mb-[10px]">
+            <li>Click <strong>New exercise</strong> (top right).</li>
+            <li>Set <strong>Week</strong> to <code className="bg-white/60 px-1 rounded">2</code> (or 3), <strong>Day</strong> to the day within that week (1–7), and <strong>Sort order</strong> to a unique ascending number (e.g. Week 2 days use 8–14, Week 3 use 15–21).</li>
+            <li>Fill in the <strong>Title</strong> — the slug auto-generates. You can edit it manually.</li>
+            <li>Add <strong>Reading content</strong> (the main lesson text) and an optional <strong>Writing prompt</strong>.</li>
+            <li>Click <strong>Create exercise</strong> — it saves as <em>Draft</em> so users can&apos;t see it yet.</li>
+            <li>When you&apos;re happy with it, click the <strong>Draft</strong> badge on the exercise to toggle it to <strong>Published</strong>.</li>
+          </ol>
+          <div className="rounded-[8px] px-[12px] py-[9px] text-[12.5px]" style={{ background: '#E3F1EE', color: '#276358' }}>
+            <strong>Sort order tip:</strong> Week 1 = 1–7, Week 2 = 8–14, Week 3 = 15–21, Week 4 = 22–28, and so on. Keep them consecutive so the progress bar stays accurate.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ContentClient({ exercises: initialExercises }: Props) {
   const [exercises, setExercises] = useState<AdminExercise[]>(initialExercises);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -336,7 +378,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
               type="button"
               onClick={() => setTab('exercises')}
               className="text-[13.5px] pb-[8px] transition-colors"
-              style={tab === 'exercises' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#8A928D' }}
+              style={tab === 'exercises' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#5F6863' }}
             >
               Exercises
             </button>
@@ -344,7 +386,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
               type="button"
               onClick={() => setTab('daily')}
               className="text-[13.5px] pb-[8px] transition-colors"
-              style={tab === 'daily' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#8A928D' }}
+              style={tab === 'daily' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#5F6863' }}
             >
               Daily practices
             </button>
@@ -365,6 +407,8 @@ export function ContentClient({ exercises: initialExercises }: Props) {
           New exercise
         </button>
       </div>
+
+      {tab === 'exercises' && <GuideBox />}
 
       <div className="flex gap-[22px] items-start">
         {/* Exercise list */}
@@ -400,7 +444,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                   <div className="text-[14px] font-semibold mb-[2px] truncate" style={{ color: isActive ? '#26302D' : '#3A403C' }}>
                     {item.title}
                   </div>
-                  <div className="text-[12px]" style={{ color: '#8A928D' }}>
+                  <div className="text-[12px]" style={{ color: '#5F6863' }}>
                     W{item.week_number} D{item.day_number} &middot; {item.duration_minutes} min
                   </div>
                 </div>
@@ -505,7 +549,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 onClick={exitCreateMode}
                 disabled={isPending}
                 className="text-[13px] hover:opacity-75 transition-opacity disabled:opacity-40"
-                style={{ color: '#8A928D' }}
+                style={{ color: '#5F6863' }}
               >
                 Cancel
               </button>
@@ -522,7 +566,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                   style={
                     !isPending && createFields.title.trim() && createFields.slug.trim()
                       ? { background: '#2F7A6D', color: '#EAF3EF' }
-                      : { background: '#EDF0EE', color: '#8A928D' }
+                      : { background: '#EDF0EE', color: '#5F6863' }
                   }
                 >
                   {isPending ? 'Creating…' : 'Create exercise'}
@@ -541,7 +585,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 W{ex.week_number} · Day {ex.day_number} · Sort {ex.sort_order}
               </div>
               <div className="flex items-center gap-[8px]">
-                <span className="text-[12px]" style={{ color: '#8A928D' }}>Status</span>
+                <span className="text-[12px]" style={{ color: '#5F6863' }}>Status</span>
                 <button
                   type="button"
                   onClick={handleTogglePublished}
@@ -652,7 +696,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                     type="button"
                     onClick={() => setConfirmDelete(false)}
                     className="text-[13px] hover:opacity-75 transition-opacity"
-                    style={{ color: '#8A928D' }}
+                    style={{ color: '#5F6863' }}
                   >
                     Cancel
                   </button>
@@ -683,7 +727,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                   style={
                     isDirty && !isPending
                       ? { background: '#2F7A6D', color: '#EAF3EF' }
-                      : { background: '#EDF0EE', color: '#8A928D' }
+                      : { background: '#EDF0EE', color: '#5F6863' }
                   }
                 >
                   {isPending ? 'Saving…' : 'Save changes'}

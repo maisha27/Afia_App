@@ -11,7 +11,7 @@ export default function CrisisSupportPage() {
   return (
     <div className="min-h-screen bg-[#FBF7F4]">
       {/* Minimal header */}
-      <header className="flex items-center justify-between bg-white border-b border-[#F0E6E2] px-8 py-4">
+      <header className="flex items-center justify-between bg-white border-b border-[#F0E6E2] px-4 sm:px-8 py-4">
         <Link
           href="/"
           className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
@@ -19,12 +19,12 @@ export default function CrisisSupportPage() {
           <Image
             src="/Images/Official_Logo.png"
             alt="Afia"
-            width={26}
-            height={26}
-            className="h-[26px] w-auto object-contain"
+            width={34}
+            height={34}
+            className="h-[34px] w-auto object-contain"
             priority
           />
-          <span className="font-heading text-[16px] font-semibold text-primary tracking-[-0.01em]">
+          <span className="font-heading text-[20px] font-semibold text-primary tracking-[-0.01em]">
             afia
           </span>
         </Link>
@@ -49,7 +49,7 @@ export default function CrisisSupportPage() {
         </Link>
       </header>
 
-      <main className="max-w-[640px] mx-auto px-8 py-[44px] pb-[52px]">
+      <main className="max-w-[640px] mx-auto px-4 sm:px-8 py-[44px] pb-[52px]">
         {/* Reassurance header */}
         <div className="text-center mb-[34px]">
           <h1 className="font-heading text-[30px] leading-[1.2] font-semibold tracking-[-0.02em] mb-2.5 [text-wrap:pretty]">
@@ -130,7 +130,7 @@ export default function CrisisSupportPage() {
           </p>
           <div className="grid grid-cols-2 gap-3.5">
             <Link
-              href="/calm"
+              href="/calm/breathe"
               className="flex items-center gap-3.5 rounded-[14px] border border-[#EFE6E1] bg-white px-5 py-[18px] hover:border-[#D8EBE5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex-shrink-0 w-10 h-10 rounded-[11px] bg-tint flex items-center justify-center text-primary">

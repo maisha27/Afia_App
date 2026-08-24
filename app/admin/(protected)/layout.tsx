@@ -17,7 +17,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
     .single();
 
   if (!adminUser) {
-    redirect('/');
+    redirect('/admin/login');
   }
 
   return <>{children}</>;

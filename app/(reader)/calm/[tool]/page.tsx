@@ -28,9 +28,11 @@ function breathCycles(
 }
 
 /* ─── Icons (serializable JSX — safe to pass as RSC props) ─── */
+const ICON_COLOR = '#EAF3EF';
+
 function OceanIcon() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgb(159,201,188)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ICON_COLOR} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0" />
       <path d="M2 17c2-4 4-4 6 0s4 4 6 0 4-4 6 0" />
     </svg>
@@ -39,7 +41,7 @@ function OceanIcon() {
 
 function HandIcon() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgb(208,167,128)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ICON_COLOR} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M6 11V6a2 2 0 0 1 4 0v4" />
       <path d="M10 10V4.5a2 2 0 0 1 4 0V10" />
       <path d="M14 10V6a2 2 0 0 1 4 0v7a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.2-3L4 14a2 2 0 0 1 3-2.6" />
@@ -49,7 +51,7 @@ function HandIcon() {
 
 function BodyIcon() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgb(208,167,128)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ICON_COLOR} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="5" r="2.4" />
       <path d="M12 7.5v7M8.5 10.5 12 12l3.5-1.5M9.5 21l2.5-6.5L14.5 21" />
     </svg>
@@ -58,7 +60,7 @@ function BodyIcon() {
 
 function HeartIcon() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgb(180,170,220)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill={ICON_COLOR} stroke="none" aria-hidden="true">
       <path d="M12 20s-7-4.5-7-9.5A3.8 3.8 0 0 1 12 7a3.8 3.8 0 0 1 7 3.5C19 15.5 12 20 12 20Z" />
     </svg>
   );
@@ -66,7 +68,7 @@ function HeartIcon() {
 
 function HomeIcon() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgb(180,170,220)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ICON_COLOR} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M3 11.5 12 4l9 7.5" />
       <path d="M5 10v10h14V10" />
       <path d="M10 20v-5h4v5" />
@@ -98,7 +100,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'Well done.',
     completionDetail: 'Twenty rounds of ocean breathing — five minutes of slow, intentional calm. Your nervous system notices every exhale.',
     icon: <OceanIcon />,
-    centerVisual: <OceanWaveAnimation accentRgb="159,201,188" />,
+    centerVisual: <OceanWaveAnimation />,
   },
 
   grounding: {
@@ -137,7 +139,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'You did it.',
     completionDetail: "Three minutes with all five senses. Grounding moves you out of your head and back into the room you're actually in.",
     icon: <HandIcon />,
-    centerVisual: <GroundingAnimation accentRgb="208,167,128" />,
+    centerVisual: <GroundingAnimation />,
   },
 
   'body-scan': {
@@ -201,7 +203,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'Well done.',
     completionDetail: 'Eight minutes travelling through your whole body. Awareness is the first step to softening.',
     icon: <BodyIcon />,
-    centerVisual: <BodyScanAnimation accentRgb="208,167,128" />,
+    centerVisual: <BodyScanAnimation />,
   },
 
   'loving-kindness': {
@@ -235,7 +237,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'That was generous.',
     completionDetail: 'Six minutes of compassion — including for yourself. That is not always easy, and you did it.',
     icon: <HeartIcon />,
-    centerVisual: <LovingKindnessAnimation accentRgb="180,170,220" />,
+    centerVisual: <LovingKindnessAnimation />,
   },
 
   'safe-place': {
@@ -274,7 +276,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     completionMessage: 'That place is yours.',
     completionDetail: 'Five minutes in somewhere safe. You can return here whenever you need it — it takes less than a second to arrive.',
     icon: <HomeIcon />,
-    centerVisual: <SafePlaceAnimation accentRgb="180,170,220" />,
+    centerVisual: <SafePlaceAnimation />,
   },
 };
 

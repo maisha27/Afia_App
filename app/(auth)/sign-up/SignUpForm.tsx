@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useTransition, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,7 @@ import { signUp } from '@/lib/actions/auth';
 
 const schema = z
   .object({
+    firstName: z.string().min(1, 'Please enter your first name.').max(50, 'Name is too long.'),
     email: z.string().email('Please enter a valid email address.'),
     password: z.string().min(8, 'Password must be at least 8 characters.'),
     confirmPassword: z.string(),
@@ -67,7 +68,7 @@ function ReflectionPreview() {
           <span className="font-heading text-[12px] font-semibold uppercase tracking-[0.08em] text-[#B26A44]">
             Moderate
           </span>
-          <span className="text-[12px] text-[#8A928D]">· 28 / 42</span>
+          <span className="text-[12px] text-[#6E7672]">· 28 / 42</span>
         </div>
         <div
           className="relative h-[6px] rounded-full mb-5 overflow-visible"
@@ -99,7 +100,7 @@ function ReflectionPreview() {
           >
             <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
           </svg>
-          <span className="text-[12px] text-[#8A928D]">Reflection saved</span>
+          <span className="text-[12px] text-[#6E7672]">Reflection saved</span>
         </div>
       </div>
     </div>
@@ -155,25 +156,15 @@ export function SignUpForm() {
 
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
-      const pendingResult =
-        typeof window !== 'undefined'
-          ? (JSON.parse(
-              sessionStorage.getItem('afia_pending_result') ?? 'null',
-            ) as { score: number; band: string; answers?: number[] } | null)
-          : null;
-
       const result = await signUp({
+        firstName: values.firstName,
         email: values.email,
         password: values.password,
-        score: pendingResult?.score ?? null,
-        band: pendingResult?.band ?? null,
-        answers: pendingResult?.answers ?? null,
       });
 
       if (result && 'error' in result) {
         setFormMessage(result.error);
       } else if (result && 'success' in result) {
-        sessionStorage.removeItem('afia_pending_result');
         setEmailSent(true);
       }
     });
@@ -311,11 +302,24 @@ export function SignUpForm() {
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1 h-px bg-[#E7E2DA]" />
-              <span className="text-[12.5px] text-[#8A928D]">or use email</span>
+              <span className="text-[12.5px] text-[#6E7672]">or use email</span>
               <div className="flex-1 h-px bg-[#E7E2DA]" />
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+              <Field label="First name" htmlFor="firstName" error={errors.firstName?.message}>
+                <input
+                  id="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  placeholder="What should we call you?"
+                  aria-invalid={!!errors.firstName}
+                  aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                  className={inputCls(!!errors.firstName)}
+                  {...register('firstName')}
+                />
+              </Field>
+
               <Field label="Email address" htmlFor="email" error={errors.email?.message}>
                 <input
                   id="email"
@@ -344,7 +348,7 @@ export function SignUpForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((p) => !p)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? 'Hide' : 'Show'}
@@ -371,7 +375,7 @@ export function SignUpForm() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm((p) => !p)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#8A928D] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
                     aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                   >
                     {showConfirm ? 'Hide' : 'Show'}
@@ -397,7 +401,7 @@ export function SignUpForm() {
               </button>
             </form>
 
-            <p className="mt-3 text-center text-[12px] text-[#8A928D] leading-[1.55]">
+            <p className="mt-3 text-center text-[12px] text-[#6E7672] leading-[1.55]">
               By creating an account you agree to our{' '}
               <Link
                 href="/terms"
@@ -415,7 +419,7 @@ export function SignUpForm() {
               .
             </p>
 
-            <p className="mt-3.5 text-center text-[13.5px] text-[#8A928D]">
+            <p className="mt-3.5 text-center text-[13.5px] text-[#6E7672]">
               Already have a space?{' '}
               <Link
                 href="/log-in"

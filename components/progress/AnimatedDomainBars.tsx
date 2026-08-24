@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import { useInView, useReducedMotion } from 'motion/react';
@@ -65,7 +65,7 @@ export function AnimatedDomainBars({
               />
             </div>
 
-            <span className="text-[12.5px] font-semibold text-[#8A928D] whitespace-nowrap">
+            <span className="text-[12.5px] font-semibold text-[#6E7672] whitespace-nowrap">
               {domain.fromLabel ? (
                 <>
                   {domain.fromLabel} <span className="text-[#C9C3B8]">→</span>{' '}
@@ -80,7 +80,7 @@ export function AnimatedDomainBars({
       })}
 
       {!hasMultiple && (
-        <p className="text-[12.5px] text-[#8A928D] pt-1">
+        <p className="text-[12.5px] text-[#6E7672] pt-1">
           After your next check-in you&rsquo;ll see before and after for each area.
         </p>
       )}

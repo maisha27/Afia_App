@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 
 export function SiteFooter() {
@@ -15,15 +15,15 @@ export function SiteFooter() {
               <Image
                 src="/Images/Official_Logo.png"
                 alt="Afia"
-                width={28}
-                height={28}
-                className="h-[28px] w-auto object-contain"
+                width={45}
+                height={45}
+                className="h-[45px] w-auto object-contain"
               />
               <div className="flex flex-col leading-none gap-[3px]">
-                <span className="font-heading text-[19px] font-semibold text-primary tracking-[-0.01em]">
+                <span className="font-heading text-[21px] font-semibold text-primary tracking-[-0.01em]">
                   afia
                 </span>
-                <span className="text-[7.5px] font-semibold tracking-[0.22em] uppercase text-[#6B827A]">
+                <span className="text-[7.5px] font-semibold tracking-[0.22em] uppercase text-[#577169]">
                   calm in mind
                 </span>
               </div>

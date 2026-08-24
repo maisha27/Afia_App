@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
@@ -281,7 +281,7 @@ export default function SubscriptionClient({
                     </span>
                   )}
                 </div>
-                <div className="text-[13px] text-[#8A928D] mt-[5px]">{dateText}</div>
+                <div className="text-[13px] text-[#6E7672] mt-[5px]">{dateText}</div>
               </div>
             </div>
 
@@ -290,7 +290,7 @@ export default function SubscriptionClient({
               <div className="flex items-center justify-between px-[22px] py-[18px] border-b border-[#F0EBE3]">
                 <div>
                   <div className="text-[14.5px] font-semibold text-[#3A403C]">Next payment</div>
-                  <div className="text-[13px] text-[#8A928D] mt-0.5">
+                  <div className="text-[13px] text-[#6E7672] mt-0.5">
                     {currentPeriodEnd}
                     {isTrialing ? ' · your trial ends' : ''}
                   </div>
@@ -312,11 +312,11 @@ export default function SubscriptionClient({
                     <div className="text-[14.5px] font-semibold text-[#3A403C]">
                       {cardBrand} ending {card.last4}
                     </div>
-                    <div className="text-[13px] text-[#8A928D] mt-0.5">{expStr}</div>
+                    <div className="text-[13px] text-[#6E7672] mt-0.5">{expStr}</div>
                   </div>
                 </div>
               ) : (
-                <div className="text-[14px] text-[#8A928D]">No payment method on file</div>
+                <div className="text-[14px] text-[#6E7672]">No payment method on file</div>
               )}
               <button
                 type="button"
@@ -365,7 +365,7 @@ export default function SubscriptionClient({
                     <span className="font-heading text-[24px] font-semibold text-[#262B29]">
                       £69.99
                     </span>
-                    <span className="text-[13px] text-[#8A928D]">/ year</span>
+                    <span className="text-[13px] text-[#6E7672]">/ year</span>
                   </div>
                 </div>
 
@@ -400,7 +400,7 @@ export default function SubscriptionClient({
                     <span className="font-heading text-[24px] font-semibold text-[#262B29]">
                       £12.99
                     </span>
-                    <span className="text-[13px] text-[#8A928D]">/ month</span>
+                    <span className="text-[13px] text-[#6E7672]">/ month</span>
                   </div>
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function SubscriptionClient({
               </span>
             </div>
             {invoices.length === 0 ? (
-              <div className="px-[22px] py-5 text-[14px] text-[#8A928D]">No invoices yet.</div>
+              <div className="px-[22px] py-5 text-[14px] text-[#6E7672]">No invoices yet.</div>
             ) : (
               invoices.map((inv) => (
                 <div
@@ -435,7 +435,7 @@ export default function SubscriptionClient({
                 >
                   <div>
                     <div className="text-[14px] font-semibold text-[#3A403C]">{inv.date}</div>
-                    <div className="text-[13px] text-[#8A928D] mt-0.5">{inv.description}</div>
+                    <div className="text-[13px] text-[#6E7672] mt-0.5">{inv.description}</div>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-[14px] font-semibold text-[#3A403C]">

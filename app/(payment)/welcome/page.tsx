@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { createClient } from '@/lib/supabase/server';
@@ -204,14 +204,14 @@ export default async function WelcomePage() {
               </svg>
             </div>
             <div className="flex-1">
-              <div className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#8A928D] mb-0.5">
+              <div className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#6E7672] mb-0.5">
                 Your first gentle step
               </div>
               <div className="text-[15.5px] font-semibold text-[#3A403C] leading-[1.35]">
                 A 3-minute grounding breath
               </div>
             </div>
-            <span className="text-[12.5px] text-[#8A928D] flex-shrink-0">3 min</span>
+            <span className="text-[12.5px] text-[#6E7672] flex-shrink-0">3 min</span>
           </div>
 
           {/* CTAs */}
