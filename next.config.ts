@@ -1,9 +1,4 @@
 import type { NextConfig } from "next";
-import bundleAnalyzer from "@next/bundle-analyzer";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 const securityHeaders = [
   // Prevent browsers prefetching DNS for external domains
@@ -58,4 +53,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default nextConfig;

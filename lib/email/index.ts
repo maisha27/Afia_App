@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = () => new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'Afia <info@afia.me>';
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
 
@@ -61,7 +61,7 @@ export async function sendDailyNudge(to: string, firstName: string): Promise<voi
     </p>
     ${btn('Continue your plan', `${SITE}/home`)}
   `;
-  await resend.emails.send({ from: FROM, to, subject: `Your plan is here when you're ready, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `Your plan is here when you're ready, ${firstName || 'there'}`, html: shell(body) });
 }
 
 /* ─── Weekly check-in ─── */
@@ -78,7 +78,7 @@ export async function sendWeeklyCheckin(to: string, firstName: string): Promise<
     </p>
     ${btn('Open my journal', `${SITE}/journal`)}
   `;
-  await resend.emails.send({ from: FROM, to, subject: `A moment to check in, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `A moment to check in, ${firstName || 'there'}`, html: shell(body) });
 }
 
 /* ─── Encouragement ─── */
@@ -111,5 +111,5 @@ export async function sendEncouragement(to: string, firstName: string): Promise<
     </p>
     ${btn('Open Afia', `${SITE}/home`)}
   `;
-  await resend.emails.send({ from: FROM, to, subject: `A thought for you, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `A thought for you, ${firstName || 'there'}`, html: shell(body) });
 }
