@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { MobileNav } from './MobileNav';
 
 interface SiteHeaderProps {
   /**
@@ -37,10 +38,10 @@ export function SiteHeader({ variant = 'screener' }: SiteHeaderProps) {
         </Link>
 
         {variant === 'landing' ? (
-          <nav aria-label="Header navigation" className="flex items-center gap-7">
+          <nav aria-label="Header navigation" className="flex items-center gap-3 md:gap-7">
             <div className="hidden md:flex items-center gap-7">
               <a
-                href="#approach"
+                href="#how-it-helps"
                 className="text-[14px] text-text-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               >
                 How it helps
@@ -70,6 +71,7 @@ export function SiteHeader({ variant = 'screener' }: SiteHeaderProps) {
             >
               Take the free test
             </Link>
+            <MobileNav />
           </nav>
         ) : (
           <nav aria-label="Header navigation" className="flex items-center gap-6">

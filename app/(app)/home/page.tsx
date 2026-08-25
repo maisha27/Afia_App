@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PlanRing } from '@/components/home/PlanRing';
 import { InViewReveal, StaggerList, StaggerItem } from '@/components/motion';
 
-export const metadata: Metadata = { title: 'Home — Afia' };
+export const metadata: Metadata = { title: 'Home' };
 
 /* ─── Helpers ─── */
 function getGreeting(): string {

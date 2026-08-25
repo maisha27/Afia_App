@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { JournalClient, type JournalEntry } from './JournalClient';
 
-export const metadata: Metadata = { title: 'Your journal — Afia' };
+export const metadata: Metadata = { title: 'Your journal' };
 
 const DAILY_PROMPTS: Record<number, string> = {
   0: 'How was your week? What felt hard, and what felt okay?',

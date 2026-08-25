@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = { title: "You're all set — Afia" };
+export const metadata: Metadata = { title: "You're all set" };
 
 /* ─── Sparkle 4-pointed star ─── */
 const STAR_PATH = 'M12 2c.5 4.4 3.1 7 7.5 7.5C15.1 10 12.5 12.6 12 17c-.5-4.4-3.1-7-7.5-7.5C8.9 9 11.5 6.4 12 2Z';

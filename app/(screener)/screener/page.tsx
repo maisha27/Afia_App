@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 
-export const metadata: Metadata = { title: 'Health Anxiety Screener — Afia' };
+export const metadata: Metadata = {
+  title: 'Health Anxiety Screener',
+  description: 'A free, private 14-question check-in to help you understand the patterns behind health anxiety. No signup needed.',
+};
 
 const HOW_IT_WORKS = [
   { label: 'Answer at your own pace', detail: 'One question at a time, nothing timed.' },

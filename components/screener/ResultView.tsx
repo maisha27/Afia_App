@@ -121,7 +121,7 @@ const EASE_SPRING: [number, number, number, number] = [0.34, 1.0, 0.64, 1.0];
 // ── ResultView ───────────────────────────────────────────────────────────────
 
 export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
-  const { isComplete, getResult, answers } = useScreener();
+  const { isComplete, getResult, answers, hydrated } = useScreener();
   const router = useRouter();
 
   const [result, setResult] = useState<ScoreResult | null>(null);
@@ -135,6 +135,7 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
   // ── Drive the loading counter ──────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return; // wait for sessionStorage to restore before deciding to redirect
     if (!isComplete) {
       router.replace('/screener');
       return;
@@ -168,7 +169,7 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [isComplete, getResult, router]);
+  }, [hydrated, isComplete, getResult, router]);
 
   // ── Animate severity thumb + insight bars once result arrives ──────────────
   useEffect(() => {

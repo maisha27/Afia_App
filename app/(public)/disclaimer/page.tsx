@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 
 export const metadata: Metadata = {
-  title: 'Medical Disclaimer — Afia',
-  description: 'What Afia is, and what it is not.',
+  title: 'Medical Disclaimer',
+  description: 'Afia is a self-help tool, not a medical service. Read what Afia is and is not before using the platform.',
 };
 
 export default function DisclaimerPage() {

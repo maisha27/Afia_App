@@ -18,9 +18,24 @@ const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://afia-app.vercel.app"
+  ),
   title: { default: "Afia", template: "%s | Afia" },
   description:
     "A self-help tool for health anxiety, grounded in CBT and ERP.",
+  openGraph: {
+    siteName: "Afia",
+    type: "website",
+    images: [{ url: "/Images/icon-512.png", width: 512, height: 512, alt: "Afia" }],
+  },
+  icons: {
+    icon: [
+      { url: "/Images/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/Images/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/Images/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -44,7 +59,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="apple-touch-icon" sizes="192x192" href="/Images/icon-192.png" />
         {/* Blocking script: apply dark class before first paint to avoid flash */}
         <script
           dangerouslySetInnerHTML={{

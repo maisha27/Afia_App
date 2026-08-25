@@ -91,7 +91,7 @@ export function InViewReveal({
     <motion.div
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px' }}
+      viewport={{ once: true, amount: 0 }}
       transition={{
         duration: reduced ? 0 : duration,
         delay: reduced ? 0 : delay,

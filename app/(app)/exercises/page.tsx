@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { InViewReveal } from '@/components/motion';
 
-export const metadata: Metadata = { title: 'My plan — Afia' };
+export const metadata: Metadata = { title: 'My plan' };
 
 const WEEK_TITLES: Record<number, string> = {
   1: 'Understanding worry',

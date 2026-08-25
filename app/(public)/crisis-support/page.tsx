@@ -3,8 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Crisis Support — Afia',
-  description: 'Real, immediate help for when things feel like too much.',
+  title: 'Crisis Support',
+  description: 'Real, immediate help for when things feel like too much. UK crisis lines, grounding exercises, and Muslim-specific support.',
 };
 
 export default function CrisisSupportPage() {
@@ -111,6 +111,10 @@ export default function CrisisSupportPage() {
             </svg>
           </a>
         </div>
+
+        <p className="text-center text-[12px] text-text-4 -mt-1 mb-3">
+          The text line opens your phone&rsquo;s messaging app &mdash; use your mobile to send.
+        </p>
 
         <p className="text-center text-[14px] text-text-4 mb-[34px]">
           If you're in immediate danger, please call{' '}

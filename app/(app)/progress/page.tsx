@@ -6,7 +6,7 @@ import { ProgressChart } from '@/components/progress/ProgressChart';
 import { AnimatedDomainBars } from '@/components/progress/AnimatedDomainBars';
 import { AnimatedStatTiles } from '@/components/progress/AnimatedStatTiles';
 
-export const metadata: Metadata = { title: 'Your progress — Afia' };
+export const metadata: Metadata = { title: 'Your progress' };
 
 /* ─── Domain groupings ─── */
 const DOMAIN_GROUPS = [

@@ -33,7 +33,7 @@ export function StaggerList({
         variants={containerVariants}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, margin: '0px 0px' }}
+        viewport={{ once: true, amount: 0 }}
         className={className}
       >
         {children}

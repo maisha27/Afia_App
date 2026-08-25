@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { PricingCard } from './PricingCard';
 
-export const metadata: Metadata = { title: 'Your plan — Afia' };
+export const metadata: Metadata = { title: 'Your plan' };
 
 /* ─── Decorative quatrefoil (design petal path, 400×400 viewbox) ─── */
 function CornerQuatrefoil() {
@@ -62,7 +63,30 @@ function Feature({ title, body }: { title: string; body: string }) {
   );
 }
 
-export default function PlanPage() {
+const BAND_LABEL: Record<string, string> = {
+  Low: 'minimal',
+  Mild: 'mild',
+  Moderate: 'moderate',
+  High: 'significant',
+  'Very High': 'high',
+};
+
+export default async function PlanPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let bandLabel: string | null = null;
+  if (user) {
+    const { data: result } = await supabase
+      .from('screener_results')
+      .select('band')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    bandLabel = result?.band ? (BAND_LABEL[result.band] ?? null) : null;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <SiteHeader variant="screener" />
@@ -96,8 +120,11 @@ export default function PlanPage() {
               A gentle way through, built around your check-in.
             </h1>
             <p className="text-[16px] leading-[1.62] text-[#565D5A] mb-7 max-w-[440px] [text-wrap:pretty]">
-              We&rsquo;ve shaped these around the moderate signs of anxiety you told us about. Open
-              them whenever you&rsquo;re ready — there&rsquo;s no rush and no right pace.
+              {bandLabel
+                ? <>We&rsquo;ve shaped these around the {bandLabel} signs of anxiety you told us about.</>
+                : <>We&rsquo;ve shaped these around what Afia knows so far.</>
+              }{' '}
+              Open them whenever you&rsquo;re ready &mdash; there&rsquo;s no rush and no right pace.
             </p>
 
             <div className="flex flex-col gap-4 max-w-[440px]">
@@ -124,7 +151,7 @@ export default function PlanPage() {
 
         {/* Maybe later link */}
         <div className="relative mt-[34px] text-center">
-          <a href="/home" className="text-[14.5px] text-[#767D79] font-medium hover:text-[#565D5A] transition-colors">
+          <a href="/" className="text-[14.5px] text-[#767D79] font-medium hover:text-[#565D5A] transition-colors">
             Maybe later — keep my free reflection
           </a>
         </div>

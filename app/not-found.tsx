@@ -35,7 +35,7 @@ export default function NotFound() {
           It may have moved, or the link might have been mistyped. Either way, you haven&rsquo;t lost anything.
         </p>
         <Link
-          href="/home"
+          href="/"
           className="inline-flex items-center gap-2.5 rounded-[12px] bg-primary px-7 py-4 font-heading text-[15.5px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Go to home

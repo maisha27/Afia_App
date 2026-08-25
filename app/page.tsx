@@ -8,8 +8,16 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { InViewReveal, StaggerList, StaggerItem } from '@/components/motion';
 
 export const metadata: Metadata = {
-  title: 'Afia — Calm in Mind',
-  description: 'A self-help tool for health anxiety, grounded in CBT and ERP.',
+  title: { absolute: 'Afia — Calm in Mind' },
+  description:
+    'Understand the patterns behind health anxiety with a free, private check-in — no signup needed. Built on CBT and ERP techniques.',
+  openGraph: {
+    title: 'Afia — Calm in Mind',
+    description:
+      'Understand the patterns behind health anxiety with a free, private check-in — no signup needed. Built on CBT and ERP techniques.',
+    url: '/',
+    type: 'website',
+  },
 };
 
 const APPROACH_CARDS = [
@@ -228,6 +236,7 @@ export default async function LandingPage() {
 
       {/* ── Founder band ────────────────────────────────────────── */}
       <section
+        id="how-it-helps"
         className="relative overflow-hidden py-[66px] px-5 sm:px-11"
         style={{ background: '#1B2320', color: '#F3F1EC' }}
       >
@@ -337,6 +346,29 @@ export default async function LandingPage() {
       </section>
 
       <SiteFooter />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebApplication',
+            name: 'Afia',
+            description:
+              'A self-help tool for health anxiety, grounded in CBT and ERP.',
+            url: 'https://afia-app.vercel.app',
+            applicationCategory: 'HealthApplication',
+            operatingSystem: 'All',
+            inLanguage: 'en-GB',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'GBP',
+              description: 'Free health anxiety check-in — no signup required',
+            },
+          }),
+        }}
+      />
     </div>
   );
 }

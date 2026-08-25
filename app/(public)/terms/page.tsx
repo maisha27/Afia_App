@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 
-export const metadata: Metadata = { title: 'Terms of Service — Afia' };
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description: 'Terms governing your use of Afia — a self-help platform for health anxiety. Subscription, cancellation, and acceptable use.',
+};
 
 export default function TermsPage() {
   return (
@@ -10,27 +13,6 @@ export default function TermsPage() {
       <SiteHeader variant="legal" />
 
       <main className="mx-auto w-full max-w-[680px] px-10 py-[44px] pb-[60px]">
-        {/* Draft notice banner */}
-        <div className="flex items-center gap-2.5 rounded-[10px] border border-[#EAD8B4] bg-[#FBF1E1] px-3.5 py-2.5 mb-7">
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#9A7526"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 8v4M12 16h.01" />
-          </svg>
-          <span className="text-[12.5px] text-[#8A5A17]">
-            Placeholder structure — final wording pending legal review.
-          </span>
-        </div>
-
         <h1 className="font-heading text-[32px] font-semibold tracking-[-0.025em] mb-1.5">
           Terms of service
         </h1>

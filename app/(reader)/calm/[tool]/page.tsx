@@ -288,7 +288,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { tool } = await params;
   const config = CONFIGS[tool as ToolId];
-  return { title: config ? `${config.title} — Afia` : 'Calm tool — Afia' };
+  return { title: config ? config.title : 'Calm tool' };
 }
 
 export default async function GuidedCalmPage({

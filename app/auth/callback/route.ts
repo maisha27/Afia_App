@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const tokenHash = searchParams.get('token_hash');
   const type = searchParams.get('type') as 'signup' | 'recovery' | 'email_change' | null;
-  const next = searchParams.get('next') ?? '/pricing';
+  const next = searchParams.get('next') ?? '/plan';
 
   const cookieStore = await cookies();
 

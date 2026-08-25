@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
 import { StaggerList, StaggerItem } from '@/components/motion';
 
-export const metadata: Metadata = { title: 'Calm tools — Afia' };
+export const metadata: Metadata = { title: 'Calm tools' };
 
 /* ─── Tool grid card ─── */
 interface ToolCardProps {
