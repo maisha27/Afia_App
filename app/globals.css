@@ -416,9 +416,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Content entry animations — show immediately instead of animating in */
+  .animate-fade-up,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-breath-cycle {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Decorative tool animations — stop moving, show at rest */
   .animate-breathe-dot,
   .animate-breathe,
-  .animate-breath-cycle,
   .animate-wave-bar,
   .animate-ocean-wave,
   .animate-scan-beam,
@@ -426,10 +436,12 @@
   .animate-pulse-ring,
   .animate-petal-reveal,
   .animate-petal-fade,
-  .animate-slow-rotate,
-  .animate-fade-up,
-  .animate-slide-up,
-  .animate-scale-in,
+  .animate-slow-rotate {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Expanding rings are invisible in their static state — keep hidden */
   .calm-ring {
     animation: none;
     opacity: 0;

@@ -68,7 +68,7 @@ export async function signUp(data: {
       });
     }
     cookieStore.delete('afia_pending_result');
-    redirect('/pricing');
+    redirect('/plan');
   }
 
   // Email confirmation required — cookie stays; auth/callback reads and clears it
@@ -129,13 +129,13 @@ export async function logIn(data: {
     .from('subscriptions')
     .select('status')
     .eq('user_id', authData.user.id)
-    .single();
+    .maybeSingle();
 
   if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
     redirect('/home');
   }
 
-  redirect('/pricing');
+  redirect('/plan');
 }
 
 export async function forgotPassword(data: {
