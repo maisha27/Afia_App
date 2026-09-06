@@ -61,11 +61,13 @@ function CancelModal({
   onConfirm,
   periodEnd,
   isPending,
+  error,
 }: {
   onClose: () => void;
   onConfirm: () => void;
   periodEnd: string;
   isPending: boolean;
+  error: string;
 }) {
   return (
     <div
@@ -138,6 +140,9 @@ function CancelModal({
           ))}
         </div>
 
+        {error && (
+          <p className="text-[13px] text-[#B0503F] mb-3" role="alert">{error}</p>
+        )}
         <div className="flex flex-col gap-[10px]">
           <button
             type="button"
@@ -174,6 +179,7 @@ export default function SubscriptionClient({
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(initialCancelAtPeriodEnd);
   const [isPending, startTransition] = useTransition();
   const [switchError, setSwitchError] = useState('');
+  const [cancelError, setCancelError] = useState('');
 
   const isTrialing = status === 'trialing';
   const planName = `Afia · ${plan === 'yearly' ? 'Yearly' : 'Monthly'}`;
@@ -198,10 +204,11 @@ export default function SubscriptionClient({
     : null;
 
   function handleCancelConfirm() {
+    setCancelError('');
     startTransition(async () => {
       const result = await cancelSubscription();
       if (result?.error) {
-        setShowCancel(false);
+        setCancelError(result.error);
         return;
       }
       setCancelAtPeriodEnd(true);
@@ -494,10 +501,11 @@ export default function SubscriptionClient({
 
       {showCancel && (
         <CancelModal
-          onClose={() => setShowCancel(false)}
+          onClose={() => { setShowCancel(false); setCancelError(''); }}
           onConfirm={handleCancelConfirm}
           periodEnd={currentPeriodEnd}
           isPending={isPending}
+          error={cancelError}
         />
       )}
     </>

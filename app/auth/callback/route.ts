@@ -46,20 +46,31 @@ export async function GET(request: NextRequest) {
   }
 
   // Save any pending screener result (set during sign-up when email confirmation was required)
+  const VALID_BANDS = ['Low', 'Mild', 'Moderate', 'High', 'Very High'];
   const pending = cookieStore.get('afia_pending_result');
   if (pending) {
     try {
-      const { score, band, answers } = JSON.parse(pending.value) as {
-        score: number;
-        band: string;
-        answers?: number[] | null;
-      };
-      await supabase.from('screener_results').insert({
-        user_id: userId,
-        score,
-        band,
-        answers: answers ?? null,
-      });
+      const parsed = JSON.parse(pending.value) as { score: unknown; band: unknown; answers?: unknown };
+      const hasValidResult =
+        Number.isInteger(parsed.score) &&
+        (parsed.score as number) >= 0 &&
+        (parsed.score as number) <= 42 &&
+        VALID_BANDS.includes(parsed.band as string);
+
+      if (hasValidResult) {
+        const answers =
+          Array.isArray(parsed.answers) &&
+          parsed.answers.length === 14 &&
+          parsed.answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3)
+            ? (parsed.answers as number[])
+            : null;
+        await supabase.from('screener_results').insert({
+          user_id: userId,
+          score: parsed.score as number,
+          band: parsed.band as string,
+          answers,
+        });
+      }
     } catch {
       // Non-fatal — screener result can be added later
     } finally {

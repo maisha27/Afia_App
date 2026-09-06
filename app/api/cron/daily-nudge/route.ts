@@ -13,10 +13,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const service = createServiceClient();
 
-  const [profilesRes, usersRes] = await Promise.all([
-    service.from('profiles').select('id, first_name, notification_prefs').not('notification_prefs', 'is', null),
-    service.auth.admin.listUsers({ perPage: 1000 }),
-  ]);
+  const profilesRes = await service.from('profiles').select('id, first_name, notification_prefs').not('notification_prefs', 'is', null);
 
   if (profilesRes.error) return NextResponse.json({ error: profilesRes.error.message }, { status: 500 });
 
@@ -25,7 +22,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   );
   if (targets.length === 0) return NextResponse.json({ sent: 0 });
 
-  const emailMap = new Map(usersRes.data.users.map((u) => [u.id, u.email ?? '']));
+  const authUsers: Array<{ id: string; email?: string }> = [];
+  let page = 1;
+  while (true) {
+    const { data } = await service.auth.admin.listUsers({ page, perPage: 1000 });
+    if (!data?.users.length) break;
+    authUsers.push(...data.users);
+    if (data.users.length < 1000) break;
+    page++;
+  }
+  const emailMap = new Map(authUsers.map((u) => [u.id, u.email ?? '']));
 
   let sent = 0;
   let failed = 0;

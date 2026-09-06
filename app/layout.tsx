@@ -19,7 +19,7 @@ const bricolageGrotesque = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://afia-app.vercel.app"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://afia.app"
   ),
   title: { default: "Afia", template: "%s | Afia" },
   description:

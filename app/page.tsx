@@ -356,7 +356,7 @@ export default async function LandingPage() {
             name: 'Afia',
             description:
               'A self-help tool for health anxiety, grounded in CBT and ERP.',
-            url: 'https://afia-app.vercel.app',
+            url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app',
             applicationCategory: 'HealthApplication',
             operatingSystem: 'All',
             inLanguage: 'en-GB',

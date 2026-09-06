@@ -142,7 +142,7 @@ export async function forgotPassword(data: {
   email: string;
 }): Promise<AuthActionResult> {
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
 
   // We don't reveal whether the email is registered — Supabase does this automatically.
   await supabase.auth.resetPasswordForEmail(data.email, {

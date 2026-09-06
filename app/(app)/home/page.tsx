@@ -130,6 +130,10 @@ function getDailyNote(): string {
   return DAILY_NOTES[dayOfYear % DAILY_NOTES.length];
 }
 
+function getCheckinLabel(): string {
+  return new Date().getDay() === 5 ? 'Due today' : 'Due Friday';
+}
+
 /* ─── Constants ─── */
 const TOTAL_PROGRAMME_DAYS = 42;
 
@@ -183,7 +187,7 @@ export default async function HomePage() {
   const [exercisesRes, progressRes, journalRes, calmRes] = await Promise.all([
     supabase
       .from('exercises')
-      .select('id, slug, title, description, sort_order, duration_minutes')
+      .select('id, slug, title, description, sort_order, duration_minutes, week_number')
       .eq('is_published', true)
       .order('sort_order', { ascending: true }),
     supabase
@@ -207,6 +211,11 @@ export default async function HomePage() {
 
   const currentSortOrder = currentExercise?.sort_order ?? allExercises.length;
   const progressPct = Math.min(100, Math.round((currentSortOrder / TOTAL_PROGRAMME_DAYS) * 100));
+
+  const maxWeekInDb = allExercises.length > 0
+    ? Math.max(...allExercises.map((e) => e.week_number as number))
+    : 1;
+  const exercisesInMaxWeek = allExercises.filter((e) => (e.week_number as number) === maxWeekInDb).length;
 
   const journalEntries = journalRes.data ?? [];
   const journalCount = journalEntries.length;
@@ -307,10 +316,10 @@ export default async function HomePage() {
             ) : (
               <>
                 <h2 className="font-heading text-[24px] font-semibold tracking-[-0.02em] text-white mt-2.5 mb-2">
-                  Week 1 complete
+                  Week {maxWeekInDb} complete
                 </h2>
                 <p className="text-[14.5px] leading-[1.55] text-[#D4E4DE] mb-5 max-w-[400px] [text-wrap:pretty]">
-                  You&rsquo;ve finished all four exercises in Week 1. Week 2 is coming soon.
+                  You&rsquo;ve finished all {exercisesInMaxWeek} {exercisesInMaxWeek === 1 ? 'exercise' : 'exercises'} in Week {maxWeekInDb}.
                 </p>
                 <Link
                   href="/exercises"
@@ -388,7 +397,7 @@ export default async function HomePage() {
                 Weekly check-in
               </div>
               <div className="text-[13px] leading-[1.5] text-[#767D79]">
-                Due Friday · see what&rsquo;s shifting.
+                {getCheckinLabel()} · see what&rsquo;s shifting.
               </div>
             </Link>
           </StaggerItem>

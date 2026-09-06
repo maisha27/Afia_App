@@ -23,15 +23,19 @@ export async function POST(request: Request) {
     ? process.env.STRIPE_PRICE_YEARLY!
     : process.env.STRIPE_PRICE_MONTHLY!;
 
-  // Re-use existing Stripe customer if one was created in a previous session
+  // Block if the user already has an active or trialing subscription
   const { data: existing } = await supabase
     .from('subscriptions')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, status')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  if (existing?.status === 'active' || existing?.status === 'trialing') {
+    return NextResponse.json({ error: 'Already subscribed' }, { status: 409 });
+  }
+
   let customerId = existing?.stripe_customer_id ?? undefined;
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
 
   try {
     if (!customerId) {

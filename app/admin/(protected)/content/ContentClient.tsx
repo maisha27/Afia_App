@@ -191,7 +191,6 @@ function GuideBox() {
 export function ContentClient({ exercises: initialExercises }: Props) {
   const [exercises, setExercises] = useState<AdminExercise[]>(initialExercises);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [tab, setTab] = useState<'exercises' | 'daily'>('exercises');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -371,27 +370,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
     <div className="flex-1 min-w-0 px-[30px] py-[30px] pb-[40px]">
       {/* Header row */}
       <div className="flex items-end justify-between mb-[18px]">
-        <div className="flex items-center gap-[22px]">
-          <h1 className="font-heading text-[24px] font-semibold tracking-[-0.02em]" style={{ color: '#26302D' }}>Content</h1>
-          <div className="flex items-center gap-[20px] pb-[2px]">
-            <button
-              type="button"
-              onClick={() => setTab('exercises')}
-              className="text-[13.5px] pb-[8px] transition-colors"
-              style={tab === 'exercises' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#5F6863' }}
-            >
-              Exercises
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab('daily')}
-              className="text-[13.5px] pb-[8px] transition-colors"
-              style={tab === 'daily' ? { fontWeight: 600, color: '#26302D', borderBottom: '2px solid #2F7A6D' } : { fontWeight: 500, color: '#5F6863' }}
-            >
-              Daily practices
-            </button>
-          </div>
-        </div>
+        <h1 className="font-heading text-[24px] font-semibold tracking-[-0.02em]" style={{ color: '#26302D' }}>Content</h1>
 
         {/* New exercise button */}
         <button
@@ -408,7 +387,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
         </button>
       </div>
 
-      {tab === 'exercises' && <GuideBox />}
+      <GuideBox />
 
       <div className="flex gap-[22px] items-start">
         {/* Exercise list */}

@@ -27,6 +27,9 @@ const WEEK_THEMES: Record<number, string> = {
   1: 'Understanding worry',
   2: 'Tools that help',
   3: 'Living with uncertainty',
+  4: 'Facing your fears',
+  5: 'Breaking the cycle',
+  6: 'Building resilience',
 };
 
 function MiniQuatrefoil() {

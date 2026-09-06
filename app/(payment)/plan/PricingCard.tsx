@@ -25,6 +25,11 @@ export function PricingCard() {
         return;
       }
 
+      if (res.status === 409) {
+        router.push('/home');
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok || !data.url) {
         throw new Error(data.error ?? 'Something went wrong. Please try again.');

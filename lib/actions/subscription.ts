@@ -97,7 +97,7 @@ export async function redirectToCustomerPortal(): Promise<never> {
 
   if (!sub?.stripe_customer_id) redirect('/subscription');
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
     return_url: `${siteUrl}/subscription`,
