@@ -30,11 +30,8 @@ export const metadata: Metadata = {
     images: [{ url: "/Images/icon-512.png", width: 512, height: 512, alt: "Afia" }],
   },
   icons: {
-    icon: [
-      { url: "/Images/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/Images/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/Images/icon-192.png", sizes: "192x192", type: "image/png" }],
+    icon: [{ url: "/Images/Official_Logo.png", type: "image/png" }],
+    apple: [{ url: "/Images/Official_Logo.png", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,
