@@ -121,17 +121,20 @@ export default function CalmToolPage() {
     <main className="relative flex-1 overflow-hidden px-6 py-9 pb-11 lg:px-10">
       <div className="relative">
         {/* ── Header ── */}
-        <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-          Reach for these anytime
-        </span>
-        <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-1.5">
-          Calm tools
-        </h1>
-        <p className="text-[15px] leading-[1.55] text-[#565D5A] mb-[26px] max-w-[440px] [text-wrap:pretty]">
-          Small resets for the moments worry spikes. There&rsquo;s no wrong one to pick.
-        </p>
+        <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
+          <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+            Reach for these anytime
+          </span>
+          <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-1.5">
+            Calm tools
+          </h1>
+          <p className="text-[15px] leading-[1.55] text-[#565D5A] mb-[26px] max-w-[440px] [text-wrap:pretty]">
+            Small resets for the moments worry spikes. There&rsquo;s no wrong one to pick.
+          </p>
+        </div>
 
         {/* ── Featured breathing tool ── */}
+        <div className="animate-fade-up" style={{ animationDelay: '80ms' }}>
         <div className="bg-[#2F5049] rounded-[20px] px-[22px] py-[22px] sm:px-[34px] sm:py-[30px] mb-[26px] relative overflow-hidden flex flex-col sm:flex-row sm:items-center gap-[22px] sm:gap-[34px]">
           <div className="flex-1 min-w-0">
             <span className="text-[11.5px] font-semibold tracking-[0.09em] uppercase text-[#9FC9BC]">
@@ -174,6 +177,7 @@ export default function CalmToolPage() {
               haloColor="234,243,239"
             />
           </div>
+        </div>
         </div>
 
         {/* ── Tool grid — staggered entrance ── */}

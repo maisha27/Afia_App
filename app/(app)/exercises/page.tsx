@@ -126,15 +126,17 @@ export default async function ExercisesPage() {
 
       <div className="relative">
         {/* ── Header ── */}
-        <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
-          Shaped from your check-in
-        </span>
-        <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-[18px]">
-          A gentle plan for anxiety
-        </h1>
+        <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
+          <span className="text-[12px] font-semibold italic tracking-[0.1em] uppercase text-primary">
+            Shaped from your check-in
+          </span>
+          <h1 className="font-heading text-[30px] font-semibold tracking-[-0.025em] text-[#262B29] mt-2 mb-[18px]">
+            A gentle plan for anxiety
+          </h1>
+        </div>
 
         {/* ── Overall progress bar ── */}
-        <div className="flex items-center gap-[14px] mb-[34px]">
+        <div className="flex items-center gap-[14px] mb-[34px] animate-fade-up" style={{ animationDelay: '70ms' }}>
           <div className="flex-1 h-[8px] rounded-full bg-[#EAE4DB] max-w-[340px]">
             <div
               className="h-full rounded-full bg-[#2F6E7A] transition-all"

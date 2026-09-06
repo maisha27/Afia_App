@@ -394,19 +394,20 @@
 /* ── CalmRings — pure-CSS animated rings (replaces Three.js MagicRings) ─── */
 .calm-rings {
   position: relative;
+  isolation: isolate;
 }
 .calm-ring {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 0;
   transform: translate(-50%, -50%);
   width: 22%;
   height: 22%;
   border-radius: 50%;
   border: 1.5px solid #9FC9BC;
   animation: calmRingExpand 3.5s ease-out infinite;
-  animation-fill-mode: backwards;
-  will-change: transform, opacity;
+  animation-fill-mode: both;
 }
 @keyframes calmRingExpand {
   0%   { transform: translate(-50%, -50%) scale(0.4);  opacity: 0;   border-color: #9FC9BC; }

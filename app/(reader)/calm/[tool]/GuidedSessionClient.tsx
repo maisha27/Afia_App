@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { recordCalmSession } from '@/lib/actions/calm';
-import CalmRings from '@/components/calm/CalmRings';
+import MagicRings from '@/components/calm/MagicRings';
 
 export interface Step {
   heading: string;
@@ -99,7 +99,7 @@ export function GuidedSessionClient({
 
         <div className="relative z-10 max-w-[400px]">
           <div className="relative mx-auto mb-10" style={{ width: 160, height: 160 }}>
-            <CalmRings size={160} />
+            <MagicRings color="#9FC9BC" colorTwo="#5A9080" ringCount={4} opacity={0.7} />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               {icon}
             </div>
@@ -196,7 +196,7 @@ export function GuidedSessionClient({
         <div className="mb-[34px]" aria-hidden="true">
           {centerVisual ?? (
             <div className="relative" style={{ width: 280, height: 280 }}>
-              <CalmRings size={280} />
+              <MagicRings color="#9FC9BC" colorTwo="#5A9080" />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {icon}
               </div>

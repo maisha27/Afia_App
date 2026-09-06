@@ -6,11 +6,6 @@ import { useReducedMotion } from 'motion/react';
 const R = 52;
 const CIRC = +(2 * Math.PI * R).toFixed(2); // 326.73
 
-// ── PlanRing ────────────────────────────────────────────────────────────────
-// Animated SVG progress ring for the dashboard plan hero card.
-// On mount the ring draws from 0% to the actual progress, and the number
-// inside counts up over the same 800ms. Extracted from home/page.tsx so the
-// animation logic can run client-side while the page stays a server component.
 export function PlanRing({
   progressPct,
 }: {
@@ -20,19 +15,26 @@ export function PlanRing({
 
   const targetOffset = +(CIRC * (1 - progressPct / 100)).toFixed(2);
 
-  // Ring starts "empty" (dashoffset = full circumference = 0%)
+  // Always start at 0 / CIRC on both server and client — prevents hydration mismatch.
+  // useReducedMotion() returns null on the server, which differs from the client value,
+  // so we must never branch on it during initial render.
   const [dashOffset, setDashOffset] = useState(CIRC);
-  const [displayPct, setDisplayPct] = useState(reduced ? progressPct : 0);
+  const [displayPct, setDisplayPct] = useState(0);
+  const [transitionCSS, setTransitionCSS] = useState(
+    'stroke-dashoffset 820ms cubic-bezier(0.34, 1.0, 0.64, 1.0)',
+  );
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced) {
+      setTransitionCSS('none');
+      setDashOffset(targetOffset);
+      setDisplayPct(progressPct);
+      return;
+    }
 
-    // Small delay so the card fades in first, then the ring animates
     const delay = setTimeout(() => {
-      // Trigger CSS transition on the ring
       setDashOffset(targetOffset);
 
-      // Count up the percentage number in sync
       const START = performance.now();
       const DURATION = 820;
       let last = -1;
@@ -40,7 +42,6 @@ export function PlanRing({
       const tick = (now: number) => {
         const elapsed = now - START;
         const t = Math.min(elapsed / DURATION, 1);
-        // ease-out cubic
         const eased = 1 - Math.pow(1 - t, 3);
         const pct = Math.round(eased * progressPct);
         if (pct !== last) {
@@ -89,11 +90,7 @@ export function PlanRing({
           strokeLinecap="round"
           strokeDasharray={CIRC}
           strokeDashoffset={dashOffset}
-          style={{
-            transition: reduced
-              ? 'none'
-              : 'stroke-dashoffset 820ms cubic-bezier(0.34, 1.0, 0.64, 1.0)',
-          }}
+          style={{ transition: transitionCSS }}
         />
       </svg>
 

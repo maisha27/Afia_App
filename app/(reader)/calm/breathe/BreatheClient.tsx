@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { recordCalmSession } from '@/lib/actions/calm';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
-import CalmRings from '@/components/calm/CalmRings';
+import MagicRings from '@/components/calm/MagicRings';
 
 /* ─── Breathing pattern: box breathing 4-4-4-4 ─── */
 type Phase = 'breathe-in' | 'hold' | 'breathe-out' | 'rest';
@@ -268,7 +268,7 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           aria-label={heading}
           role="img"
         >
-          <CalmRings size={300} />
+          <MagicRings color="#9FC9BC" colorTwo="#5A9080" />
           {/* Centre quatrefoil */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
             <div
