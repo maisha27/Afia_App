@@ -31,7 +31,7 @@ export default function DisclaimerPage() {
             </h2>
             <p className="text-[15px] leading-[1.65] text-text-2">
               It is not a medical device, and it does not provide medical advice, treatment, or
-              care. It cannot diagnose any condition — physical or mental — and it is not a
+              care. It cannot diagnose any condition (physical or mental) and it is not a
               substitute for a doctor, therapist, or other qualified professional.
             </p>
           </section>
@@ -42,7 +42,7 @@ export default function DisclaimerPage() {
             </h2>
             <p className="text-[15px] leading-[1.65] text-text-2">
               The screener helps you notice patterns in how you relate to worry about your health.
-              Its result is a starting point for reflection — never a clinical assessment, score,
+              Its result is a starting point for reflection, never a clinical assessment, score,
               or label.
             </p>
           </section>

@@ -86,7 +86,7 @@ export default function ScreenerIntroPage() {
             </h1>
             <p className="text-[17px] leading-[1.65] text-text-2 max-w-[500px] mx-auto mb-[30px] [text-wrap:pretty]">
               This short check-in helps you notice the patterns behind health anxiety more clearly.
-              There are no right or wrong answers — only what feels true for you right now.
+              There are no right or wrong answers - only what feels true for you right now.
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export default function ScreenerIntroPage() {
       </div>
 
       {/* How it works card with corner quatrefoils */}
-      <div className="relative overflow-hidden px-11 pt-5 pb-[60px] animate-fade-up" style={{ animationDelay: '160ms' }}>
+      <div className="relative overflow-hidden px-11 pt-5 pb-[60px] animate-fade-up" style={{ animationDelay: '120ms' }}>
         {/* Top-left quatrefoil */}
         <QuatrefoilDecor className="absolute top-[-188px] left-[-172px] rotate-[-17deg]" />
         {/* Bottom-right quatrefoil */}
@@ -158,7 +158,7 @@ export default function ScreenerIntroPage() {
       </div>
 
       {/* CTA */}
-      <div className="px-11 pb-[66px] text-center animate-fade-up" style={{ animationDelay: '260ms' }}>
+      <div className="px-11 pb-[66px] text-center animate-fade-up" style={{ animationDelay: '140ms' }}>
         <Link
           href="/screener/1"
           className="inline-flex items-center justify-center rounded-[10px] bg-primary px-[68px] py-[19px] text-[18px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

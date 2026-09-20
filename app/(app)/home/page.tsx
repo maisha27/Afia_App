@@ -60,7 +60,7 @@ const DAILY_NOTES = [
   "One difficult week doesn't undo what you've already built. Progress doesn't disappear.",
   "Reassurance feels like relief, but noticing the urge is the real skill. You're practising it.",
   "Anxiety lies about urgency. Most things can wait the length of one slow breath.",
-  "You came back today. That's the whole thing — that's what this is built on.",
+  "You came back today. That's the whole thing - that's what this is built on.",
   "It's okay if this feels hard. Hard and hopeless are not the same thing.",
   "The goal isn't to stop worrying entirely. It's to let worry take up less of your day.",
   "Every time you sit with uncertainty instead of checking, you're rewiring something real.",
@@ -68,59 +68,59 @@ const DAILY_NOTES = [
   "Small and consistent beats large and occasional, every time.",
   "Your nervous system is doing what it thinks is helpful. You can gently teach it otherwise.",
   "Rest is not falling behind. Rest is part of the plan.",
-  "A symptom noticed is not a symptom confirmed. Your mind and body talk — sometimes they bluff.",
+  "A symptom noticed is not a symptom confirmed. Your mind and body talk - sometimes they bluff.",
   "Uncertainty isn't danger. It's just information you don't have yet, and that's okay.",
   "The urge to check will pass whether you check or not. Waiting it out is the practice.",
   "You've survived every difficult day so far. Today is just another one of those.",
   "Avoidance keeps anxiety alive. Approaching what you fear, gently, is how it softens.",
   "Your thoughts about your health aren't medical evidence. They're anxiety doing its job too well.",
-  "Kindness toward yourself isn't weakness — it's the ground that recovery is built on.",
+  "Kindness toward yourself isn't weakness - it's the ground that recovery is built on.",
   "It's okay to have a bad day in the middle of getting better. That's still getting better.",
   "The pattern you're changing took years to build. Patience isn't optional; it's the method.",
   "Checking in is not the same as checking out. Noticing how you feel is different from spiralling.",
   "Body sensations are not predictions. Noticing a flutter in your chest is not a diagnosis.",
   "You don't need certainty to move forward. Most good things were done without it.",
   "Courage with anxiety doesn't look dramatic. It looks like you, doing the next ordinary thing.",
-  "Every time you resist a compulsion, you're building trust in yourself — not just breaking a habit.",
+  "Every time you resist a compulsion, you're building trust in yourself - not just breaking a habit.",
   "Reassurance from others can feel like relief but it feeds the cycle. You already know this.",
   "A hard morning doesn't mean a hard day. Anxiety lies about time spans too.",
   "Being gentle with your progress is not the same as being complacent about it.",
-  "Health anxiety is not about being weak or strange. It's a pattern — and patterns can shift.",
+  "Health anxiety is not about being weak or strange. It's a pattern - and patterns can shift.",
   "Your brain overestimates risk. That's not a character flaw; it's a habit that can change.",
   "The present moment is the only one where anything can actually happen. The rest is projection.",
   "You don't have to believe your thoughts to notice them and let them pass.",
-  "Exposure isn't about proving anxiety wrong — it's about proving you can cope when it's there.",
+  "Exposure isn't about proving anxiety wrong - it's about proving you can cope when it's there.",
   "One hour of sitting with discomfort teaches more than a year of avoiding it.",
   "There's no perfect way to do this. Imperfect and consistent beats perfect and occasional.",
   "Your worth is not measured by how anxious you are or aren't today.",
   "Feeling anxious doesn't mean something is wrong with you. It means you're human.",
-  "The days you don't feel like doing this and do it anyway — those are the important ones.",
+  "The days you don't feel like doing this and do it anyway - those are the important ones.",
   "Anxiety feels urgent because it evolved to. But urgency is a feeling, not a fact.",
   "Grief about having anxiety is valid. And underneath it, recovery is still possible.",
   "When worry spirals, your body braces. When you breathe slowly, it unbracers. That's real.",
-  "You're not trying to eliminate fear — you're learning to walk alongside it.",
+  "You're not trying to eliminate fear - you're learning to walk alongside it.",
   "Good enough is genuinely good enough. Perfection in recovery is still just anxiety in a nicer coat.",
   "The more you practise tolerating uncertainty, the less threatening it becomes. This is neuroplasticity.",
   "Intrusive thoughts are not wishes or warnings. They're noise. You don't have to answer them.",
-  "You've already shown up. The hardest part for anxious minds is beginning — and you've begun.",
+  "You've already shown up. The hardest part for anxious minds is beginning - and you've begun.",
   "Healing isn't linear. A difficult week after good ones is not a relapse; it's normal variation.",
   "Something small done with care is worth more than something large done in panic.",
   "Noticing the spiral early is a skill. You're building it every time you recognise what's happening.",
-  "Your body is not your enemy. Anxiety makes it feel that way — but your body is working for you.",
+  "Your body is not your enemy. Anxiety makes it feel that way - but your body is working for you.",
   "Safety behaviours feel protective and are secretly costly. You're learning to tell the difference.",
   "You are more than your health anxiety. It's one part of you, not the whole story.",
-  "The quiet days are doing work too. Rest, routine, small steps — these all count.",
+  "The quiet days are doing work too. Rest, routine, small steps - these all count.",
   "If it were happening to a friend, you'd be kind. Try some of that kindness on yourself today.",
-  "Anxiety spikes and then it settles — every single time, if you let it. That's the biology.",
+  "Anxiety spikes and then it settles - every single time, if you let it. That's the biology.",
   "Checking a symptom twice doesn't make you safer. It makes the symptom feel more significant.",
   "Your instinct to seek certainty is understandable. Your practice is learning to sit without it.",
   "Each session here is a vote for the version of you that handles this differently.",
   "The work you're doing is quiet and hard and largely invisible. That makes it no less real.",
-  "Unhelpful thoughts can be noticed without being believed. That gap — noticing — is everything.",
+  "Unhelpful thoughts can be noticed without being believed. That gap - noticing - is everything.",
   "Recovery has bad weeks. That doesn't make it not recovery.",
   "You are building something. Some days you can see it clearly, some days not at all. Both are true.",
   "Worry about tomorrow is still happening today, in your body. It's always worth asking: what about now?",
-  "You came back. That's not nothing — it's everything this is made of.",
+  "You came back. That's not nothing - it's everything this is made of.",
 ] as const;
 
 function getDailyNote(): string {
@@ -131,7 +131,7 @@ function getDailyNote(): string {
 }
 
 function getCheckinLabel(): string {
-  return new Date().getDay() === 5 ? 'Due today' : 'Due Friday';
+  return 'Weekly check-in';
 }
 
 /* ─── Constants ─── */
@@ -209,7 +209,7 @@ export default async function HomePage() {
   const firstIncomplete = allExercises.find((e) => !completedIds.has(e.id));
   const currentExercise = firstIncomplete ?? null;
 
-  const currentSortOrder = currentExercise?.sort_order ?? allExercises.length;
+  const currentSortOrder = currentExercise?.sort_order ?? (allExercises[allExercises.length - 1]?.sort_order ?? 0);
   const progressPct = Math.min(100, Math.round((currentSortOrder / TOTAL_PROGRAMME_DAYS) * 100));
 
   const maxWeekInDb = allExercises.length > 0
@@ -319,7 +319,10 @@ export default async function HomePage() {
                   Week {maxWeekInDb} complete
                 </h2>
                 <p className="text-[14.5px] leading-[1.55] text-[#D4E4DE] mb-5 max-w-[400px] [text-wrap:pretty]">
-                  You&rsquo;ve finished all {exercisesInMaxWeek} {exercisesInMaxWeek === 1 ? 'exercise' : 'exercises'} in Week {maxWeekInDb}.
+                  {exercisesInMaxWeek === 1
+                    ? <>You&rsquo;ve finished the exercise in Week {maxWeekInDb}.</>
+                    : <>You&rsquo;ve finished all {exercisesInMaxWeek} exercises in Week {maxWeekInDb}.</>
+                  }
                 </p>
                 <Link
                   href="/exercises"
@@ -420,7 +423,7 @@ export default async function HomePage() {
               </div>
               <div className="text-[13px] leading-[1.5] text-[#767D79]">
                 {journalCount === 0
-                  ? 'No reflections yet — start writing.'
+                  ? 'No reflections yet - start writing.'
                   : `${journalCount} ${journalCount === 1 ? 'reflection' : 'reflections'} saved so far.`}
               </div>
             </Link>

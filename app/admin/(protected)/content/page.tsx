@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { ContentClient, type AdminExercise } from './ContentClient';
 
-export const metadata: Metadata = { title: 'Content — Admin · Afia' };
+export const metadata: Metadata = { title: 'Content · Admin · Afia' };
 
 export default async function AdminContentPage() {
   const [supabase, service] = [await createClient(), createServiceClient()];

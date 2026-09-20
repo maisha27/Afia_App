@@ -9,11 +9,10 @@ export function AnimatedStatTiles({
 }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-[14px] mb-[22px]">
-      {tiles.map((tile, i) => (
+      {tiles.map((tile) => (
         <div
           key={tile.label}
-          className="bg-white border border-[#E7E2DA] rounded-[14px] px-[18px] py-4 animate-fade-up"
-          style={{ animationDelay: `${280 + i * 55}ms` }}
+          className="bg-white border border-[#E7E2DA] rounded-[14px] px-[18px] py-4"
         >
           <div className="font-heading text-[26px] font-semibold text-[#2F5049]">
             <AnimatedNumber value={tile.value} duration={0.9} />

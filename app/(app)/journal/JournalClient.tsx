@@ -154,7 +154,7 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                 )}
               </>
             ) : (
-              'Start writing — no one else will see this'
+              'Start writing - no one else will see this'
             )}
           </div>
           <div className="flex items-center gap-3">
@@ -251,12 +251,9 @@ export function JournalClient({ initialEntries, dailyPrompt }: Props) {
                   style={{ boxShadow: '0 2px 12px -4px rgba(20,24,22,.05)' }}
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
-                    <time
-                      dateTime={entry.created_at}
-                      className="text-[12px] font-semibold text-[#6E7672]"
-                    >
+                    <span className="text-[12px] font-semibold text-[#6E7672]">
                       {formatEntryDate(entry.created_at)}
-                    </time>
+                    </span>
 
                     {confirmDeleteId === entry.id ? (
                       <div className="flex items-center gap-3 flex-shrink-0">

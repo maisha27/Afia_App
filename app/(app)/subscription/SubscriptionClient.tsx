@@ -107,7 +107,7 @@ function CancelModal({
           Cancel your subscription?
         </h2>
         <p className="text-[14.5px] leading-[1.6] text-[#565D5A] mb-5 [text-wrap:pretty]">
-          That&rsquo;s completely okay — you can do this whenever you like. Here&rsquo;s what
+          That&rsquo;s completely okay - you can do this whenever you like. Here&rsquo;s what
           happens:
         </p>
 
@@ -242,7 +242,7 @@ export default function SubscriptionClient({
           {/* Back link */}
           <Link
             href="/settings"
-            className="inline-flex items-center gap-[7px] text-[13px] font-semibold text-[#5F6863] mb-4 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            className="flex items-center gap-[7px] text-[13px] font-semibold text-[#5F6863] mb-4 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm w-fit"
           >
             <svg
               width="15"

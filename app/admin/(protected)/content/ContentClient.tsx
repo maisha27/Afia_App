@@ -174,9 +174,9 @@ function GuideBox() {
           <ol className="list-decimal list-inside space-y-[6px] mb-[10px]">
             <li>Click <strong>New exercise</strong> (top right).</li>
             <li>Set <strong>Week</strong> to <code className="bg-white/60 px-1 rounded">2</code> (or 3), <strong>Day</strong> to the day within that week (1–7), and <strong>Sort order</strong> to a unique ascending number (e.g. Week 2 days use 8–14, Week 3 use 15–21).</li>
-            <li>Fill in the <strong>Title</strong> — the slug auto-generates. You can edit it manually.</li>
+            <li>Fill in the <strong>Title</strong> - the slug auto-generates. You can edit it manually.</li>
             <li>Add <strong>Reading content</strong> (the main lesson text) and an optional <strong>Writing prompt</strong>.</li>
-            <li>Click <strong>Create exercise</strong> — it saves as <em>Draft</em> so users can&apos;t see it yet.</li>
+            <li>Click <strong>Create exercise</strong> - it saves as <em>Draft</em> so users can&apos;t see it yet.</li>
             <li>When you&apos;re happy with it, click the <strong>Draft</strong> badge on the exercise to toggle it to <strong>Published</strong>.</li>
           </ol>
           <div className="rounded-[8px] px-[12px] py-[9px] text-[12.5px]" style={{ background: '#E3F1EE', color: '#276358' }}>
@@ -478,7 +478,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
             {/* Slug */}
             <div className="flex flex-col gap-[6px] mb-[14px]">
               <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>
-                Slug <span className="font-normal text-[#9AA29C]">(used in the URL — lowercase, hyphens only)</span>
+                Slug <span className="font-normal text-[#9AA29C]">(used in the URL - lowercase, hyphens only)</span>
               </label>
               <input
                 type="text"
@@ -519,7 +519,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
 
             <FieldTextarea label="Description" value={createFields.description} onChange={(v) => setCreateField('description', v)} rows={2} />
             <FieldTextarea label="Reading content" value={createFields.content} onChange={(v) => setCreateField('content', v)} rows={5} />
-            <FieldTextarea label="Writing prompt" value={createFields.writing_prompt} onChange={(v) => setCreateField('writing_prompt', v)} rows={2} placeholder="Optional — leave blank to hide" italic />
+            <FieldTextarea label="Writing prompt" value={createFields.writing_prompt} onChange={(v) => setCreateField('writing_prompt', v)} rows={2} placeholder="Optional - leave blank to hide" italic />
 
             {/* Footer */}
             <div className="flex items-center justify-between pt-[16px]" style={{ borderTop: '1px solid #F0F1EE' }}>
@@ -649,7 +649,7 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 value={draft.writing_prompt}
                 onChange={(e) => setField('writing_prompt', e.target.value)}
                 rows={2}
-                placeholder="Optional — leave blank to hide"
+                placeholder="Optional - leave blank to hide"
                 className="rounded-[10px] px-[14px] py-[11px] text-[13.5px] leading-[1.6] italic resize-y outline-none transition-colors"
                 style={{ ...INPUT_STYLE, color: '#5F6863' }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}

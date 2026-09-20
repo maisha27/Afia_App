@@ -38,7 +38,7 @@ export default function AppError({
         Something went wrong.
       </h2>
       <p className="text-[15px] leading-[1.6] text-[#565D5A] max-w-[340px] mb-8 [text-wrap:pretty]">
-        A page failed to load. Your data is safe — this is just a technical hiccup.
+        A page failed to load. Your data is safe - this is just a technical hiccup.
       </p>
 
       <div className="flex flex-col items-center gap-3">

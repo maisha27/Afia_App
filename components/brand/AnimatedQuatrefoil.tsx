@@ -48,8 +48,17 @@ export function AnimatedQuatrefoil({
 }) {
   const reduced = useReducedMotion();
 
-  const [revealed, setRevealed] = useState(reduced ? 8 : 0);
-  const [phase, setPhase] = useState<Phase>(reduced ? 'holding' : 'blooming');
+  // Always start with server-safe values to avoid SSR/client hydration mismatch (React #418).
+  // The effect below snaps to the reduced-motion state after hydration.
+  const [revealed, setRevealed] = useState(0);
+  const [phase, setPhase] = useState<Phase>('blooming');
+
+  useEffect(() => {
+    if (reduced) {
+      setRevealed(8);
+      setPhase('holding');
+    }
+  }, [reduced]);
 
   useEffect(() => {
     if (reduced) return;

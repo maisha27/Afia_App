@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { PricingCard } from './PricingCard';
@@ -75,6 +76,17 @@ export default async function PlanPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (user) {
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (sub && ['active', 'trialing'].includes(sub.status)) {
+      redirect('/home');
+    }
+  }
+
   let bandLabel: string | null = null;
   if (user) {
     const { data: result } = await supabase
@@ -124,7 +136,7 @@ export default async function PlanPage() {
                 ? <>We&rsquo;ve shaped these around the {bandLabel} signs of anxiety you told us about.</>
                 : <>We&rsquo;ve shaped these around what Afia knows so far.</>
               }{' '}
-              Open them whenever you&rsquo;re ready &mdash; there&rsquo;s no rush and no right pace.
+              Open them whenever you&rsquo;re ready - there&rsquo;s no rush and no right pace.
             </p>
 
             <div className="flex flex-col gap-4 max-w-[440px]">
@@ -152,7 +164,7 @@ export default async function PlanPage() {
         {/* Maybe later link */}
         <div className="relative mt-[34px] text-center">
           <a href="/" className="text-[14.5px] text-[#767D79] font-medium hover:text-[#565D5A] transition-colors">
-            Maybe later — keep my free reflection
+            Maybe later - keep my free reflection
           </a>
         </div>
       </main>

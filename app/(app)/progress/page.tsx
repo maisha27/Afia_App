@@ -173,7 +173,7 @@ export default async function ProgressPage() {
   if (!hasCheckIns) {
     trendSubtitle = 'Complete your first check-in to start tracking';
   } else if (!hasMultiple) {
-    trendSubtitle = 'Your baseline — check in again to see your trend';
+    trendSubtitle = 'Your baseline - check in again to see your trend';
   } else if (improving) {
     trendSubtitle = `Gently easing over ${weekLabel}`;
   } else if (worsening) {
@@ -216,7 +216,7 @@ export default async function ProgressPage() {
       afterColor: domain.afterColor,
       afterPct: currentPct,
       beforePct: priorPct,
-      toLabel: currentIntensity?.label ?? '—',
+      toLabel: currentIntensity?.label ?? '',
       toColor: currentIntensity?.color ?? domain.toColor,
       fromLabel: priorIntensity?.label ?? null,
     };
@@ -229,16 +229,16 @@ export default async function ProgressPage() {
       'Your journey starts with one step. Complete your first check-in to see your patterns taking shape.';
   } else if (!hasMultiple) {
     gentleNote =
-      "You've taken the first step — that's the hardest one. Your next check-in will show what's already beginning to shift.";
+      "You've taken the first step - that's the hardest one. Your next check-in will show what's already beginning to shift.";
   } else if (improving) {
     gentleNote =
-      "Progress like this rarely moves in a straight line — a steady direction is all you need. A flat week isn't a step back.";
+      "Progress like this rarely moves in a straight line - a steady direction is all you need. A flat week isn't a step back.";
   } else if (worsening) {
     gentleNote =
-      "A harder week doesn't undo the work you've done. Just notice what feels different — that's insight you can use.";
+      "A harder week doesn't undo the work you've done. Just notice what feels different - that's insight you can use.";
   } else {
     gentleNote =
-      "Staying steady is its own kind of progress. Notice what you're doing to hold that ground — it's already working.";
+      "Staying steady is its own kind of progress. Notice what you're doing to hold that ground - it's already working.";
   }
 
   return (
@@ -397,15 +397,17 @@ export default async function ProgressPage() {
           </InViewReveal>
         )}
 
-        {/* ── Stat tiles ── stagger-3 (individual tiles stagger internally) */}
-        <AnimatedStatTiles
-          tiles={[
-            { value: checkIns.length, label: 'Check-ins' },
-            { value: planSteps, label: 'Plan steps' },
-            { value: calmCount, label: 'Calm sessions' },
-            { value: journalCount, label: 'Journal notes' },
-          ]}
-        />
+        {/* ── Stat tiles ── */}
+        <InViewReveal y={12} duration={0.5}>
+          <AnimatedStatTiles
+            tiles={[
+              { value: checkIns.length, label: 'Check-ins' },
+              { value: planSteps, label: 'Plan steps' },
+              { value: calmCount, label: 'Calm sessions' },
+              { value: journalCount, label: 'Journal notes' },
+            ]}
+          />
+        </InViewReveal>
 
         {/* ── Gentle note ── reveals on scroll */}
         <InViewReveal y={12} duration={0.5} delay={0.05}>

@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+
+export const metadata: Metadata = { title: 'Your subscription' };
 import { stripe } from '@/lib/stripe';
 import SubscriptionClient from './SubscriptionClient';
 import type { CardInfo, InvoiceItem } from './SubscriptionClient';

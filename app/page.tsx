@@ -8,13 +8,13 @@ import { SiteFooter } from '@/components/layout/SiteFooter';
 import { InViewReveal, StaggerList, StaggerItem } from '@/components/motion';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Afia — Calm in Mind' },
+  title: { absolute: 'Afia - Calm in Mind' },
   description:
-    'Understand the patterns behind health anxiety with a free, private check-in — no signup needed. Built on CBT and ERP techniques.',
+    'Understand the patterns behind health anxiety with a free, private check-in - no signup needed. Built on CBT and ERP techniques.',
   openGraph: {
-    title: 'Afia — Calm in Mind',
+    title: 'Afia - Calm in Mind',
     description:
-      'Understand the patterns behind health anxiety with a free, private check-in — no signup needed. Built on CBT and ERP techniques.',
+      'Understand the patterns behind health anxiety with a free, private check-in - no signup needed. Built on CBT and ERP techniques.',
     url: '/',
     type: 'website',
   },
@@ -123,7 +123,7 @@ export default async function LandingPage() {
               </p>
               <div
                 className="flex flex-wrap gap-4 items-center mb-5 animate-fade-up"
-                style={{ animationDelay: '160ms' }}
+                style={{ animationDelay: '120ms' }}
               >
                 <Link
                   href="/screener"
@@ -140,7 +140,7 @@ export default async function LandingPage() {
               </div>
               <p
                 className="text-[13px] text-text-3 animate-fade-up"
-                style={{ animationDelay: '230ms' }}
+                style={{ animationDelay: '140ms' }}
               >
                 Free. No signup. Two to four minutes. Your answers stay on your device.
               </p>
@@ -364,7 +364,7 @@ export default async function LandingPage() {
               '@type': 'Offer',
               price: '0',
               priceCurrency: 'GBP',
-              description: 'Free health anxiety check-in — no signup required',
+              description: 'Free health anxiety check-in - no signup required',
             },
           }),
         }}

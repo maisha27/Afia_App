@@ -37,13 +37,13 @@ const BAND_LABEL: Record<Band, string> = {
 };
 
 const BRIDGE: Record<Band, string> = {
-  Low: "These patterns tend to stay manageable. Afia's tools can help you keep it that way — catching worry early before it has a chance to build.",
+  Low: "These patterns tend to stay manageable. Afia's tools can help you keep it that way - catching worry early before it has a chance to build.",
   Mild: "At this level, gentle daily habits make a real difference. Afia's short practices are built for exactly where you are right now.",
   Moderate:
     "This is where structured support helps most. Afia's step-by-step programme is designed to gradually shift these patterns, one small practice at a time.",
   High: "Daily structured practice is one of the most effective ways through this. Afia gives you that structure, at your own pace, in a space only you can see.",
   'Very High':
-    "At this level, self-help works best alongside professional support. Afia's programme can be part of that — a private, structured companion to your care.",
+    "At this level, self-help works best alongside professional support. Afia's programme can be part of that - a private, structured companion to your care.",
 };
 
 // ── Insight groups ───────────────────────────────────────────────────────────

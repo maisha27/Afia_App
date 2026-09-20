@@ -3,7 +3,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
-export const metadata: Metadata = { title: 'Users — Admin · Afia' };
+export const metadata: Metadata = { title: 'Users · Admin · Afia' };
 
 const PAGE_SIZE = 20;
 

@@ -373,7 +373,10 @@
   animation: afiaSlowRotate 60s linear infinite;
 }
 
-/* afiaFadeUp: CSS-only entrance for elements that don't need JS orchestration */
+/* afiaFadeUp: CSS-only entrance for elements that don't need JS orchestration.
+   fill-mode:both means the element is at opacity:0 during its animation-delay period.
+   Keep animation-delay ≤140ms on any element that contains an interactive control,
+   otherwise the click target is invisible and displaced for too long. */
 @keyframes afiaFadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }

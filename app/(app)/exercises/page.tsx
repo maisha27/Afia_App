@@ -208,17 +208,20 @@ export default async function ExercisesPage() {
 
                     {/* Card */}
                     {exercise.state === 'done' && (
-                      <div className="flex-1 bg-white border border-[#EBE6DE] rounded-[14px] px-[20px] py-[15px] flex items-center justify-between opacity-[.72]">
+                      <Link
+                        href={`/plan/${exercise.slug}`}
+                        className="flex-1 bg-white border border-[#EBE6DE] rounded-[14px] px-[20px] py-[15px] flex items-center justify-between opacity-[.72] hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
                         <div>
                           <div className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#9AA29C]">
-                            Day {exercise.day_number}
+                            Day {exercise.sort_order}
                           </div>
                           <div className="text-[15.5px] font-semibold text-[#3A403C] mt-0.5">
                             {exercise.title}
                           </div>
                         </div>
                         <span className="text-[12.5px] font-semibold text-[#2F6E7A]">Done</span>
-                      </div>
+                      </Link>
                     )}
 
                     {exercise.state === 'current' && (
@@ -228,7 +231,7 @@ export default async function ExercisesPage() {
                       >
                         <div>
                           <div className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#2F6E7A]">
-                            Day {exercise.day_number} · Today
+                            Day {exercise.sort_order} · Today
                           </div>
                           <div className="font-heading text-[17px] font-semibold text-[#2F5049] mt-[3px]">
                             {exercise.title}
@@ -251,7 +254,7 @@ export default async function ExercisesPage() {
                       <div className="flex-1 bg-[#FCFBF9] border border-[#EBE6DE] rounded-[14px] px-[20px] py-[15px] flex items-center justify-between">
                         <div>
                           <div className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#B3B7B0]">
-                            Day {exercise.day_number}
+                            Day {exercise.sort_order}
                           </div>
                           <div className="text-[15.5px] font-semibold text-[#6C736E] mt-0.5">
                             {exercise.title}
@@ -269,8 +272,8 @@ export default async function ExercisesPage() {
           );
         })}
 
-        {/* ── Next week locked — shown whenever there are exercises in DB ── */}
-        {rawExercises.length > 0 && (
+        {/* ── Next week locked — shown while user still has an active exercise ── */}
+        {rawExercises.length > 0 && currentExercise !== null && unlockDay > currentExercise.sort_order && (
           <>
             <div className="flex items-center gap-3 mb-4">
               <span className="font-heading text-[13px] font-semibold tracking-[0.08em] uppercase text-[#A6A79F]">
@@ -283,7 +286,7 @@ export default async function ExercisesPage() {
               </span>
             </div>
             <div className="bg-[#FBF9F5] border border-dashed border-[#E0DACF] rounded-[14px] px-[22px] py-[18px] text-[13.5px] leading-[1.55] text-[#6E7672] [text-wrap:pretty]">
-              More exercises are on their way. These open once the current week feels settled — no
+              More exercises are on their way. These open once the current week feels settled - no
               need to rush ahead.
             </div>
           </>
@@ -297,7 +300,7 @@ export default async function ExercisesPage() {
             </div>
             <p className="text-[13.5px] leading-[1.55] text-[#3F6B60]">
               You&rsquo;ve finished all the exercises in Week {maxWeekInDb}. Week {nextWeekNum} content is on its
-              way — come back soon.
+              way - come back soon.
             </p>
           </div>
         )}

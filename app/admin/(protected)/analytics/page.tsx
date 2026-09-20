@@ -3,7 +3,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
-export const metadata: Metadata = { title: 'Analytics — Admin · Afia' };
+export const metadata: Metadata = { title: 'Analytics · Admin · Afia' };
 
 /* ─── Helpers ─── */
 function startOfMonth(offsetMonths = 0): Date {
@@ -107,7 +107,7 @@ export default async function AdminAnalyticsPage() {
   ).length;
   const newSubsChange = lastMonthNew > 0
     ? `${Math.round(Math.abs(((thisMonthNew - lastMonthNew) / lastMonthNew) * 100))}%`
-    : thisMonthNew > 0 ? 'New' : '—';
+    : thisMonthNew > 0 ? 'New' : '-';
   const newSubsUp = thisMonthNew >= lastMonthNew;
 
   // Conversion: active / (active + trial)
@@ -161,7 +161,7 @@ export default async function AdminAnalyticsPage() {
           <MetricCard
             label="Total users"
             value={totalUsers.toLocaleString()}
-            change={newSubsChange !== '—' ? newSubsChange : ''}
+            change={newSubsChange !== '-' ? newSubsChange : ''}
             changeUp={newSubsUp}
             sub={`${thisMonthNew} new this month`}
           />

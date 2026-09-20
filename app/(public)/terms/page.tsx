@@ -4,7 +4,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Terms governing your use of Afia — a self-help platform for health anxiety. Subscription, cancellation, and acceptable use.',
+  description: 'Terms governing your use of Afia, a self-help platform for health anxiety. Subscription, cancellation, and acceptable use.',
 };
 
 export default function TermsPage() {
@@ -63,15 +63,15 @@ export default function TermsPage() {
             </p>
             <ul className="mt-3 list-disc space-y-2 pl-5">
               <li>
-                <strong>Cancellation</strong> — cancel at any time from your account settings.
+                <strong>Cancellation:</strong> cancel at any time from your account settings.
                 Access continues until the end of the current billing period.
               </li>
               <li>
-                <strong>Price changes</strong> — we will give you at least 30 days' notice before
+                <strong>Price changes:</strong> we will give you at least 30 days' notice before
                 any price change affects your subscription.
               </li>
               <li>
-                <strong>Payment processing</strong> — payments are handled by Stripe. By
+                <strong>Payment processing:</strong> payments are handled by Stripe. By
                 subscribing, you agree to Stripe's terms of service.
               </li>
             </ul>
@@ -88,8 +88,8 @@ export default function TermsPage() {
 
           <Section title="Intellectual property">
             <p>
-              All content on Afia — including exercises, copy, design, and the Afia name and logo
-              — is owned by Afia Ltd. You may use the platform for your personal, non-commercial
+              All content on Afia, including exercises, copy, design, and the Afia name and logo,
+              is owned by Afia Ltd. You may use the platform for your personal, non-commercial
               use only.
             </p>
           </Section>

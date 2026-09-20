@@ -19,7 +19,7 @@ const TOTAL_DURATION_S = TOTAL_ROUNDS * ROUND_DURATION_S; // 96s
 const PHASE_LABELS: Record<Phase, { heading: string; sub: string }> = {
   'breathe-in': {
     heading: 'Breathe in',
-    sub: "Follow the bloom as it opens — slowly, through your nose. There's no wrong way to do this.",
+    sub: "Follow the bloom as it opens - slowly, through your nose. There's no wrong way to do this.",
   },
   hold: {
     heading: 'Hold gently',
@@ -27,7 +27,7 @@ const PHASE_LABELS: Record<Phase, { heading: string; sub: string }> = {
   },
   'breathe-out': {
     heading: 'Breathe out',
-    sub: 'Let it go slowly through your mouth — longer than the inhale.',
+    sub: 'Let it go slowly through your mouth - longer than the inhale.',
   },
   rest: {
     heading: 'Rest',
@@ -141,7 +141,7 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             className="text-[16px] leading-[1.6] mb-9 [text-wrap:pretty]"
             style={{ color: '#B9D2C9' }}
           >
-            Six rounds of box breathing — {formatTime(TOTAL_DURATION_S)} of intentional calm. That
+            Six rounds of box breathing - {formatTime(TOTAL_DURATION_S)} of intentional calm. That
             takes real effort.
           </p>
 

@@ -95,10 +95,10 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       'Draw a slow breath in through your nose. Let your belly soften and rise.',
       10000,
       'Breathe out',
-      'Let it go slowly through your mouth — twice as long as the inhale. Like a tide going out.',
+      'Let it go slowly through your mouth - twice as long as the inhale. Like a tide going out.',
     ),
     completionMessage: 'Well done.',
-    completionDetail: 'Twenty rounds of ocean breathing — five minutes of slow, intentional calm. Your nervous system notices every exhale.',
+    completionDetail: 'Twenty rounds of ocean breathing - five minutes of slow, intentional calm. Your nervous system notices every exhale.',
     icon: <OceanIcon />,
     centerVisual: <OceanWaveAnimation />,
   },
@@ -112,7 +112,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     steps: [
       {
         heading: 'Five things you can see',
-        sub: 'Look around slowly. Name five things in this space — anything at all. Their colour, their edges, their texture.',
+        sub: 'Look around slowly. Name five things in this space - anything at all. Their colour, their edges, their texture.',
         durationMs: 40000,
       },
       {
@@ -122,12 +122,12 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       },
       {
         heading: 'Three things you can hear',
-        sub: 'Close your eyes if that feels right. Listen for three separate sounds — close by or far away.',
+        sub: 'Close your eyes if that feels right. Listen for three separate sounds - close by or far away.',
         durationMs: 35000,
       },
       {
         heading: 'Two things you can smell',
-        sub: 'Breathe gently through your nose. Notice any scent, however faint — even the quality of the air itself.',
+        sub: 'Breathe gently through your nose. Notice any scent, however faint - even the quality of the air itself.',
         durationMs: 35000,
       },
       {
@@ -151,12 +151,12 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     steps: [
       {
         heading: 'Top of your head',
-        sub: 'Begin here — the very top. Let your scalp soften. Notice any tingling or warmth, without trying to change it.',
+        sub: 'Begin here, at the very top. Let your scalp soften. Notice any tingling or warmth, without trying to change it.',
         durationMs: 48000,
       },
       {
         heading: 'Face and jaw',
-        sub: 'Soften your forehead. Let your eyebrows release. Notice how much the jaw holds — let it drop slightly.',
+        sub: 'Soften your forehead. Let your eyebrows release. Notice how much the jaw holds - let it drop slightly.',
         durationMs: 48000,
       },
       {
@@ -186,7 +186,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       },
       {
         heading: 'Thighs and knees',
-        sub: 'Travel through each leg. Notice any sensation — pressure, warmth, stillness. Just observe.',
+        sub: 'Travel through each leg. Notice any sensation: pressure, warmth, stillness. Just observe.',
         durationMs: 48000,
       },
       {
@@ -220,7 +220,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       },
       {
         heading: 'Someone you love',
-        sub: "Bring to mind someone who makes you feel warm — a person, a pet, anyone. Offer them the same: 'May you be safe. May you be well. May you be at ease.'",
+        sub: "Bring to mind someone who makes you feel warm - a person, a pet, anyone. Offer them the same: 'May you be safe. May you be well. May you be at ease.'",
         durationMs: 90000,
       },
       {
@@ -230,12 +230,12 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       },
       {
         heading: 'All beings, everywhere',
-        sub: "Let the warmth expand outward — to everyone, near and far, known and unknown. 'May all beings be safe. May all beings be well. May all beings be at ease.'",
+        sub: "Let the warmth expand outward, to everyone near and far, known and unknown. 'May all beings be safe. May all beings be well. May all beings be at ease.'",
         durationMs: 90000,
       },
     ],
     completionMessage: 'That was generous.',
-    completionDetail: 'Six minutes of compassion — including for yourself. That is not always easy, and you did it.',
+    completionDetail: 'Six minutes of compassion, including for yourself. That is not always easy, and you did it.',
     icon: <HeartIcon />,
     centerVisual: <LovingKindnessAnimation />,
   },
@@ -249,7 +249,7 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
     steps: [
       {
         heading: 'Find your place',
-        sub: 'Close your eyes and let somewhere arise — a place where you feel completely safe. Real or imagined. A room, a garden, a hillside, anywhere.',
+        sub: 'Close your eyes and let somewhere come to mind - a place where you feel completely safe. Real or imagined. A room, a garden, a hillside, anywhere.',
         durationMs: 60000,
       },
       {
@@ -269,12 +269,12 @@ const CONFIGS: Record<ToolId, ToolConfig> = {
       },
       {
         heading: 'Rest a while',
-        sub: "You don't need to do anything. Just stay. This place is always available to you — you can return whenever you need it.",
+        sub: "You don't need to do anything. Just stay. This place is always available to you - you can return whenever you need it.",
         durationMs: 60000,
       },
     ],
     completionMessage: 'That place is yours.',
-    completionDetail: 'Five minutes in somewhere safe. You can return here whenever you need it — it takes less than a second to arrive.',
+    completionDetail: 'Five minutes in somewhere safe. You can return here whenever you need it - it takes less than a second to arrive.',
     icon: <HomeIcon />,
     centerVisual: <SafePlaceAnimation />,
   },

@@ -162,7 +162,7 @@ export function ResetPasswordForm() {
 
           {/* Password hint */}
           <p className="text-[12px] text-[#6E7672]">
-            Use at least 8 characters — a mix of letters and numbers works well.
+            Use at least 8 characters - a mix of letters and numbers works well.
           </p>
 
           {/* Form-level error */}

@@ -215,7 +215,7 @@ export default function PlanReaderClient({
                 <path d="M8.5 15.5c2.6-2.6 4.6-4.8 6.5-8" />
               </svg>
               <h2 className="font-heading text-[18px] font-semibold text-[#3A403C]">
-                Your turn — about 2 minutes
+                Your turn - about 2 minutes
               </h2>
             </div>
             <p className="text-[15.5px] leading-[1.6] text-[#565D5A] mb-4 [text-wrap:pretty]">

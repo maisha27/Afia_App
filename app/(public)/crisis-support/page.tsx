@@ -56,7 +56,7 @@ export default function CrisisSupportPage() {
             If things feel like too much right now
           </h1>
           <p className="text-[16.5px] leading-[1.55] text-text-2 [text-wrap:pretty]">
-            You don't have to hold it alone. Reaching out is a strong thing to do — help is
+            You don't have to hold it alone. Reaching out is a strong thing to do - help is
             available any hour, any day.
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function CrisisSupportPage() {
         </div>
 
         <p className="text-center text-[12px] text-text-4 -mt-1 mb-3">
-          The text line opens your phone&rsquo;s messaging app &mdash; use your mobile to send.
+          The text line opens your phone&rsquo;s messaging app - use your mobile to send.
         </p>
 
         <p className="text-center text-[14px] text-text-4 mb-[34px]">
@@ -149,13 +149,11 @@ export default function CrisisSupportPage() {
                 <div className="text-[12.5px] text-text-4 mt-px">3 minutes</div>
               </div>
             </Link>
-            <a
-              href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/five-steps-to-mental-wellbeing/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3.5 rounded-[14px] border border-[#EFE6E1] bg-white px-5 py-[18px] hover:border-[#E0D5CA] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <Link
+              href="/calm/grounding"
+              className="flex items-center gap-3.5 rounded-[14px] border border-[#EFE6E1] bg-white px-5 py-[18px] hover:border-[#D8EBE5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className="flex-shrink-0 w-10 h-10 rounded-[11px] flex items-center justify-center" style={{ background: '#F3EEE6', color: '#B26A44' }}>
+              <span className="flex-shrink-0 w-10 h-10 rounded-[11px] bg-tint flex items-center justify-center text-primary">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M6 11V6a2 2 0 0 1 4 0v4" />
                   <path d="M10 10V4.5a2 2 0 0 1 4 0V10" />
@@ -166,7 +164,7 @@ export default function CrisisSupportPage() {
                 <div className="text-[15px] font-semibold text-text-1">5-4-3-2-1 senses</div>
                 <div className="text-[12.5px] text-text-4 mt-px">3 minutes</div>
               </div>
-            </a>
+            </Link>
           </div>
 
           {/* Other services */}

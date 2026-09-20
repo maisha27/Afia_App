@@ -21,7 +21,7 @@ export function AnimatedNumber({
 }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
+  const inView = useInView(ref, { once: true, margin: '0px 0px 120px 0px' });
   const reduced = useReducedMotion();
 
   useEffect(() => {

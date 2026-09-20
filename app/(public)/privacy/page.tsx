@@ -46,23 +46,23 @@ export default function PrivacyPage() {
             <p>We collect the following categories of personal data:</p>
             <ul className="mt-3 list-disc space-y-2 pl-5">
               <li>
-                <strong>Account information</strong> — your email address when you create an account.
+                <strong>Account information:</strong> your email address when you create an account.
               </li>
               <li>
-                <strong>Screener responses</strong> — your anonymised answers to the health anxiety
+                <strong>Screener responses:</strong> your anonymised answers to the health anxiety
                 check-in, and the resulting score band. These are linked to your account only if you
                 choose to save them by signing up.
               </li>
               <li>
-                <strong>Exercise and progress data</strong> — records of which exercises you have
+                <strong>Exercise and progress data:</strong> records of which exercises you have
                 completed and on which dates, used to generate your streak and progress view.
               </li>
               <li>
-                <strong>Subscription and billing data</strong> — your subscription status, plan type,
+                <strong>Subscription and billing data:</strong> your subscription status, plan type,
                 and billing period. Payment card details are processed by Stripe and never stored by us.
               </li>
               <li>
-                <strong>Usage data</strong> — standard server logs including IP address, browser type,
+                <strong>Usage data:</strong> standard server logs including IP address, browser type,
                 and pages visited. We use this only for security and to understand how the platform
                 performs.
               </li>
@@ -88,11 +88,11 @@ export default function PrivacyPage() {
           <Section title="Who we share it with">
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong>Supabase</strong> — our database and authentication provider. Your account
+                <strong>Supabase:</strong> our database and authentication provider. Your account
                 and app data is stored on Supabase infrastructure hosted in the EU.
               </li>
               <li>
-                <strong>Stripe</strong> — our payment processor. When you subscribe, your payment
+                <strong>Stripe:</strong> our payment processor. When you subscribe, your payment
                 details are handled directly by Stripe under their own privacy policy.
               </li>
             </ul>

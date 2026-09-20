@@ -141,7 +141,7 @@ export function PricingCard() {
         >
           <path d="M20 6 9 17l-5-5" />
         </svg>
-        Cancel anytime before your trial ends — no charge
+        Cancel anytime before your trial ends - no charge
       </div>
 
       {/* Footer assurances */}

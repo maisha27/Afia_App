@@ -194,9 +194,9 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
   const endDate = subscription?.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : null;
   const priceStr = subscription?.plan === 'monthly' ? '£12.99/month' : '£69.99/year';
   const subDateText = subscription?.cancelAtPeriodEnd
-    ? `Access until ${endDate ?? '—'}, then cancelled.`
+    ? `Access until ${endDate ?? 'N/A'}, then cancelled.`
     : isTrialing
-    ? `Free until ${endDate ?? '—'} · then ${priceStr}. Cancel anytime.`
+    ? `Free until ${endDate ?? 'N/A'} · then ${priceStr}. Cancel anytime.`
     : endDate
     ? `Next payment ${endDate}. Cancel anytime.`
     : 'Manage your plan';
@@ -220,7 +220,7 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
           {/* Display name row */}
           <SettingsRow
             title="Your name"
-            sub={nameStatus?.success ? 'Name updated.' : (firstName ?? 'Not set — add your first name')}
+            sub={nameStatus?.success ? 'Name updated.' : (firstName ?? 'Not set - add your first name')}
             right={
               <button
                 type="button"
@@ -259,7 +259,7 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
           {/* Email row */}
           <SettingsRow
             title="Email"
-            sub={emailStatus?.success ? 'Confirmation sent — check your inbox.' : email}
+            sub={emailStatus?.success ? 'Confirmation sent - check your inbox.' : email}
             right={
               <button
                 type="button"

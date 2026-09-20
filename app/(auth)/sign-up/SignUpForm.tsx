@@ -208,7 +208,7 @@ export function SignUpForm() {
             Check your email
           </h2>
           <p className="text-[14px] text-[#767D79] leading-[1.6] mb-7">
-            We sent a confirmation link to your inbox. Click it to activate your account — your
+            We sent a confirmation link to your inbox. Click it to activate your account - your
             private space will be ready.
           </p>
           <Link
@@ -258,7 +258,7 @@ export function SignUpForm() {
               A private space,<br />just for your mind.
             </h2>
             <p className="text-[14.5px] text-[#565D5A] leading-[1.65]">
-              Save today&rsquo;s reflection and pick up the gentle steps that help — all in a space
+              Save today&rsquo;s reflection and pick up the gentle steps that help - all in a space
               only you can see.
             </p>
             <ReflectionPreview />

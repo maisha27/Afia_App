@@ -178,7 +178,7 @@ export default async function WelcomePage() {
 
           <p className="text-[16.5px] leading-[1.6] text-[#565D5A] max-w-[460px] mx-auto mb-[26px] [text-wrap:pretty]">
             Your plan is ready and waiting. You&rsquo;re free until{' '}
-            <strong className="text-[#3A403C] font-semibold">{trialEndStr}</strong> — cancel
+            <strong className="text-[#3A403C] font-semibold">{trialEndStr}</strong> - cancel
             any time before then and you won&rsquo;t be charged a thing.
           </p>
 

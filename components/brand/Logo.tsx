@@ -18,13 +18,13 @@ const configs = {
   },
   wordmark: {
     src: '/Images/Official_WordMark.png',
-    alt: 'Afia — Calm in Mind',
+    alt: 'Afia - Calm in Mind',
     width: 120,
     height: 40,
   },
   full: {
     src: '/Images/Official_Logo_with_wordmark.png',
-    alt: 'Afia — Calm in Mind',
+    alt: 'Afia - Calm in Mind',
     width: 160,
     height: 64,
   },
