@@ -12,7 +12,7 @@ export default async function AdminContentPage() {
 
   const { data } = await service
     .from('exercises')
-    .select('id, title, description, content, writing_prompt, duration_minutes, week_number, day_number, sort_order, is_published')
+    .select('id, slug, title, description, content, writing_prompt, duration_minutes, week_number, day_number, sort_order, is_published, exercise_type, therapy_focus, minimum_band')
     .order('sort_order', { ascending: true });
 
   const exercises = (data ?? []) as AdminExercise[];

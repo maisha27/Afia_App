@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppBottomNav } from "@/components/layout/AppBottomNav";
 
@@ -17,21 +18,19 @@ export default async function AppLayout({
     redirect("/log-in");
   }
 
-  const { data: sub } = await supabase
-    .from('subscriptions')
-    .select('status')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const service = createServiceClient();
+  const [{ data: sub }, { data: profile }] = await Promise.all([
+    supabase.from('subscriptions').select('status').eq('user_id', user.id).maybeSingle(),
+    supabase.from('profiles').select('first_name').eq('id', user.id).maybeSingle(),
+    service.from('profiles').upsert(
+      { id: user.id, last_active_at: new Date().toISOString() },
+      { onConflict: 'id' },
+    ),
+  ]);
 
   if (!sub || !['active', 'trialing'].includes(sub.status)) {
     redirect('/plan');
   }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name')
-    .eq('id', user.id)
-    .maybeSingle();
 
   return (
     <div className="flex min-h-screen bg-background">

@@ -84,11 +84,39 @@ export default async function AdminAnalyticsPage() {
   const lastMonthStart = startOfMonth(-1).toISOString();
   const eightWeeksAgo = new Date(Date.now() - 56 * 86_400_000).toISOString();
 
-  // Fetch all subscription data in parallel
-  const [allSubsRes, recentSubsRes, totalUsersRes] = await Promise.all([
+  // Fetch all data in parallel — subscriptions + engagement
+  const [
+    allSubsRes,
+    recentSubsRes,
+    totalUsersRes,
+    screenerTotalRes,
+    screenerThisRes,
+    screenerLastRes,
+    exerciseTotalRes,
+    exerciseThisRes,
+    exerciseLastRes,
+    calmTotalRes,
+    calmThisRes,
+    calmLastRes,
+    screenerWeeklyRes,
+    exerciseWeeklyRes,
+    calmWeeklyRes,
+  ] = await Promise.all([
     service.from('subscriptions').select('status, cancel_at_period_end, created_at'),
     service.from('subscriptions').select('created_at').gte('created_at', eightWeeksAgo).order('created_at', { ascending: true }),
     service.auth.admin.listUsers({ page: 1, perPage: 1 }),
+    service.from('screener_results').select('id', { count: 'exact', head: true }),
+    service.from('screener_results').select('id', { count: 'exact', head: true }).gte('created_at', thisMonthStart),
+    service.from('screener_results').select('id', { count: 'exact', head: true }).gte('created_at', lastMonthStart).lt('created_at', thisMonthStart),
+    service.from('user_exercise_progress').select('id', { count: 'exact', head: true }),
+    service.from('user_exercise_progress').select('id', { count: 'exact', head: true }).gte('created_at', thisMonthStart),
+    service.from('user_exercise_progress').select('id', { count: 'exact', head: true }).gte('created_at', lastMonthStart).lt('created_at', thisMonthStart),
+    service.from('calm_sessions').select('id', { count: 'exact', head: true }),
+    service.from('calm_sessions').select('id', { count: 'exact', head: true }).gte('created_at', thisMonthStart),
+    service.from('calm_sessions').select('id', { count: 'exact', head: true }).gte('created_at', lastMonthStart).lt('created_at', thisMonthStart),
+    service.from('screener_results').select('created_at').gte('created_at', eightWeeksAgo),
+    service.from('user_exercise_progress').select('created_at').gte('created_at', eightWeeksAgo),
+    service.from('calm_sessions').select('created_at').gte('created_at', eightWeeksAgo),
   ]);
 
   const allSubs = allSubsRes.data ?? [];
@@ -116,7 +144,28 @@ export default async function AdminAnalyticsPage() {
       ? Math.round((activeCount / (activeCount + trialCount)) * 100)
       : 0;
 
-  // Weekly bars (group subscriptions created in last 8 weeks by Monday)
+  // ── Engagement metric counts ──
+  const screenerTotal  = screenerTotalRes.count  ?? 0;
+  const screenerThis   = screenerThisRes.count   ?? 0;
+  const screenerLast   = screenerLastRes.count   ?? 0;
+  const exerciseTotal  = exerciseTotalRes.count  ?? 0;
+  const exerciseThis   = exerciseThisRes.count   ?? 0;
+  const exerciseLast   = exerciseLastRes.count   ?? 0;
+  const calmTotal      = calmTotalRes.count      ?? 0;
+  const calmThis       = calmThisRes.count       ?? 0;
+  const calmLast       = calmLastRes.count       ?? 0;
+
+  function engChange(thisMonth: number, lastMonth: number): { text: string; up: boolean } {
+    if (lastMonth === 0) return { text: thisMonth > 0 ? 'New' : '', up: true };
+    const pct = Math.round(Math.abs(((thisMonth - lastMonth) / lastMonth) * 100));
+    return { text: `${pct}%`, up: thisMonth >= lastMonth };
+  }
+
+  const screenerChange = engChange(screenerThis, screenerLast);
+  const exerciseChange = engChange(exerciseThis, exerciseLast);
+  const calmChange     = engChange(calmThis, calmLast);
+
+  // ── Weekly bars — new subscriptions ──
   const weekMap = new Map<string, number>();
   for (const sub of recentSubs) {
     const key = isoWeekStart(new Date(sub.created_at));
@@ -136,6 +185,24 @@ export default async function AdminAnalyticsPage() {
   const bars = weeks.map((w) => ({
     label: w.label,
     heightPct: Math.max(4, Math.round((w.count / maxCount) * 100)),
+    count: w.count,
+  }));
+
+  // ── Weekly bars — engagement activity (screener + exercises + calm) ──
+  const engWeekMap = new Map<string, number>();
+  for (const row of [
+    ...(screenerWeeklyRes.data ?? []),
+    ...(exerciseWeeklyRes.data ?? []),
+    ...(calmWeeklyRes.data ?? []),
+  ] as { created_at: string }[]) {
+    const key = isoWeekStart(new Date(row.created_at));
+    engWeekMap.set(key, (engWeekMap.get(key) ?? 0) + 1);
+  }
+  const engWeeks = weeks.map((w) => ({ ...w, count: engWeekMap.get(w.key) ?? 0 }));
+  const engMaxCount = Math.max(1, ...engWeeks.map((w) => w.count));
+  const engBars = engWeeks.map((w) => ({
+    label: w.label,
+    heightPct: Math.max(4, Math.round((w.count / engMaxCount) * 100)),
     count: w.count,
   }));
 
@@ -181,8 +248,8 @@ export default async function AdminAnalyticsPage() {
           />
         </div>
 
-        {/* Weekly bar chart */}
-        <div className="rounded-[14px] px-[26px] pt-[24px] pb-[20px]" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
+        {/* Weekly bar chart — subscriptions */}
+        <div className="rounded-[14px] px-[26px] pt-[24px] pb-[20px] mb-[22px]" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
           <div className="flex items-center justify-between mb-[22px]">
             <div className="text-[14.5px] font-semibold" style={{ color: '#3A403C' }}>
               New subscriptions &middot; last 8 weeks
@@ -201,6 +268,70 @@ export default async function AdminAnalyticsPage() {
                 <div
                   className="w-full rounded-t-[7px] transition-all"
                   title={`${label}: ${count}`}
+                  style={{ maxWidth: 52, height: `${heightPct}%`, background: barColor(heightPct) }}
+                  aria-hidden="true"
+                />
+                <span className="text-[11.5px]" style={{ color: '#9AA29C' }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="text-[11px] font-semibold tracking-[0.06em] uppercase mb-[16px]" style={{ color: '#9AA29C' }}>
+          Engagement
+        </div>
+
+        {/* Engagement metric cards */}
+        <div className="grid grid-cols-3 gap-[16px] mb-[22px]">
+          <MetricCard
+            label="Screener completions"
+            value={screenerTotal.toLocaleString()}
+            change={screenerChange.text}
+            changeUp={screenerChange.up}
+            sub={`${screenerThis} this month`}
+          />
+          <MetricCard
+            label="Exercise completions"
+            value={exerciseTotal.toLocaleString()}
+            change={exerciseChange.text}
+            changeUp={exerciseChange.up}
+            sub={`${exerciseThis} this month`}
+          />
+          <MetricCard
+            label="Calm sessions"
+            value={calmTotal.toLocaleString()}
+            change={calmChange.text}
+            changeUp={calmChange.up}
+            sub={`${calmThis} this month`}
+          />
+        </div>
+
+        {/* Weekly bar chart — engagement */}
+        <div className="rounded-[14px] px-[26px] pt-[24px] pb-[20px]" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
+          <div className="flex items-center justify-between mb-[22px]">
+            <div>
+              <div className="text-[14.5px] font-semibold" style={{ color: '#3A403C' }}>
+                Engagement activity &middot; last 8 weeks
+              </div>
+              <div className="text-[12px] mt-[3px]" style={{ color: '#9AA29C' }}>
+                Screener completions, exercise completions &amp; calm sessions
+              </div>
+            </div>
+            <div className="text-[12.5px]" style={{ color: '#9AA29C' }}>Weekly</div>
+          </div>
+
+          <div
+            className="flex items-end gap-[22px]"
+            style={{ height: 172, paddingBottom: 26 }}
+            aria-label="Bar chart: engagement activity over last 8 weeks"
+            role="img"
+          >
+            {engBars.map(({ label, heightPct, count }) => (
+              <div key={label} className="flex-1 flex flex-col items-center justify-end gap-[8px]" style={{ height: '100%' }}>
+                <div
+                  className="w-full rounded-t-[7px] transition-all"
+                  title={`${label}: ${count} events`}
                   style={{ maxWidth: 52, height: `${heightPct}%`, background: barColor(heightPct) }}
                   aria-hidden="true"
                 />

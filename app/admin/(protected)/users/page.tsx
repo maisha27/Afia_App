@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from 'next';
+import Link from 'next/link';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -73,56 +74,76 @@ function StatusPill({ status }: { status: Status }) {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; s?: string }>;
 }) {
-  const { page: pageStr } = await searchParams;
-  const currentPage = Math.max(1, parseInt(pageStr ?? '1', 10));
+  const { page: pageStr, q: rawQ, s: rawS } = await searchParams;
+  const q = rawQ?.trim() ?? '';
+  const statusFilter = rawS?.trim() ?? '';
+  const isSearching = q.length > 0;
+  const isFiltering = isSearching || (statusFilter !== '' && statusFilter !== 'All');
+  const currentPage = isFiltering ? 1 : Math.max(1, parseInt(pageStr ?? '1', 10));
 
   const [supabase, service] = [await createClient(), createServiceClient()];
   const { data: { user: adminUser } } = await supabase.auth.getUser();
 
+  // When filtering: fetch a large batch — Supabase Admin API lacks server-side email/status search
   const { data: listData, error } = await service.auth.admin.listUsers({
-    page: currentPage,
-    perPage: PAGE_SIZE,
+    page: isFiltering ? 1 : currentPage,
+    perPage: isFiltering ? 500 : PAGE_SIZE,
   });
 
-  const users = listData?.users ?? [];
-  const total = (listData as { total?: number })?.total ?? 0;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const allFetched = listData?.users ?? [];
 
-  // Fetch subscriptions for this page's users
-  const userIds = users.map((u) => u.id);
-  const { data: subs } = userIds.length
-    ? await service.from('subscriptions')
-        .select('user_id, status, cancel_at_period_end')
-        .in('user_id', userIds)
-    : { data: [] };
+  // Fetch subscriptions, profiles, and summary counts in parallel — use allFetched so status filter has full data
+  const fetchIds = allFetched.map((u) => u.id);
+  const [subsRes, profilesRes, allSubsRes] = await Promise.all([
+    fetchIds.length
+      ? service.from('subscriptions').select('user_id, status, cancel_at_period_end').in('user_id', fetchIds)
+      : Promise.resolve({ data: [] }),
+    fetchIds.length
+      ? service.from('profiles').select('id, last_active_at').in('id', fetchIds)
+      : Promise.resolve({ data: [] }),
+    service.from('subscriptions').select('status, cancel_at_period_end'),
+  ]);
 
   const subMap = Object.fromEntries(
-    (subs ?? []).map((s) => [s.user_id, s as { status: string; cancel_at_period_end: boolean }]),
+    ((subsRes.data ?? []) as { user_id: string; status: string; cancel_at_period_end: boolean }[])
+      .map((s) => [s.user_id, s]),
   );
 
-  // Summary counts across all subscriptions
-  const { data: allSubs } = await service
-    .from('subscriptions')
-    .select('status, cancel_at_period_end');
-  const subscribedCount = (allSubs ?? []).filter(
+  const profileMap = Object.fromEntries(
+    ((profilesRes.data ?? []) as { id: string; last_active_at: string | null }[])
+      .map((p) => [p.id, p.last_active_at]),
+  );
+
+  const allSubs = allSubsRes.data ?? [];
+  const subscribedCount = allSubs.filter(
     (s) => s.status === 'active' && !s.cancel_at_period_end,
   ).length;
-  const trialCount = (allSubs ?? []).filter((s) => s.status === 'trialing').length;
+  const trialCount = allSubs.filter((s) => s.status === 'trialing').length;
 
-  const rows = users.map((u) => {
+  const allRows = allFetched.map((u) => {
     const sub = subMap[u.id] ?? null;
     const status = getStatus(sub);
+    const lastActive = profileMap[u.id] ?? u.last_sign_in_at ?? null;
     return {
       id: u.id,
       email: u.email ?? '(no email)',
       initials: emailInitials(u.email ?? 'XX'),
       status,
       joined: formatJoinDate(u.created_at),
-      lastActive: formatRelativeDate(u.last_sign_in_at ?? null),
+      lastActive: formatRelativeDate(lastActive),
     };
   });
+
+  const rows = isFiltering
+    ? allRows
+        .filter((r) => !isSearching || r.email.toLowerCase().includes(q.toLowerCase()))
+        .filter((r) => !statusFilter || statusFilter === 'All' || r.status === statusFilter)
+    : allRows;
+
+  const total = isFiltering ? rows.length : ((listData as { total?: number })?.total ?? 0);
+  const totalPages = isFiltering ? 1 : Math.ceil(total / PAGE_SIZE);
 
   if (error) {
     return (
@@ -143,15 +164,90 @@ export default async function AdminUsersPage({
 
       <main className="flex-1 min-w-0 px-[34px] py-[30px]">
         {/* Header */}
-        <div className="flex items-end justify-between mb-[22px]">
-          <div>
+        <div className="flex items-start justify-between mb-[22px] gap-[16px]">
+          <div className="flex-shrink-0">
             <h1 className="font-heading text-[24px] font-semibold tracking-[-0.02em] mb-[3px]" style={{ color: '#26302D' }}>
               Users
             </h1>
             <div className="text-[13px]" style={{ color: '#7A827D' }}>
-              {total.toLocaleString()} total &middot; {subscribedCount} subscribed &middot; {trialCount} in trial
+              {isFiltering
+                ? `${rows.length} result${rows.length !== 1 ? 's' : ''}${isSearching ? ` for "${q}"` : ''}${statusFilter && statusFilter !== 'All' ? ` · ${statusFilter}` : ''}`
+                : `${total.toLocaleString()} total · ${subscribedCount} subscribed · ${trialCount} in trial`}
             </div>
           </div>
+
+          <div className="flex items-center gap-[10px]">
+            {/* Search */}
+            <form method="GET" action="/admin/users" className="relative">
+              <input
+                type="search"
+                name="q"
+                defaultValue={q}
+                placeholder="Search by email…"
+                className="rounded-[10px] pl-[36px] pr-[12px] py-[8px] text-[13.5px] outline-none transition-colors w-[230px]"
+                style={{ background: '#fff', border: '1.5px solid #E4E6E2', color: '#2E3330' }}
+                onFocus={undefined}
+              />
+              <svg
+                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA29C"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                className="absolute left-[11px] top-[50%] -translate-y-[50%] pointer-events-none"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              {isSearching && (
+                <a
+                  href="/admin/users"
+                  className="absolute right-[9px] top-[50%] -translate-y-[50%] text-[16px] leading-none hover:opacity-60 transition-opacity"
+                  style={{ color: '#9AA29C' }}
+                  aria-label="Clear search"
+                >
+                  ×
+                </a>
+              )}
+            </form>
+
+            {/* Export CSV */}
+            <a
+              href="/admin/users/export"
+              className="inline-flex items-center gap-[6px] text-[13px] font-semibold px-[13px] py-[8px] rounded-[9px] transition-colors hover:opacity-80 flex-shrink-0"
+              style={{ background: '#F5F6F5', color: '#3A403C', border: '1px solid #E4E6E2' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export CSV
+            </a>
+          </div>
+        </div>
+
+        {/* Status filter pills */}
+        <div className="flex items-center gap-[8px] mb-[16px] flex-wrap">
+          {(['All', 'Subscribed', 'Trial', 'Free', 'Cancelled'] as const).map((s) => {
+            const isActive = s === 'All'
+              ? !statusFilter || statusFilter === 'All' || statusFilter === ''
+              : statusFilter === s;
+            const params = new URLSearchParams();
+            if (q) params.set('q', q);
+            if (s !== 'All') params.set('s', s);
+            const href = `/admin/users${params.toString() ? `?${params.toString()}` : ''}`;
+            return (
+              <a
+                key={s}
+                href={href}
+                className="text-[13px] font-semibold px-[13px] py-[6px] rounded-[8px] transition-colors"
+                style={isActive
+                  ? { background: '#2F7A6D', color: '#EAF3EF' }
+                  : { background: '#fff', color: '#5F6863', border: '1px solid #E4E6E2' }
+                }
+              >
+                {s}
+              </a>
+            );
+          })}
         </div>
 
         {/* Table */}
@@ -162,6 +258,7 @@ export default async function AdminUsersPage({
             <div className="flex-[1.5] text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>Status</div>
             <div className="flex-[1.1] text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>Joined</div>
             <div className="flex-[1.1] text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>Last active</div>
+            <div className="w-[20px] flex-shrink-0" aria-hidden="true" />
           </div>
 
           {rows.length === 0 ? (
@@ -170,9 +267,10 @@ export default async function AdminUsersPage({
             </div>
           ) : (
             rows.map((row, i) => (
-              <div
+              <Link
                 key={row.id}
-                className="flex items-center px-[20px] py-[14px]"
+                href={`/admin/users/${row.id}`}
+                className="flex items-center px-[20px] py-[14px] hover:bg-[#F6FAF8] transition-colors"
                 style={i < rows.length - 1 ? { borderBottom: '1px solid #F0F2EE' } : undefined}
               >
                 <div className="flex-[2.4] flex items-center gap-[11px] min-w-0 pr-4">
@@ -198,7 +296,12 @@ export default async function AdminUsersPage({
                 <div className="flex-[1.1] text-[13px]" style={{ color: '#5F6863' }}>
                   {row.lastActive}
                 </div>
-              </div>
+                <div className="w-[20px] flex-shrink-0 flex items-center justify-end">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C4C9C5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </div>
+              </Link>
             ))
           )}
         </div>

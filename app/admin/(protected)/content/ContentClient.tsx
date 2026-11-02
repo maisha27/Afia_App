@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { setExercisePublished, deleteExercise, updateExercise, createExercise } from '@/lib/actions/admin';
+import { setExercisePublished, deleteExercise, updateExercise, createExercise, bulkSetPublished } from '@/lib/actions/admin';
+
+const EXERCISE_TYPES = [
+  'Psychoeducation', 'CBT', 'ERP', 'Behavioural',
+  'Body awareness', 'ACT-adjacent', 'Reflection', 'Relapse prevention',
+] as const;
 
 export interface AdminExercise {
   id: string;
+  slug: string;
   title: string;
   description: string | null;
   content: string | null;
@@ -14,6 +20,9 @@ export interface AdminExercise {
   day_number: number;
   sort_order: number;
   is_published: boolean;
+  exercise_type: string | null;
+  therapy_focus: string | null;
+  minimum_band: string | null;
 }
 
 type ExStatus = 'Published' | 'Draft';
@@ -43,6 +52,9 @@ interface DraftFields {
   content: string;
   writing_prompt: string;
   duration_minutes: number;
+  exercise_type: string;
+  therapy_focus: string;
+  minimum_band: string;
 }
 
 /* ─── Fields for new exercise creation ─── */
@@ -56,7 +68,10 @@ interface CreateFields {
   description: string;
   content: string;
   writing_prompt: string;
-  slugTouched: boolean; // track if user manually edited the slug
+  exercise_type: string;
+  therapy_focus: string;
+  minimum_band: string;
+  slugTouched: boolean;
 }
 
 function toDraft(ex: AdminExercise): DraftFields {
@@ -66,6 +81,9 @@ function toDraft(ex: AdminExercise): DraftFields {
     content: ex.content ?? '',
     writing_prompt: ex.writing_prompt ?? '',
     duration_minutes: ex.duration_minutes,
+    exercise_type: ex.exercise_type ?? '',
+    therapy_focus: ex.therapy_focus ?? '',
+    minimum_band: ex.minimum_band ?? '',
   };
 }
 
@@ -196,6 +214,41 @@ export function ContentClient({ exercises: initialExercises }: Props) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  /* ─── Bulk selection ─── */
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const allSelected = exercises.length > 0 && exercises.every((e) => selectedIds.has(e.id));
+  const someSelected = !allSelected && exercises.some((e) => selectedIds.has(e.id));
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(exercises.map((e) => e.id)));
+  }
+
+  const handleBulkPublish = (published: boolean) => {
+    setBulkError(null);
+    const ids = [...selectedIds];
+    setExercises((prev) => prev.map((e) => selectedIds.has(e.id) ? { ...e, is_published: published } : e));
+    setSelectedIds(new Set());
+    startTransition(async () => {
+      const result = await bulkSetPublished(ids, published);
+      if (result.error) {
+        setBulkError(result.error);
+        setExercises((prev) => prev.map((e) => ids.includes(e.id) ? { ...e, is_published: !published } : e));
+      }
+    });
+  };
+
+  /* ─── Last-saved timestamp ─── */
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+
   /* ─── Create mode ─── */
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -212,6 +265,9 @@ export function ContentClient({ exercises: initialExercises }: Props) {
       description: '',
       content: '',
       writing_prompt: '',
+      exercise_type: '',
+      therapy_focus: '',
+      minimum_band: '',
       slugTouched: false,
     };
   }
@@ -256,6 +312,9 @@ export function ContentClient({ exercises: initialExercises }: Props) {
         description: createFields.description || null,
         content: createFields.content || null,
         writing_prompt: createFields.writing_prompt || null,
+        exercise_type: createFields.exercise_type || null,
+        therapy_focus: createFields.therapy_focus || null,
+        minimum_band: createFields.minimum_band || null,
       });
 
       if (result.error) {
@@ -277,12 +336,13 @@ export function ContentClient({ exercises: initialExercises }: Props) {
   const ex = exercises[selectedIndex] as AdminExercise | undefined;
 
   const [draft, setDraft] = useState<DraftFields>(() => ex ? toDraft(ex) : toDraft({
-    id: '', title: '', description: null, content: null, writing_prompt: null,
+    id: '', slug: '', title: '', description: null, content: null, writing_prompt: null,
     duration_minutes: 5, week_number: 1, day_number: 1, sort_order: 1, is_published: false,
+    exercise_type: null, therapy_focus: null, minimum_band: null,
   }));
 
   useEffect(() => {
-    if (ex) { setDraft(toDraft(ex)); setSaveSuccess(false); setActionError(null); setConfirmDelete(false); }
+    if (ex) { setDraft(toDraft(ex)); setSaveSuccess(false); setActionError(null); setConfirmDelete(false); setLastSavedAt(null); }
   }, [selectedIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isDirty = ex ? (
@@ -290,7 +350,10 @@ export function ContentClient({ exercises: initialExercises }: Props) {
     draft.description !== (ex.description ?? '') ||
     draft.content !== (ex.content ?? '') ||
     draft.writing_prompt !== (ex.writing_prompt ?? '') ||
-    draft.duration_minutes !== ex.duration_minutes
+    draft.duration_minutes !== ex.duration_minutes ||
+    draft.exercise_type !== (ex.exercise_type ?? '') ||
+    draft.therapy_focus !== (ex.therapy_focus ?? '') ||
+    draft.minimum_band !== (ex.minimum_band ?? '')
   ) : false;
 
   function setField<K extends keyof DraftFields>(key: K, value: DraftFields[K]) {
@@ -327,6 +390,9 @@ export function ContentClient({ exercises: initialExercises }: Props) {
         content: draft.content || null,
         writing_prompt: draft.writing_prompt || null,
         duration_minutes: draft.duration_minutes,
+        exercise_type: draft.exercise_type || null,
+        therapy_focus: draft.therapy_focus || null,
+        minimum_band: draft.minimum_band || null,
       });
       if (result.error) { setActionError(result.error); return; }
       setExercises((prev) =>
@@ -339,11 +405,15 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 content: draft.content || null,
                 writing_prompt: draft.writing_prompt || null,
                 duration_minutes: draft.duration_minutes,
+                exercise_type: draft.exercise_type || null,
+                therapy_focus: draft.therapy_focus || null,
+                minimum_band: draft.minimum_band || null,
               }
             : e,
         ),
       );
       setSaveSuccess(true);
+      setLastSavedAt(new Date());
     });
   };
 
@@ -392,8 +462,20 @@ export function ContentClient({ exercises: initialExercises }: Props) {
       <div className="flex gap-[22px] items-start">
         {/* Exercise list */}
         <div className="w-[296px] flex-shrink-0 rounded-[14px] overflow-hidden" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
-          <div className="px-[18px] py-[14px] text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C', borderBottom: '1px solid #F0F1EE' }}>
-            {exercises.length} exercise{exercises.length !== 1 ? 's' : ''}
+          <div className="px-[18px] py-[13px] flex items-center gap-[10px]" style={{ borderBottom: '1px solid #F0F1EE' }}>
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(el) => { if (el) el.indeterminate = someSelected; }}
+              onChange={toggleSelectAll}
+              className="w-[14px] h-[14px] rounded cursor-pointer flex-shrink-0"
+              aria-label="Select all exercises"
+              title="Select all"
+              style={{ accentColor: '#2F7A6D' }}
+            />
+            <span className="text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>
+              {exercises.length} exercise{exercises.length !== 1 ? 's' : ''}
+            </span>
           </div>
 
           {exercises.length === 0 && !isCreating && (
@@ -406,18 +488,35 @@ export function ContentClient({ exercises: initialExercises }: Props) {
             const isActive = !isCreating && i === selectedIndex;
             const itemStatus: ExStatus = item.is_published ? 'Published' : 'Draft';
             return (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                onClick={() => { setSelectedIndex(i); setConfirmDelete(false); setActionError(null); exitCreateMode(); }}
-                className="w-full text-left flex items-center gap-3 px-[18px] py-[14px] transition-colors hover:bg-[#F6FAF8]"
+                className="w-full flex items-center transition-colors hover:bg-[#F6FAF8]"
                 style={{
                   background: isActive ? '#F1F7F5' : undefined,
                   borderLeft: isActive ? '3px solid #2F7A6D' : '3px solid transparent',
                   borderBottom: i < exercises.length - 1 ? '1px solid #F0F1EE' : undefined,
-                  paddingLeft: isActive ? 15 : 18,
                 }}
               >
+                <div
+                  className="flex-shrink-0 px-[12px] py-[14px]"
+                  onClick={(e) => { e.stopPropagation(); toggleSelect(item.id); }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(item.id)}
+                    onChange={() => toggleSelect(item.id)}
+                    className="w-[14px] h-[14px] rounded cursor-pointer"
+                    style={{ accentColor: '#2F7A6D' }}
+                    aria-label={`Select ${item.title}`}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedIndex(i); setConfirmDelete(false); setActionError(null); exitCreateMode(); }}
+                  className="flex-1 text-left flex items-center gap-3 pr-[18px] py-[14px] min-w-0"
+                  style={{ paddingLeft: isActive ? 0 : 0 }}
+                >
                 <GripIcon />
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-semibold mb-[2px] truncate" style={{ color: isActive ? '#26302D' : '#3A403C' }}>
@@ -430,7 +529,8 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 <span className={`text-[11px] font-semibold px-[8px] py-[3px] rounded-full flex-shrink-0 ${STATUS_PILL[itemStatus]}`}>
                   {itemStatus}
                 </span>
-              </button>
+                </button>
+              </div>
             );
           })}
 
@@ -517,6 +617,60 @@ export function ContentClient({ exercises: initialExercises }: Props) {
               ))}
             </div>
 
+            {/* Exercise type + Therapy focus */}
+            <div className="grid grid-cols-2 gap-[12px] mb-[14px]">
+              <div className="flex flex-col gap-[6px]">
+                <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>Exercise type</label>
+                <select
+                  value={createFields.exercise_type}
+                  onChange={(e) => setCreateField('exercise_type', e.target.value)}
+                  className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                  style={INPUT_STYLE}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+                >
+                  <option value="">— Select type —</option>
+                  {EXERCISE_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-[6px]">
+                <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>
+                  Therapy focus <span className="font-normal" style={{ color: '#9AA29C' }}>(comma-separated)</span>
+                </label>
+                <input
+                  type="text"
+                  value={createFields.therapy_focus}
+                  onChange={(e) => setCreateField('therapy_focus', e.target.value)}
+                  placeholder="e.g. Worry, Reassurance seeking"
+                  className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                  style={INPUT_STYLE}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+                />
+              </div>
+            </div>
+
+            {/* Minimum band (create) */}
+            <div className="flex flex-col gap-[6px] mb-[14px]">
+              <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>
+                Minimum band <span className="font-normal" style={{ color: '#9AA29C' }}>(who sees this exercise)</span>
+              </label>
+              <select
+                value={createFields.minimum_band}
+                onChange={(e) => setCreateField('minimum_band', e.target.value)}
+                className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                style={INPUT_STYLE}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+              >
+                <option value="">All bands</option>
+                <option value="mild">Mild+</option>
+                <option value="moderate">Moderate+</option>
+              </select>
+            </div>
+
             <FieldTextarea label="Description" value={createFields.description} onChange={(v) => setCreateField('description', v)} rows={2} />
             <FieldTextarea label="Reading content" value={createFields.content} onChange={(v) => setCreateField('content', v)} rows={5} />
             <FieldTextarea label="Writing prompt" value={createFields.writing_prompt} onChange={(v) => setCreateField('writing_prompt', v)} rows={2} placeholder="Optional - leave blank to hide" italic />
@@ -560,8 +714,30 @@ export function ContentClient({ exercises: initialExercises }: Props) {
           <div className="flex-1 min-w-0 rounded-[14px] px-[26px] py-[24px]" style={{ background: '#fff', border: '1px solid #E4E6E2' }}>
             {/* Editor header */}
             <div className="flex items-center justify-between mb-[22px]">
-              <div className="text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>
-                W{ex.week_number} · Day {ex.day_number} · Sort {ex.sort_order}
+              <div className="flex items-center gap-[12px]">
+                <div className="text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: '#9AA29C' }}>
+                  W{ex.week_number} · Day {ex.day_number} · Sort {ex.sort_order}
+                </div>
+                {lastSavedAt && (
+                  <span className="text-[11.5px]" style={{ color: '#9AA29C' }}>
+                    Saved at {lastSavedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+                <a
+                  href={`/plan/${ex.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Preview exercise (opens as user)"
+                  className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold px-[9px] py-[4px] rounded-[7px] transition-colors hover:opacity-80"
+                  style={{ color: '#276358', background: '#E3F1EE', border: '1px solid #CBE6DE' }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14L21 3" />
+                  </svg>
+                  Preview
+                </a>
               </div>
               <div className="flex items-center gap-[8px]">
                 <span className="text-[12px]" style={{ color: '#5F6863' }}>Status</span>
@@ -612,6 +788,60 @@ export function ContentClient({ exercises: initialExercises }: Props) {
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
               />
+            </div>
+
+            {/* Exercise type + Therapy focus */}
+            <div className="grid grid-cols-2 gap-[12px] mb-[14px]">
+              <div className="flex flex-col gap-[6px]">
+                <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>Exercise type</label>
+                <select
+                  value={draft.exercise_type}
+                  onChange={(e) => setField('exercise_type', e.target.value)}
+                  className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                  style={INPUT_STYLE}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+                >
+                  <option value="">— Select type —</option>
+                  {EXERCISE_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-[6px]">
+                <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>
+                  Therapy focus <span className="font-normal" style={{ color: '#9AA29C' }}>(comma-separated)</span>
+                </label>
+                <input
+                  type="text"
+                  value={draft.therapy_focus}
+                  onChange={(e) => setField('therapy_focus', e.target.value)}
+                  placeholder="e.g. Worry, Reassurance seeking"
+                  className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                  style={INPUT_STYLE}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+                />
+              </div>
+            </div>
+
+            {/* Minimum band */}
+            <div className="flex flex-col gap-[6px] mb-[14px]">
+              <label className="text-[12.5px] font-semibold" style={{ color: '#4A514C' }}>
+                Minimum band <span className="font-normal" style={{ color: '#9AA29C' }}>(who sees this exercise)</span>
+              </label>
+              <select
+                value={draft.minimum_band}
+                onChange={(e) => setField('minimum_band', e.target.value)}
+                className="rounded-[10px] px-[14px] py-[11px] text-[14px] outline-none transition-colors"
+                style={INPUT_STYLE}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4A786E')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#E4E6E2')}
+              >
+                <option value="">All bands</option>
+                <option value="mild">Mild+</option>
+                <option value="moderate">Moderate+</option>
+              </select>
             </div>
 
             {/* Description */}
@@ -723,6 +953,57 @@ export function ContentClient({ exercises: initialExercises }: Props) {
           </div>
         )}
       </div>
+
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div
+          className="fixed bottom-[24px] left-[50%] -translate-x-[50%] z-50 flex items-center gap-[10px] rounded-[14px] px-[20px] py-[13px] shadow-lg"
+          style={{ background: '#2A302D', border: '1px solid #3D4540' }}
+        >
+          <span className="text-[13px] font-semibold mr-[4px]" style={{ color: '#C5CCC8' }}>
+            {selectedIds.size} selected
+          </span>
+
+          <button
+            type="button"
+            onClick={() => handleBulkPublish(true)}
+            disabled={isPending}
+            className="inline-flex items-center gap-[6px] text-[13px] font-semibold px-[13px] py-[7px] rounded-[9px] transition-colors disabled:opacity-50"
+            style={{ background: '#2F7A6D', color: '#EAF3EF' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            Publish
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleBulkPublish(false)}
+            disabled={isPending}
+            className="inline-flex items-center gap-[6px] text-[13px] font-semibold px-[13px] py-[7px] rounded-[9px] transition-colors disabled:opacity-50"
+            style={{ background: '#3D4540', color: '#C5CCC8', border: '1px solid #4E5650' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" /><path d="M8 12h8" />
+            </svg>
+            Set draft
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSelectedIds(new Set()); setBulkError(null); }}
+            className="text-[13px] hover:opacity-70 transition-opacity ml-[2px]"
+            style={{ color: '#8A928E' }}
+          >
+            Clear
+          </button>
+
+          {bulkError && (
+            <span className="text-[12.5px]" style={{ color: '#E8AA7A' }}>{bulkError}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
