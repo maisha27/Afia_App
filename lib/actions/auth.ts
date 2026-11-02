@@ -28,19 +28,49 @@ export async function signUp(data: {
     ? (JSON.parse(pendingRaw) as { score: number; band: string; answers: number[] | null })
     : null;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
+
   const { data: authData, error } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=/plan`,
+    },
   });
 
   if (error) {
-    const raw = error.message ?? '';
-    const isMeaningless = !raw || raw === '{}' || raw === '{ }' || raw.startsWith('{');
-    return {
-      error: isMeaningless
-        ? 'Too many attempts. Please wait a few minutes and try again.'
-        : raw,
-    };
+    const raw = (error.message ?? '').trim();
+    let code = (error as { code?: string }).code ?? '';
+    let innerMsg = raw;
+
+    // Supabase sometimes encodes the full error as a JSON string in message
+    if (raw.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(raw) as { code?: string; message?: string; msg?: string };
+        code = parsed.code ?? code;
+        innerMsg = parsed.message ?? parsed.msg ?? raw;
+      } catch { /* not JSON, leave as-is */ }
+    }
+
+    if (!innerMsg || innerMsg === '{}' || innerMsg === '{ }') {
+      return { error: 'Something went wrong. Please try again.' };
+    }
+    if (
+      code === 'over_email_send_rate_limit' ||
+      innerMsg.toLowerCase().includes('rate limit') ||
+      innerMsg.toLowerCase().includes('too many')
+    ) {
+      return { error: 'Too many sign-up emails sent to this address. Please try a different email or wait an hour.' };
+    }
+    if (
+      code === 'user_already_exists' ||
+      innerMsg.toLowerCase().includes('already registered') ||
+      innerMsg.toLowerCase().includes('already exists')
+    ) {
+      return { error: 'An account with this email already exists. Try logging in instead.' };
+    }
+
+    return { error: innerMsg };
   }
   if (!authData.user) return { error: 'Something went wrong. Please try again.' };
 

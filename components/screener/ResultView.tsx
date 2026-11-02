@@ -451,6 +451,8 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
                   your patterns, not to confirm or rule out any condition.{' '}
                   <Link
                     href="/disclaimer"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="underline underline-offset-2 hover:text-foreground transition-colors"
                   >
                     Medical disclaimer
