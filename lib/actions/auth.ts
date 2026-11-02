@@ -33,7 +33,15 @@ export async function signUp(data: {
     password: data.password,
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    const raw = error.message ?? '';
+    const isMeaningless = !raw || raw === '{}' || raw === '{ }' || raw.startsWith('{');
+    return {
+      error: isMeaningless
+        ? 'Too many attempts. Please wait a few minutes and try again.'
+        : raw,
+    };
+  }
   if (!authData.user) return { error: 'Something went wrong. Please try again.' };
 
   // Save first name — service client bypasses RLS so this works before email confirmation too
