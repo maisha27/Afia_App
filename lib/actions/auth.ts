@@ -28,7 +28,7 @@ export async function signUp(data: {
     ? (JSON.parse(pendingRaw) as { score: number; band: string; answers: number[] | null })
     : null;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia-app.vercel.app';
 
   const { data: authData, error } = await supabase.auth.signUp({
     email: data.email,
@@ -53,7 +53,7 @@ export async function signUp(data: {
     }
 
     if (!innerMsg || innerMsg === '{}' || innerMsg === '{ }') {
-      return { error: 'Something went wrong. Please try again.' };
+      return { error: `Sign-up failed (status ${error.status ?? 'unknown'}). Check Supabase SMTP settings in the dashboard.` };
     }
     if (
       code === 'over_email_send_rate_limit' ||
@@ -180,7 +180,7 @@ export async function forgotPassword(data: {
   email: string;
 }): Promise<AuthActionResult> {
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia-app.vercel.app';
 
   // We don't reveal whether the email is registered — Supabase does this automatically.
   await supabase.auth.resetPasswordForEmail(data.email, {

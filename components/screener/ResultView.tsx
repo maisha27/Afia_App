@@ -199,7 +199,7 @@ export function ResultView({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
       } catch {
         // cookie unavailable — sign-up still works without screener result
       }
-      router.push('/sign-up');
+      router.push(`/sign-up?band=${encodeURIComponent(band)}&score=${score}`);
     });
   };
 

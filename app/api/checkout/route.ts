@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   }
 
   let customerId = existing?.stripe_customer_id ?? undefined;
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia-app.vercel.app';
 
   try {
     if (!customerId) {

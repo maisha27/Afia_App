@@ -58,18 +58,44 @@ function CornerQuatrefoil() {
   );
 }
 
-/* ─── Decorative reflection-card preview (left column) ─── */
-function ReflectionPreview() {
+/* ─── Band display maps ─── */
+const BAND_COLORS: Record<string, string> = {
+  Low: '#2F6E7A',
+  Mild: '#6B7D2C',
+  Moderate: '#B26A44',
+  High: '#B26A44',
+  'Very High': '#B0503F',
+};
+
+const BAND_PREVIEW_TEXT: Record<string, string> = {
+  Low: 'Your patterns are manageable. The tools here can help you keep it that way.',
+  Mild: 'Gentle daily habits make a real difference at this level. Your reflection is saved.',
+  Moderate: 'Checking symptoms and seeking reassurance came up most. The worry loop is real, but so is your progress.',
+  High: 'Daily structured practice is one of the most effective ways through this. Your space is ready.',
+  'Very High': 'Self-help works best alongside professional support. Your reflection is here whenever you need it.',
+};
+
+/* ─── Reflection-card preview (left column) ─── */
+function ReflectionPreview({ band, score }: { band: string | null; score: number | null }) {
+  const displayBand = band ?? 'Moderate';
+  const displayScore = score ?? 28;
+  const color = BAND_COLORS[displayBand] ?? '#B26A44';
+  const thumbPct = Math.min(92, Math.max(8, (displayScore / 42) * 100));
+  const previewText = BAND_PREVIEW_TEXT[displayBand] ?? BAND_PREVIEW_TEXT['Moderate'];
+
   return (
     <div className="relative mt-8 select-none" aria-hidden="true">
       <div className="absolute inset-0 translate-x-2.5 translate-y-2.5 rounded-[18px] bg-white border border-[#E7E2DA] opacity-25" />
       <div className="absolute inset-0 translate-x-1 translate-y-1.5 rounded-[18px] bg-white border border-[#E7E2DA] opacity-50" />
       <div className="relative rounded-[18px] bg-white border border-[#E7E2DA] shadow-[0_16px_40px_-20px_rgba(20,24,22,.18)] p-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className="font-heading text-[12px] font-semibold uppercase tracking-[0.08em] text-[#B26A44]">
-            Moderate
+          <span
+            className="font-heading text-[12px] font-semibold uppercase tracking-[0.08em]"
+            style={{ color }}
+          >
+            {displayBand}
           </span>
-          <span className="text-[12px] text-[#6E7672]">· 28 / 42</span>
+          <span className="text-[12px] text-[#6E7672]">· {displayScore} / 42</span>
         </div>
         <div
           className="relative h-[6px] rounded-full mb-5 overflow-visible"
@@ -79,13 +105,12 @@ function ReflectionPreview() {
           }}
         >
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-[2.5px] border-[#B26A44] shadow-sm"
-            style={{ left: 'calc(68% - 7px)' }}
+            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-[2.5px] shadow-sm"
+            style={{ left: `calc(${thumbPct}% - 7px)`, borderColor: color }}
           />
         </div>
         <p className="text-[13px] text-[#767D79] leading-[1.55]">
-          &ldquo;Checking symptoms and seeking reassurance came up most often this week. The worry
-          loop is real, but so is your progress.&rdquo;
+          &ldquo;{previewText}&rdquo;
         </p>
         <div className="mt-4 pt-3.5 border-t border-[#EEE9E1] flex items-center gap-2">
           <svg
@@ -141,7 +166,7 @@ function inputCls(hasError: boolean) {
   } rounded-[12px] px-[15px] py-[13px] text-[14.5px] text-[#262B29] placeholder:text-[#9AA29C] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors`;
 }
 
-export function SignUpForm() {
+export function SignUpForm({ band = null, score = null }: { band?: string | null; score?: number | null }) {
   const reduced = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [formMessage, setFormMessage] = useState<string | null>(null);
@@ -275,7 +300,7 @@ export function SignUpForm() {
               Save today&rsquo;s reflection and pick up the gentle steps that help - all in a space
               only you can see.
             </p>
-            <ReflectionPreview />
+            <ReflectionPreview band={band} score={score} />
           </motion.div>
 
           {/* Right column — form card */}
