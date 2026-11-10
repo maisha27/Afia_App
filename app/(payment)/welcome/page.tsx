@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
+import { stripe } from '@/lib/stripe';
 
 export const metadata: Metadata = { title: "You're all set" };
 
@@ -113,7 +115,67 @@ function BloomedQuatrefoil() {
   );
 }
 
-export default async function WelcomePage() {
+async function syncSubscriptionFromCheckout(sessionId: string, userId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from('subscriptions')
+    .select('status')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (existing?.status === 'active' || existing?.status === 'trialing') return;
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ['subscription'],
+  });
+
+  if (
+    session.status !== 'complete' ||
+    !session.subscription ||
+    typeof session.subscription === 'string'
+  ) return;
+
+  const sub = session.subscription;
+  const priceId = sub.items.data[0]?.price.id ?? '';
+  const periodEndTs = sub.items.data[0]?.current_period_end;
+
+  const service = createServiceClient();
+  await service.from('subscriptions').upsert(
+    {
+      user_id: userId,
+      stripe_customer_id: session.customer as string,
+      stripe_subscription_id: sub.id,
+      status: sub.status,
+      plan:
+        priceId === process.env.STRIPE_PRICE_YEARLY
+          ? 'yearly'
+          : priceId === process.env.STRIPE_PRICE_MONTHLY
+            ? 'monthly'
+            : null,
+      current_period_end: periodEndTs ? new Date(periodEndTs * 1000).toISOString() : null,
+    },
+    { onConflict: 'user_id' }
+  );
+}
+
+export default async function WelcomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const { session_id } = await searchParams;
+
+  /* Sync subscription from Stripe before anything else — webhook may not have fired yet */
+  if (session_id) {
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await syncSubscriptionFromCheckout(session_id, user.id);
+    } catch {
+      // Don't block page render if Stripe call fails
+    }
+  }
+
   /* Read trial end from subscription row; fall back to today + 7 if webhook hasn't fired yet */
   let trialEndStr: string;
   try {
@@ -217,7 +279,7 @@ export default async function WelcomePage() {
           {/* CTAs */}
           <div className="flex gap-3 justify-center flex-wrap">
             <Link
-              href="/home"
+              href="/exercises"
               className="inline-flex items-center gap-2.5 bg-primary text-white font-heading text-[16px] font-semibold py-[16px] px-[30px] rounded-[12px] hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               style={{ boxShadow: '0 12px 24px -10px rgba(47,122,109,.6)' }}
             >

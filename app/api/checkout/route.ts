@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         metadata: { user_id: user.id },
       },
       metadata: { user_id: user.id },
-      success_url: `${origin}/welcome`,
+      success_url: `${origin}/welcome?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/plan`,
     });
 
