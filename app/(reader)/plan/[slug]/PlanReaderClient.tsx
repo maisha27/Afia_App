@@ -6,6 +6,83 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { saveExerciseProgress } from '@/lib/actions/exercises';
 
+function ContentComingModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10"
+      style={{ background: 'rgba(28,38,34,.42)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="coming-modal-title"
+        className="w-[460px] max-w-full bg-white rounded-[22px] px-[32px] pt-[32px] pb-[28px]"
+        style={{ boxShadow: '0 40px 80px -24px rgba(20,24,22,.5)' }}
+      >
+        {/* Icon */}
+        <span className="flex w-[48px] h-[48px] rounded-[14px] bg-[#E3F1EE] items-center justify-center mb-[18px]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2F6E7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 22V12" />
+            <path d="M5 12a7 7 0 0 1 14 0" />
+            <path d="M12 12c0-3.5 2-6 4-7.5" />
+            <path d="M12 12c0-3.5-2-6-4-7.5" />
+          </svg>
+        </span>
+
+        <h2
+          id="coming-modal-title"
+          className="font-heading text-[23px] font-semibold tracking-[-0.02em] text-[#2A2F2C] mb-[10px]"
+        >
+          You&rsquo;re all caught up for now.
+        </h2>
+        <p className="text-[14.5px] leading-[1.65] text-[#565D5A] mb-[22px] [text-wrap:pretty]">
+          You&rsquo;ve worked through everything that&rsquo;s available right now — that&rsquo;s
+          real progress. New content arrives as your plan unfolds. While you wait, here are some
+          gentle ways to keep going.
+        </p>
+
+        {/* Suggestions */}
+        <div className="flex flex-col gap-[10px] mb-[24px]">
+          <Link
+            href="/calm-tool"
+            className="flex items-center gap-3 bg-[#2F6E7A] text-white font-heading text-[15px] font-semibold px-[20px] py-[14px] rounded-[12px] hover:bg-[#275E69] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ boxShadow: '0 10px 20px -10px rgba(47,110,122,.55)' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="2.3" />
+              <path d="M7.4 12a4.6 4.6 0 0 1 9.2 0" />
+              <path d="M3.5 12a8.5 8.5 0 0 1 17 0" />
+            </svg>
+            Try a calm tool
+          </Link>
+          <Link
+            href="/journal"
+            className="flex items-center gap-3 bg-white border border-[#D9E0DA] text-[#2F5049] font-heading text-[15px] font-semibold px-[20px] py-[14px] rounded-[12px] hover:bg-[#F5F3EF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 4C11 5 6 10 5 19l3-3c6-1 10-5 12-12Z" />
+              <path d="M8.5 15.5c2.6-2.6 4.6-4.8 6.5-8" />
+              <path d="M4 20l3.5-3.5" />
+            </svg>
+            Write in your journal
+          </Link>
+        </div>
+
+        {/* Back link */}
+        <div className="text-center border-t border-[#F0EBE3] pt-[18px]">
+          <Link
+            href="/exercises"
+            className="text-[13.5px] font-semibold text-[#767D79] hover:text-[#3A403C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+          >
+            Back to your plan
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export interface PlanExercise {
   id: string;
   slug: string;
@@ -73,6 +150,7 @@ export default function PlanReaderClient({
   const [saveError, setSaveError] = useState('');
   const [promptError, setPromptError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [showDoneModal, setShowDoneModal] = useState(false);
 
   function handleSave() {
     setSaveError('');
@@ -91,7 +169,11 @@ export default function PlanReaderClient({
       }
       setSaved(true);
       setTimeout(() => {
-        router.push(nextSlug ? `/plan/${nextSlug}` : '/exercises');
+        if (nextSlug) {
+          router.push(`/plan/${nextSlug}`);
+        } else {
+          setShowDoneModal(true);
+        }
       }, 480);
     });
   }
@@ -266,6 +348,9 @@ export default function PlanReaderClient({
           </div>
         </div>
       </main>
+
+      {/* ── Content-coming modal ── */}
+      {showDoneModal && <ContentComingModal onClose={() => setShowDoneModal(false)} />}
 
       {/* ── Footer ── */}
       <footer className="sticky bottom-0 bg-white border-t border-[#EFEAE2]">
