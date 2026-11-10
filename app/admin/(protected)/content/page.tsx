@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { ContentClient, type AdminExercise } from './ContentClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'Content · Admin · Afia' };
 
 export default async function AdminContentPage() {

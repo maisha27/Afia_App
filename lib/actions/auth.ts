@@ -74,14 +74,17 @@ export async function signUp(data: {
   }
   if (!authData.user) return { error: 'Something went wrong. Please try again.' };
 
-  // Save first name — service client bypasses RLS so this works before email confirmation too
+  // Always write profile row — sets default notification prefs so cron emails reach new users
   const trimmedName = data.firstName.trim();
-  if (trimmedName) {
-    const service = createServiceClient();
-    await service
-      .from('profiles')
-      .upsert({ id: authData.user.id, first_name: trimmedName }, { onConflict: 'id' });
-  }
+  const service = createServiceClient();
+  await service.from('profiles').upsert(
+    {
+      id: authData.user.id,
+      ...(trimmedName ? { first_name: trimmedName } : {}),
+      notification_prefs: { daily: true, weekly: true, encourage: false },
+    },
+    { onConflict: 'id' },
+  );
 
   const hasValidResult =
     pending !== null &&

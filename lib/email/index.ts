@@ -52,7 +52,7 @@ export async function sendDailyNudge(to: string, firstName: string): Promise<voi
   const greeting = firstName ? `Hi ${firstName}` : 'Hi there';
   const body = `
     <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#2F6E7A;">Your plan · today</p>
-    <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting} — your next step is ready.</h1>
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting}, your next step is ready.</h1>
     <p style="margin:0;font-size:15px;line-height:1.65;color:#4A524E;">
       A short exercise is waiting for you in your plan. It only takes a few minutes and it all adds up — one small step at a time.
     </p>
@@ -69,7 +69,7 @@ export async function sendWeeklyCheckin(to: string, firstName: string): Promise<
   const greeting = firstName ? `Hi ${firstName}` : 'Hi there';
   const body = `
     <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#2F6E7A;">Weekly check-in</p>
-    <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting} — how has the week felt?</h1>
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting}, how has the week felt?</h1>
     <p style="margin:0;font-size:15px;line-height:1.65;color:#4A524E;">
       Taking a moment to notice how your week has gone is part of the practice. You don't need a perfect week to do a check-in — any week counts.
     </p>
@@ -83,7 +83,7 @@ export async function sendWeeklyCheckin(to: string, firstName: string): Promise<
 
 /* ─── Encouragement ─── */
 const ENCOURAGEMENT_NOTES = [
-  "You came back today. That's the whole thing — that's what this is built on.",
+  "You came back today. That's the whole thing. That's what this is built on.",
   "Being aware of your patterns is not the same as being stuck in them.",
   "Small and consistent beats large and occasional, every time.",
   "The goal isn't to stop worrying entirely. It's to let worry take up less of your day.",
@@ -92,9 +92,9 @@ const ENCOURAGEMENT_NOTES = [
   "Courage with anxiety doesn't look dramatic. It looks like you, doing the next ordinary thing.",
   "It's okay if this feels hard. Hard and hopeless are not the same thing.",
   "Your worth is not measured by how anxious you are or aren't today.",
-  "The days you don't feel like doing this and do it anyway — those are the important ones.",
+  "The days you don't feel like doing this and do it anyway are the important ones.",
   "One difficult week doesn't undo what you've already built. Progress doesn't disappear.",
-  "Kindness toward yourself isn't weakness — it's the ground that recovery is built on.",
+  "Kindness toward yourself isn't weakness. It's the ground that recovery is built on.",
 ];
 
 export async function sendEncouragement(to: string, firstName: string): Promise<void> {
