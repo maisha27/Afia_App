@@ -71,10 +71,18 @@ export default function PlanReaderClient({
   const [response, setResponse] = useState(initialResponse);
   const [isPending, startTransition] = useTransition();
   const [saveError, setSaveError] = useState('');
+  const [promptError, setPromptError] = useState('');
   const [saved, setSaved] = useState(false);
 
   function handleSave() {
     setSaveError('');
+
+    if (!response.trim()) {
+      setPromptError("Take a moment to write your thoughts — even a few words is a great start.");
+      return;
+    }
+    setPromptError('');
+
     startTransition(async () => {
       const result = await saveExerciseProgress(exercise.id, response);
       if (result?.error) {
@@ -223,12 +231,20 @@ export default function PlanReaderClient({
             </p>
             <textarea
               value={response}
-              onChange={(e) => setResponse(e.target.value)}
+              onChange={(e) => { setResponse(e.target.value); if (promptError) setPromptError(''); }}
               placeholder="Write your thoughts here…"
               rows={5}
-              className="w-full bg-white border border-[#E0DACF] rounded-[14px] px-[20px] py-[18px] text-[16px] leading-[1.6] text-foreground placeholder:text-[#B3B7B0] placeholder:italic resize-none focus:outline-none focus:border-[#2F6E7A] focus:ring-2 focus:ring-[#2F6E7A]/20 transition-colors"
+              className={`w-full bg-white border rounded-[14px] px-[20px] py-[18px] text-[16px] leading-[1.6] text-foreground placeholder:text-[#B3B7B0] placeholder:italic resize-none focus:outline-none focus:border-[#2F6E7A] focus:ring-2 focus:ring-[#2F6E7A]/20 transition-colors ${promptError ? 'border-[#C99A46]' : 'border-[#E0DACF]'}`}
               style={{ boxShadow: 'inset 0 1px 3px rgba(20,24,22,.03)', minHeight: 118 }}
             />
+            {promptError && (
+              <p className="text-[13px] text-[#C99A46] mt-2 flex items-start gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-[1px] flex-shrink-0" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
+                </svg>
+                {promptError}
+              </p>
+            )}
             {saveError && (
               <p className="text-[13px] text-[#B0503F] mt-2">{saveError}</p>
             )}

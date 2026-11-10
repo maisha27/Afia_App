@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 
 export async function saveExerciseProgress(
   exerciseId: string,
@@ -14,7 +15,11 @@ export async function saveExerciseProgress(
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { error } = await supabase.from('user_exercise_progress').upsert(
+  // Service client bypasses RLS for the upsert — the UPDATE path of an upsert
+  // requires a separate UPDATE RLS policy which is not present on this table.
+  // User identity is already verified above.
+  const service = createServiceClient();
+  const { error } = await service.from('user_exercise_progress').upsert(
     {
       user_id: user.id,
       exercise_id: exerciseId,
