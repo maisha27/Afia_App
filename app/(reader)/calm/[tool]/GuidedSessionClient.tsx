@@ -196,7 +196,7 @@ export function GuidedSessionClient({
         <div className="mb-[34px]" aria-hidden="true">
           {centerVisual ?? (
             <div className="relative" style={{ width: 280, height: 280 }}>
-              <MagicRings color="#9FC9BC" colorTwo="#5A9080" />
+              <MagicRings color="#9FC9BC" colorTwo="#5A9080" paused={paused} />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {icon}
               </div>

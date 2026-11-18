@@ -210,28 +210,31 @@ export default function MagicRings({
     const animate = (t: number) => {
       frameId = requestAnimationFrame(animate);
       const p = propsRef.current;
-      if (p.paused) { lastT = t; return; }
-      const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
-      lastT = t;
-      elapsed += dt * 0.001 * p.speed;
+      if (!p.paused) {
+        const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
+        lastT = t;
+        elapsed += dt * 0.001 * p.speed;
 
-      uniforms.uTime.value = elapsed;
-      uniforms.uAttenuation.value = p.attenuation;
-      (uniforms.uColor.value as THREE.Color).set(p.color);
-      (uniforms.uColorTwo.value as THREE.Color).set(p.colorTwo);
-      uniforms.uLineThickness.value = p.lineThickness;
-      uniforms.uBaseRadius.value = p.baseRadius;
-      uniforms.uRadiusStep.value = p.radiusStep;
-      uniforms.uScaleRate.value = p.scaleRate;
-      uniforms.uRingCount.value = p.ringCount;
-      uniforms.uOpacity.value = p.opacity;
-      uniforms.uNoiseAmount.value = p.noiseAmount;
-      uniforms.uRotation.value = (p.rotation * Math.PI) / 180;
-      uniforms.uRingGap.value = p.ringGap;
-      uniforms.uFadeIn.value = p.fadeIn;
-      uniforms.uFadeOut.value = p.fadeOut;
-      uniforms.uCoverageAlpha.value = 0;
-
+        uniforms.uTime.value = elapsed;
+        uniforms.uAttenuation.value = p.attenuation;
+        (uniforms.uColor.value as THREE.Color).set(p.color);
+        (uniforms.uColorTwo.value as THREE.Color).set(p.colorTwo);
+        uniforms.uLineThickness.value = p.lineThickness;
+        uniforms.uBaseRadius.value = p.baseRadius;
+        uniforms.uRadiusStep.value = p.radiusStep;
+        uniforms.uScaleRate.value = p.scaleRate;
+        uniforms.uRingCount.value = p.ringCount;
+        uniforms.uOpacity.value = p.opacity;
+        uniforms.uNoiseAmount.value = p.noiseAmount;
+        uniforms.uRotation.value = (p.rotation * Math.PI) / 180;
+        uniforms.uRingGap.value = p.ringGap;
+        uniforms.uFadeIn.value = p.fadeIn;
+        uniforms.uFadeOut.value = p.fadeOut;
+        uniforms.uCoverageAlpha.value = 0;
+      } else {
+        lastT = t;
+      }
+      // Always render — skipping render with preserveDrawingBuffer:false clears the canvas on some browsers
       renderer.render(scene, camera);
     };
 
