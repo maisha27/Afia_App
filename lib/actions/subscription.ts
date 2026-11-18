@@ -64,6 +64,9 @@ export async function switchPlan(billing: 'monthly' | 'yearly'): Promise<{ error
 
   try {
     const stripeSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+    if (stripeSub.status === 'canceled') {
+      return { error: 'Your subscription has ended. Please start a new one to change your plan.' };
+    }
     const itemId = stripeSub.items.data[0]?.id;
     if (!itemId) return { error: 'Could not retrieve subscription item' };
 

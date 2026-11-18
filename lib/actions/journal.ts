@@ -8,7 +8,7 @@ export async function saveJournalEntry(
 ): Promise<{ error?: string; id?: string }> {
   const trimmed = content.trim();
   if (!trimmed) return { error: 'Entry cannot be empty.' };
-  if (trimmed.length > 10000) return { error: 'Entry is too long (max 10,000 characters).' };
+  if (trimmed.length > 20000) return { error: 'Entry is too long (max 20,000 characters).' };
 
   const supabase = await createClient();
   const {
