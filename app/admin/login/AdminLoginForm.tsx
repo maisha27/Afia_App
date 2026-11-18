@@ -6,6 +6,7 @@ import { adminLogin } from '@/lib/actions/admin';
 export function AdminLoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -42,18 +43,29 @@ export function AdminLoginForm() {
         <label htmlFor="admin-password" className="text-[12.5px] font-semibold" style={{ color: '#7FB3A6' }}>
           Password
         </label>
-        <input
-          id="admin-password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-          disabled={isPending}
-          className="rounded-[10px] px-[14px] py-[12px] text-[14.5px] outline-none transition-colors placeholder:text-[#4E5E59] focus:border-[#4A786E] disabled:opacity-60"
-          style={{ background: '#1B2523', border: '1.5px solid #38463F', color: '#EAF3EF' }}
-        />
+        <div className="relative">
+          <input
+            id="admin-password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            disabled={isPending}
+            className="w-full rounded-[10px] px-[14px] py-[12px] pr-[52px] text-[14.5px] outline-none transition-colors placeholder:text-[#4E5E59] focus:border-[#4A786E] disabled:opacity-60"
+            style={{ background: '#1B2523', border: '1.5px solid #38463F', color: '#EAF3EF' }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-semibold transition-opacity hover:opacity-70 focus-visible:outline-none"
+            style={{ color: '#7FB3A6' }}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </div>
       </div>
 
       {error && (

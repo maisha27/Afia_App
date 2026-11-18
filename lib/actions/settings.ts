@@ -1,8 +1,10 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { stripe } from '@/lib/stripe';
 
 interface NotificationPrefs {
   daily: boolean;
@@ -114,6 +116,7 @@ export async function updateDisplayName(firstName: string): Promise<{ error?: st
     .upsert({ id: user.id, first_name: trimmed }, { onConflict: 'id' });
 
   if (error) return { error: error.message };
+  revalidatePath('/settings');
   return {};
 }
 
@@ -123,6 +126,26 @@ export async function deleteAccount(): Promise<{ error?: string }> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
+
+  // Cancel any live Stripe subscription before wiping the user — prevents
+  // orphaned subscriptions that keep billing a deleted account.
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('stripe_subscription_id, status')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (
+    sub?.stripe_subscription_id &&
+    ['active', 'trialing', 'past_due'].includes(sub.status ?? '')
+  ) {
+    try {
+      await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+    } catch {
+      // Non-fatal — if Stripe call fails we still delete the user.
+      // Stripe will surface the orphaned subscription in the dashboard.
+    }
+  }
 
   const service = createServiceClient();
   const { error } = await service.auth.admin.deleteUser(user.id);

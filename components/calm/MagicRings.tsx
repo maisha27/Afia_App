@@ -96,6 +96,7 @@ export interface MagicRingsProps {
   ringGap?: number;
   fadeIn?: number;
   fadeOut?: number;
+  paused?: boolean;
 }
 
 export default function MagicRings({
@@ -114,18 +115,19 @@ export default function MagicRings({
   ringGap = 1.5,
   fadeIn = 0.7,
   fadeOut = 0.5,
+  paused = false,
 }: MagicRingsProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   const propsRef = useRef({
     color, colorTwo, speed, ringCount, attenuation, lineThickness,
     baseRadius, radiusStep, scaleRate, opacity, noiseAmount,
-    rotation, ringGap, fadeIn, fadeOut,
+    rotation, ringGap, fadeIn, fadeOut, paused,
   });
   propsRef.current = {
     color, colorTwo, speed, ringCount, attenuation, lineThickness,
     baseRadius, radiusStep, scaleRate, opacity, noiseAmount,
-    rotation, ringGap, fadeIn, fadeOut,
+    rotation, ringGap, fadeIn, fadeOut, paused,
   };
 
   useEffect(() => {
@@ -208,6 +210,7 @@ export default function MagicRings({
     const animate = (t: number) => {
       frameId = requestAnimationFrame(animate);
       const p = propsRef.current;
+      if (p.paused) { lastT = t; return; }
       const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
       lastT = t;
       elapsed += dt * 0.001 * p.speed;

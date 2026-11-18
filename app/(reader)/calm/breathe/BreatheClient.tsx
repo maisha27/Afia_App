@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { recordCalmSession } from '@/lib/actions/calm';
 import { AnimatedQuatrefoil } from '@/components/brand/AnimatedQuatrefoil';
 import MagicRings from '@/components/calm/MagicRings';
@@ -44,6 +45,7 @@ function formatTime(s: number): string {
 }
 
 export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const router = useRouter();
   const [paused, setPaused] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [round, setRound] = useState(1);
@@ -75,7 +77,7 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   /* ─── Record completed session ─── */
   useEffect(() => {
     if (!finished) return;
-    recordCalmSession('breathe');
+    recordCalmSession('breathe').catch(() => {});
   }, [finished]);
 
   /* ─── Progress display ─── */
@@ -87,6 +89,14 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
     past: i < round - 1,
     active: i === round - 1,
   }));
+
+  /* ─── End session handler — saves session for any partial progress ─── */
+  function handleEndSession() {
+    if (isLoggedIn && elapsedPhases > 0) {
+      recordCalmSession('breathe').catch(() => {});
+    }
+    router.push(isLoggedIn ? '/calm-tool' : '/');
+  }
 
   /* ─── Finished screen ─── */
   if (finished) {
@@ -268,7 +278,7 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           aria-label={heading}
           role="img"
         >
-          <MagicRings color="#9FC9BC" colorTwo="#5A9080" />
+          <MagicRings color="#9FC9BC" colorTwo="#5A9080" paused={paused} />
           {/* Centre quatrefoil */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
             <div
@@ -364,13 +374,14 @@ export default function BreatheClient({ isLoggedIn }: { isLoggedIn: boolean }) {
               </>
             )}
           </button>
-          <Link
-            href={isLoggedIn ? '/calm-tool' : '/'}
+          <button
+            type="button"
+            onClick={handleEndSession}
             className="inline-flex items-center text-[14px] font-medium px-[18px] py-[14px] rounded-[12px] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             style={{ color: '#CADED6', border: '1px solid rgba(202,222,214,.28)' }}
           >
             End session
-          </Link>
+          </button>
         </div>
       </div>
     </div>

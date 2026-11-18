@@ -47,12 +47,15 @@ export async function switchPlan(billing: 'monthly' | 'yearly'): Promise<{ error
 
   const { data: sub } = await supabase
     .from('subscriptions')
-    .select('stripe_subscription_id, plan')
+    .select('stripe_subscription_id, plan, status')
     .eq('user_id', user.id)
     .maybeSingle();
 
   if (!sub?.stripe_subscription_id) return { error: 'No active subscription found' };
   if (sub.plan === billing) return {};
+  if (sub.status === 'canceled') {
+    return { error: 'Your subscription has ended. Please start a new one to change your plan.' };
+  }
 
   const newPriceId =
     billing === 'yearly'

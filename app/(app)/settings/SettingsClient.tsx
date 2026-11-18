@@ -107,7 +107,8 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  // Display name change
+  // Display name change — track current name so export uses the latest value
+  const [currentFirstName, setCurrentFirstName] = useState(firstName);
   const [nameFormOpen, setNameFormOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [nameStatus, setNameStatus] = useState<{ error?: string; success?: boolean } | null>(null);
@@ -121,6 +122,8 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
   const [passwordFormOpen, setPasswordFormOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [passwordStatus, setPasswordStatus] = useState<{ error?: string; success?: boolean } | null>(null);
 
   function handleNameSubmit() {
@@ -129,6 +132,7 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
       const result = await updateDisplayName(newName);
       if (result.error) { setNameStatus({ error: result.error }); return; }
       setNameStatus({ success: true });
+      setCurrentFirstName(newName.trim());
       setNewName('');
     });
   }
@@ -171,7 +175,7 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
       const result = await exportUserData();
       if ('error' in result) return;
       const { generatePDF } = await import('@/lib/export/generatePDF');
-      generatePDF({ ...result, firstName });
+      generatePDF({ ...result, firstName: currentFirstName });
     });
   }
 
@@ -220,7 +224,7 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
           {/* Display name row */}
           <SettingsRow
             title="Your name"
-            sub={nameStatus?.success ? 'Name updated.' : (firstName ?? 'Not set - add your first name')}
+            sub={currentFirstName ?? 'Not set - add your first name'}
             right={
               <button
                 type="button"
@@ -311,21 +315,41 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
           />
           {passwordFormOpen && !passwordStatus?.success && (
             <div className="px-[22px] pb-[18px] flex flex-col gap-[10px]">
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="New password (8+ characters)"
-                autoFocus
-                className="w-full rounded-[10px] px-[14px] py-[11px] text-[14px] border border-[#E0DACF] bg-[#FAFAF8] text-[#2E332F] placeholder:text-[#B3B7B0] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
-              />
-              <input
-                type="password"
-                value={confirmPw}
-                onChange={(e) => setConfirmPw(e.target.value)}
-                placeholder="Confirm new password"
-                className="w-full rounded-[10px] px-[14px] py-[11px] text-[14px] border border-[#E0DACF] bg-[#FAFAF8] text-[#2E332F] placeholder:text-[#B3B7B0] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New password (8+ characters)"
+                  autoFocus
+                  className="w-full rounded-[10px] px-[14px] py-[11px] pr-[52px] text-[14px] border border-[#E0DACF] bg-[#FAFAF8] text-[#2E332F] placeholder:text-[#B3B7B0] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((p) => !p)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
+                  aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showNewPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showConfirmPw ? 'text' : 'password'}
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                  placeholder="Confirm new password"
+                  className="w-full rounded-[10px] px-[14px] py-[11px] pr-[52px] text-[14px] border border-[#E0DACF] bg-[#FAFAF8] text-[#2E332F] placeholder:text-[#B3B7B0] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPw((p) => !p)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-[#6E7672] hover:text-[#565D5A] transition-colors focus-visible:outline-none"
+                  aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPw ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {passwordStatus?.error && (
                 <p className="text-[12.5px] text-[#B0503F]">{passwordStatus.error}</p>
               )}
