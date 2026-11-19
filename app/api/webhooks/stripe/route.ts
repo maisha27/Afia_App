@@ -99,6 +99,21 @@ export async function POST(request: Request) {
         if (error) throw error;
         break;
       }
+
+      case 'invoice.paid': {
+        // Payment succeeded (covers recovery from past_due and normal renewals)
+        const invoice = event.data.object as Stripe.Invoice;
+        const subRef = invoice.parent?.subscription_details?.subscription;
+        if (!subRef) break;
+        const subscriptionId = typeof subRef === 'string' ? subRef : subRef.id;
+
+        const { error } = await db
+          .from('subscriptions')
+          .update({ status: 'active' })
+          .eq('stripe_subscription_id', subscriptionId);
+        if (error) throw error;
+        break;
+      }
     }
   } catch (err) {
     console.error('[stripe-webhook] event processing failed:', event.type, err);
