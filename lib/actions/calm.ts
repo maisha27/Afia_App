@@ -26,6 +26,6 @@ export async function recordCalmSession(tool: string): Promise<{ error?: string 
     tool,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't record your session. Please try again." };
   return {};
 }

@@ -29,6 +29,7 @@ export interface SubscriptionClientProps {
   initialCancelAtPeriodEnd: boolean;
   card: CardInfo | null;
   invoices: InvoiceItem[];
+  portalError: boolean;
 }
 
 /* ─── Shared UI ─── */
@@ -173,6 +174,7 @@ export default function SubscriptionClient({
   initialCancelAtPeriodEnd,
   card,
   invoices,
+  portalError,
 }: SubscriptionClientProps) {
   const router = useRouter();
   const [showCancel, setShowCancel] = useState(false);
@@ -239,6 +241,16 @@ export default function SubscriptionClient({
     <>
       <main className="relative flex-1 overflow-hidden px-6 py-9 pb-12 lg:px-10">
         <div className="relative max-w-[600px] mx-auto">
+          {/* Portal error banner */}
+          {portalError && (
+            <div
+              className="mb-5 rounded-[12px] border border-[#F0D0CE] bg-[#FBEAE9] px-4 py-3 text-[13px] text-[#8A2F2D]"
+              role="alert"
+            >
+              We couldn&rsquo;t open the billing portal right now. Please try again in a few minutes.
+            </div>
+          )}
+
           {/* Back link */}
           <Link
             href="/settings"

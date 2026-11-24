@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { JournalClient, type JournalEntry } from './JournalClient';
 
@@ -20,7 +21,7 @@ export default async function JournalPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) redirect('/log-in');
 
   const { data } = await supabase
     .from('journal_entries')

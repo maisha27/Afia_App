@@ -8,7 +8,7 @@ export async function saveJournalEntry(
 ): Promise<{ error?: string; id?: string }> {
   const trimmed = content.trim();
   if (!trimmed) return { error: 'Entry cannot be empty.' };
-  if (trimmed.length > 20000) return { error: 'Entry is too long (max 20,000 characters).' };
+  if (trimmed.length > 10000) return { error: 'Entry is too long (max 10,000 characters).' };
 
   const supabase = await createClient();
   const {
@@ -22,7 +22,7 @@ export async function saveJournalEntry(
     .select('id')
     .single();
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't save your entry. Please try again." };
   revalidatePath('/journal');
   return { id: data.id as string };
 }
@@ -41,7 +41,7 @@ export async function deleteJournalEntry(id: string): Promise<{ error?: string }
     .eq('id', id)
     .eq('user_id', user.id);
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't delete that entry. Please try again." };
   revalidatePath('/journal');
   return {};
 }

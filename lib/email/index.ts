@@ -2,7 +2,16 @@ import { Resend } from 'resend';
 
 const resend = () => new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'Afia <info@afia.me>';
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.me';
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /* ─── Shared template shell ─── */
 function shell(body: string): string {
@@ -49,7 +58,8 @@ function btn(label: string, href: string): string {
 
 /* ─── Daily nudge ─── */
 export async function sendDailyNudge(to: string, firstName: string): Promise<void> {
-  const greeting = firstName ? `Hi ${firstName}` : 'Hi there';
+  const safeName = escapeHtml(firstName);
+  const greeting = safeName ? `Hi ${safeName}` : 'Hi there';
   const body = `
     <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#2F6E7A;">Your plan · today</p>
     <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting}, your next step is ready.</h1>
@@ -61,12 +71,13 @@ export async function sendDailyNudge(to: string, firstName: string): Promise<voi
     </p>
     ${btn('Continue your plan', `${SITE}/home`)}
   `;
-  await resend().emails.send({ from: FROM, to, subject: `Your plan is here when you're ready, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `Your plan is here when you're ready, ${safeName || 'there'}`, html: shell(body) });
 }
 
 /* ─── Weekly check-in ─── */
 export async function sendWeeklyCheckin(to: string, firstName: string): Promise<void> {
-  const greeting = firstName ? `Hi ${firstName}` : 'Hi there';
+  const safeName = escapeHtml(firstName);
+  const greeting = safeName ? `Hi ${safeName}` : 'Hi there';
   const body = `
     <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#2F6E7A;">Weekly check-in</p>
     <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1E2A26;letter-spacing:-0.02em;">${greeting}, how has the week felt?</h1>
@@ -78,7 +89,7 @@ export async function sendWeeklyCheckin(to: string, firstName: string): Promise<
     </p>
     ${btn('Open my journal', `${SITE}/journal`)}
   `;
-  await resend().emails.send({ from: FROM, to, subject: `A moment to check in, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `A moment to check in, ${safeName || 'there'}`, html: shell(body) });
 }
 
 /* ─── Encouragement ─── */
@@ -98,7 +109,8 @@ const ENCOURAGEMENT_NOTES = [
 ];
 
 export async function sendEncouragement(to: string, firstName: string): Promise<void> {
-  const greeting = firstName ? `Hi ${firstName}` : 'Hi there';
+  const safeName = escapeHtml(firstName);
+  const greeting = safeName ? `Hi ${safeName}` : 'Hi there';
   const note = ENCOURAGEMENT_NOTES[Math.floor(Math.random() * ENCOURAGEMENT_NOTES.length)];
   const body = `
     <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#2F6E7A;">A thought for you</p>
@@ -111,5 +123,5 @@ export async function sendEncouragement(to: string, firstName: string): Promise<
     </p>
     ${btn('Open Afia', `${SITE}/home`)}
   `;
-  await resend().emails.send({ from: FROM, to, subject: `A thought for you, ${firstName || 'there'}`, html: shell(body) });
+  await resend().emails.send({ from: FROM, to, subject: `A thought for you, ${safeName || 'there'}`, html: shell(body) });
 }

@@ -1,9 +1,32 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe';
+
+function friendlyStripeError(err: unknown): string {
+  if (err instanceof Stripe.errors.StripeInvalidRequestError) {
+    if (err.code === 'resource_missing') {
+      return "We couldn't find your subscription record. This can happen if your account was set up during testing. Please contact us and we'll sort it out.";
+    }
+    return 'There was a problem with your request. Please try again or contact support.';
+  }
+  if (err instanceof Stripe.errors.StripeRateLimitError) {
+    return 'Too many requests. Please wait a moment and try again.';
+  }
+  if (
+    err instanceof Stripe.errors.StripeConnectionError ||
+    err instanceof Stripe.errors.StripeAPIError
+  ) {
+    return 'Our payment provider is temporarily unavailable. Please try again in a few minutes.';
+  }
+  if (err instanceof Stripe.errors.StripeAuthenticationError) {
+    return "There's a configuration issue on our end. Please contact support.";
+  }
+  return 'Something went wrong. Please try again or contact support.';
+}
 
 export async function cancelSubscription(): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -34,7 +57,7 @@ export async function cancelSubscription(): Promise<{ error?: string }> {
 
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Failed to cancel subscription' };
+    return { error: friendlyStripeError(err) };
   }
 }
 
@@ -84,7 +107,7 @@ export async function switchPlan(billing: 'monthly' | 'yearly'): Promise<{ error
 
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Failed to switch plan' };
+    return { error: friendlyStripeError(err) };
   }
 }
 
@@ -103,11 +126,17 @@ export async function redirectToCustomerPortal(): Promise<never> {
 
   if (!sub?.stripe_customer_id) redirect('/subscription');
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia.app';
-  const session = await stripe.billingPortal.sessions.create({
-    customer: sub.stripe_customer_id,
-    return_url: `${siteUrl}/subscription`,
-  });
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.afia.me';
 
-  redirect(session.url);
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: sub.stripe_customer_id,
+      return_url: `${siteUrl}/subscription`,
+    });
+    redirect(session.url);
+  } catch (err) {
+    // Re-throw Next.js redirect signals; catch actual Stripe/network failures
+    if ((err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw err;
+    redirect('/subscription?error=portal-unavailable');
+  }
 }

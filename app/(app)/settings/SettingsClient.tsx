@@ -106,6 +106,8 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [notifError, setNotifError] = useState('');
+  const [exportError, setExportError] = useState('');
 
   // Display name change — track current name so export uses the latest value
   const [currentFirstName, setCurrentFirstName] = useState(firstName);
@@ -159,23 +161,41 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
   }
 
   function handleToggle(field: 'daily' | 'weekly' | 'encourage') {
+    const prevDaily = daily;
+    const prevWeekly = weekly;
+    const prevEncourage = encourage;
     const nextDaily = field === 'daily' ? !daily : daily;
     const nextWeekly = field === 'weekly' ? !weekly : weekly;
     const nextEncourage = field === 'encourage' ? !encourage : encourage;
     if (field === 'daily') setDaily(nextDaily);
     if (field === 'weekly') setWeekly(nextWeekly);
     if (field === 'encourage') setEncourage(nextEncourage);
+    setNotifError('');
     startTransition(async () => {
-      await saveNotificationPrefs({ daily: nextDaily, weekly: nextWeekly, encourage: nextEncourage });
+      const result = await saveNotificationPrefs({ daily: nextDaily, weekly: nextWeekly, encourage: nextEncourage });
+      if (result.error) {
+        if (field === 'daily') setDaily(prevDaily);
+        if (field === 'weekly') setWeekly(prevWeekly);
+        if (field === 'encourage') setEncourage(prevEncourage);
+        setNotifError("We couldn't save your preference. Please try again.");
+      }
     });
   }
 
   function handleExport() {
+    setExportError('');
     startTransition(async () => {
-      const result = await exportUserData();
-      if ('error' in result) return;
-      const { generatePDF } = await import('@/lib/export/generatePDF');
-      generatePDF({ ...result, firstName: currentFirstName });
+      try {
+        const result = await exportUserData();
+        if ('error' in result) {
+          setExportError("We couldn't load your data. Please try again.");
+          return;
+        }
+        const { generatePDF } = await import('@/lib/export/generatePDF');
+        generatePDF({ ...result, firstName: currentFirstName });
+      } catch {
+        setExportError("We couldn't generate your export. Please try again.");
+      }
     });
   }
 
@@ -397,6 +417,9 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
             }
           />
         </SettingsCard>
+        {notifError && (
+          <p className="text-[12.5px] text-[#B0503F] mt-2">{notifError}</p>
+        )}
         </div>
 
         {/* ── Your data ── */}
@@ -414,6 +437,9 @@ export default function SettingsClient({ email, firstName, initialPrefs, subscri
           </svg>
           Export my data
         </button>
+        {exportError && (
+          <p className="text-[12.5px] text-[#B0503F] mt-2 mb-1">{exportError}</p>
+        )}
         <div className="flex gap-3 mb-2">
           <form action={signOut} className="flex-1">
             <button

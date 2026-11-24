@@ -28,7 +28,7 @@ export async function signUp(data: {
     ? (JSON.parse(pendingRaw) as { score: number; band: string; answers: number[] | null })
     : null;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia-app.vercel.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.afia.me';
 
   const { data: authData, error } = await supabase.auth.signUp({
     email: data.email,
@@ -183,7 +183,7 @@ export async function forgotPassword(data: {
   email: string;
 }): Promise<AuthActionResult> {
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://afia-app.vercel.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.afia.me';
 
   // We don't reveal whether the email is registered — Supabase does this automatically.
   await supabase.auth.resetPasswordForEmail(data.email, {
@@ -199,7 +199,19 @@ export async function resetPassword(data: {
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: data.password });
 
-  if (error) return { error: error.message };
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes('same') && msg.includes('password')) {
+      return { error: 'That is the same as your current password. Please choose a different one.' };
+    }
+    if (msg.includes('weak') || (msg.includes('password') && msg.includes('should be at least'))) {
+      return { error: 'Please choose a stronger password.' };
+    }
+    if (msg.includes('rate') || msg.includes('too many')) {
+      return { error: 'Too many attempts. Please wait a moment and try again.' };
+    }
+    return { error: 'Something went wrong. Please try again.' };
+  }
 
   redirect('/log-in?reset=1');
 }
@@ -230,7 +242,7 @@ export async function saveScreenerResult(data: {
     answers: data.answers,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't save your result. Please try again." };
   revalidatePath('/progress');
   return {};
 }

@@ -7,7 +7,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import { SiteHeader } from '@/components/layout/SiteHeader';
-import { signUp } from '@/lib/actions/auth';
+import { signUp, setPendingScreenerResult } from '@/lib/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 
 const schema = z
@@ -67,6 +67,15 @@ const BAND_COLORS: Record<string, string> = {
   'Very High': '#B0503F',
 };
 
+// Matches the descriptive labels shown on the result page
+const BAND_DISPLAY_LABEL: Record<string, string> = {
+  Low: 'Minimal',
+  Mild: 'Mild',
+  Moderate: 'Moderate',
+  High: 'Significant',
+  'Very High': 'High',
+};
+
 const BAND_PREVIEW_TEXT: Record<string, string> = {
   Low: 'Your patterns are manageable. The tools here can help you keep it that way.',
   Mild: 'Gentle daily habits make a real difference at this level. Your reflection is saved.',
@@ -76,12 +85,11 @@ const BAND_PREVIEW_TEXT: Record<string, string> = {
 };
 
 /* ─── Reflection-card preview (left column) ─── */
-function ReflectionPreview({ band, score }: { band: string | null; score: number | null }) {
-  const displayBand = band ?? 'Moderate';
-  const displayScore = score ?? 28;
-  const color = BAND_COLORS[displayBand] ?? '#B26A44';
-  const thumbPct = Math.min(92, Math.max(8, (displayScore / 42) * 100));
-  const previewText = BAND_PREVIEW_TEXT[displayBand] ?? BAND_PREVIEW_TEXT['Moderate'];
+function ReflectionPreview({ band, score }: { band: string; score: number }) {
+  const color = BAND_COLORS[band] ?? '#B26A44';
+  const displayLabel = BAND_DISPLAY_LABEL[band] ?? band;
+  const thumbPct = Math.min(92, Math.max(8, (score / 42) * 100));
+  const previewText = BAND_PREVIEW_TEXT[band] ?? BAND_PREVIEW_TEXT['Moderate'];
 
   return (
     <div className="relative mt-8 select-none" aria-hidden="true">
@@ -93,9 +101,9 @@ function ReflectionPreview({ band, score }: { band: string | null; score: number
             className="font-heading text-[12px] font-semibold uppercase tracking-[0.08em]"
             style={{ color }}
           >
-            {displayBand}
+            {displayLabel}
           </span>
-          <span className="text-[12px] text-[#6E7672]">· {displayScore} / 42</span>
+          <span className="text-[12px] text-[#6E7672]">· {score} / 42</span>
         </div>
         <div
           className="relative h-[6px] rounded-full mb-5 overflow-visible"
@@ -177,6 +185,11 @@ export function SignUpForm({ band = null, score = null }: { band?: string | null
 
   const handleGoogleSignIn = async () => {
     setGooglePending(true);
+    if (band !== null && score !== null) {
+      try {
+        await setPendingScreenerResult({ score, band, answers: [] });
+      } catch { /* non-fatal — screener result won't be saved but sign-in continues */ }
+    }
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -184,7 +197,6 @@ export function SignUpForm({ band = null, score = null }: { band?: string | null
         redirectTo: `${window.location.origin}/auth/callback?next=/plan`,
       },
     });
-    // browser redirects away — no need to reset googlePending
   };
 
   const {
@@ -217,7 +229,7 @@ export function SignUpForm({ band = null, score = null }: { band?: string | null
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
             backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='60'%3E%3Cpath d='M22 0Q44 0 44 30 44 60 22 60 0 60 0 30 0 0 22 0Z' fill='none' stroke='%232F6E7A' stroke-width='1.5'/%3E%3C/svg%3E\")",
             backgroundSize: '44px 60px',
           }}
         />
@@ -246,9 +258,12 @@ export function SignUpForm({ band = null, score = null }: { band?: string | null
           <h2 className="font-heading text-[23px] font-semibold tracking-[-0.02em] text-[#262B29] mb-2">
             Check your email
           </h2>
-          <p className="text-[14px] text-[#767D79] leading-[1.6] mb-7">
+          <p className="text-[14px] text-[#767D79] leading-[1.6] mb-3">
             We sent a confirmation link to your inbox. Click it to activate your account - your
             private space will be ready.
+          </p>
+          <p className="text-[12.5px] text-[#9AA29C] leading-[1.55] mb-7">
+            Open the link in this browser — it won&apos;t work if clicked on a different device or browser.
           </p>
           <Link
             href="/log-in"
@@ -300,7 +315,9 @@ export function SignUpForm({ band = null, score = null }: { band?: string | null
               Save today&rsquo;s reflection and pick up the gentle steps that help - all in a space
               only you can see.
             </p>
-            <ReflectionPreview band={band} score={score} />
+            {band !== null && score !== null && (
+              <ReflectionPreview band={band} score={score} />
+            )}
           </motion.div>
 
           {/* Right column — form card */}

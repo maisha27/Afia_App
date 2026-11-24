@@ -6,6 +6,26 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { stripe } from '@/lib/stripe';
 
+function friendlyAuthError(err: { message: string }): string {
+  const msg = err.message.toLowerCase();
+  if (msg.includes('already') && (msg.includes('registered') || msg.includes('in use'))) {
+    return 'That email address is already in use.';
+  }
+  if (msg.includes('same') && msg.includes('password')) {
+    return 'That is the same as your current password. Please choose a different one.';
+  }
+  if (msg.includes('weak') || (msg.includes('password') && msg.includes('should be at least'))) {
+    return 'Please choose a stronger password.';
+  }
+  if (msg.includes('rate') || msg.includes('security purposes') || msg.includes('too many')) {
+    return 'Too many attempts. Please wait a moment and try again.';
+  }
+  if (msg.includes('not confirmed') || msg.includes('email not confirmed')) {
+    return 'Please confirm your email address before making changes.';
+  }
+  return 'Something went wrong. Please try again.';
+}
+
 interface NotificationPrefs {
   daily: boolean;
   weekly: boolean;
@@ -24,7 +44,7 @@ export async function changeEmail(newEmail: string): Promise<{ error?: string }>
   if (trimmed === user.email?.toLowerCase()) return { error: 'That is already your current email.' };
 
   const { error } = await supabase.auth.updateUser({ email: trimmed });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyAuthError(error) };
   return {};
 }
 
@@ -39,7 +59,7 @@ export async function changePassword(newPassword: string, confirm: string): Prom
   if (newPassword !== confirm) return { error: 'Passwords do not match.' };
 
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyAuthError(error) };
   return {};
 }
 
@@ -55,7 +75,7 @@ export async function saveNotificationPrefs(prefs: NotificationPrefs): Promise<{
     .from('profiles')
     .upsert({ id: user.id, notification_prefs: prefs }, { onConflict: 'id' });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't save your preferences. Please try again." };
   return {};
 }
 
@@ -115,7 +135,7 @@ export async function updateDisplayName(firstName: string): Promise<{ error?: st
     .from('profiles')
     .upsert({ id: user.id, first_name: trimmed }, { onConflict: 'id' });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't update your name. Please try again." };
   revalidatePath('/settings');
   return {};
 }
@@ -149,7 +169,7 @@ export async function deleteAccount(): Promise<{ error?: string }> {
 
   const service = createServiceClient();
   const { error } = await service.auth.admin.deleteUser(user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: "We couldn't delete your account. Please contact support if this continues." };
 
   redirect('/');
 }

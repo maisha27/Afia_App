@@ -104,7 +104,7 @@ export function LogInForm() {
             className="mb-5 rounded-[10px] border border-[#F0D0CE] bg-[#FBEAE9] px-3.5 py-2.5 text-center text-[12.5px] text-[#8A2F2D]"
             role="alert"
           >
-            That link has expired or is invalid. Please request a new one.
+            If you clicked a confirmation link, your account may already be ready &mdash; try logging in below. Confirmation links only work in the browser you signed up with.
           </div>
         )}
 

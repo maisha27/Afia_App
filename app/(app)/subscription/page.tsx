@@ -15,7 +15,13 @@ function formatDate(iso: string) {
   });
 }
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const portalError = params.error === 'portal-unavailable';
   const supabase = await createClient();
   const {
     data: { user },
@@ -88,6 +94,7 @@ export default async function SubscriptionPage() {
       initialCancelAtPeriodEnd={(sub.cancel_at_period_end as boolean) ?? false}
       card={card}
       invoices={invoices}
+      portalError={portalError}
     />
   );
 }

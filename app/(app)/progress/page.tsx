@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { InViewReveal } from '@/components/motion';
 import { ProgressChart } from '@/components/progress/ProgressChart';
@@ -108,7 +109,7 @@ export default async function ProgressPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) redirect('/log-in');
 
   const [screenerRes, progressRes, calmRes, journalRes] = await Promise.all([
     supabase

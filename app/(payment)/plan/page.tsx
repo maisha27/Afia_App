@@ -163,7 +163,7 @@ export default async function PlanPage() {
 
         {/* Maybe later link */}
         <div className="relative mt-[34px] text-center">
-          <a href="/" className="text-[14.5px] text-[#767D79] font-medium hover:text-[#565D5A] transition-colors">
+          <a href="/screener" className="text-[14.5px] text-[#767D79] font-medium hover:text-[#565D5A] transition-colors">
             Maybe later - keep my free reflection
           </a>
         </div>
